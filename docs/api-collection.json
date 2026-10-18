@@ -1,0 +1,224 @@
+{
+  "info": {
+    "name": "PPFC Portal API",
+    "description": "Example calls for acceptance tests A–E and H.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base", "value": "http://localhost:4000/api/v1" },
+    { "key": "token", "value": "" },
+    { "key": "adminEmail", "value": "garnet.wiegand@ppfc.demo" },
+    { "key": "pmEmail", "value": "christelle.satterfield@ppfc.demo" },
+    { "key": "contributorEmail", "value": "estell.conroy@ppfc.demo" },
+    { "key": "password", "value": "Demo@1234" }
+  ],
+  "item": [
+    {
+      "name": "A — Health check",
+      "request": {
+        "method": "GET",
+        "url": "{{base}}/health",
+        "description": "Acceptance A: liveness + DB up"
+      }
+    },
+    {
+      "name": "A — Login as admin",
+      "request": {
+        "method": "POST",
+        "url": "{{base}}/auth/login",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"{{adminEmail}}\",\"password\":\"{{password}}\"}"
+        },
+        "description": "Login; copy token from response body for Bearer auth."
+      }
+    },
+    {
+      "name": "A — Login as PM",
+      "request": {
+        "method": "POST",
+        "url": "{{base}}/auth/login",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"{{pmEmail}}\",\"password\":\"{{password}}\"}"
+        }
+      }
+    },
+    {
+      "name": "A — Login as contributor",
+      "request": {
+        "method": "POST",
+        "url": "{{base}}/auth/login",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"{{contributorEmail}}\",\"password\":\"{{password}}\"}"
+        }
+      }
+    },
+    {
+      "name": "B — List projects (scoped)",
+      "request": {
+        "method": "GET",
+        "url": "{{base}}/projects",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "description": "Acceptance B: returns paginated projects the caller can see."
+      }
+    },
+    {
+      "name": "B — Get project detail + financials",
+      "request": {
+        "method": "GET",
+        "url": "{{base}}/projects/1",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "description": "Includes progressPct, deliveryStatus, currentBudget, actualSpend, utilization."
+      }
+    },
+    {
+      "name": "B — List project tasks",
+      "request": {
+        "method": "GET",
+        "url": "{{base}}/projects/1/tasks",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+      }
+    },
+    {
+      "name": "B — List project risks",
+      "request": {
+        "method": "GET",
+        "url": "{{base}}/projects/1/risks",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+      }
+    },
+    {
+      "name": "C — Submit change request",
+      "request": {
+        "method": "POST",
+        "url": "{{base}}/projects/1/change-requests",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\":\"Add reporting module\",\"description\":\"New quarterly reporting feature\",\"impactSummary\":\"No schedule impact\"}"
+        },
+        "description": "Acceptance C: any member can submit."
+      }
+    },
+    {
+      "name": "C — Decide change request",
+      "request": {
+        "method": "POST",
+        "url": "{{base}}/change-requests/2/decision",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Idempotency-Key", "value": "decide-cr-2-example" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"decision\":\"approve\",\"reason\":\"Approved — within scope\",\"version\":1}"
+        },
+        "description": "PM decides (not own CR). Idempotency-Key required."
+      }
+    },
+    {
+      "name": "D — Create draft cost",
+      "request": {
+        "method": "POST",
+        "url": "{{base}}/projects/1/costs",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"categoryId\":1,\"txnDate\":\"2026-06-15\",\"amount\":5000,\"description\":\"Consulting services\",\"vendor\":\"Acme Corp\"}"
+        },
+        "description": "Acceptance D: PM creates draft cost."
+      }
+    },
+    {
+      "name": "D — Post cost",
+      "request": {
+        "method": "POST",
+        "url": "{{base}}/costs/1/post",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Idempotency-Key", "value": "post-cost-1-example" }
+        ],
+        "description": "Draft → posted. Returns refreshed financial headline."
+      }
+    },
+    {
+      "name": "D — Financial summary",
+      "request": {
+        "method": "GET",
+        "url": "{{base}}/projects/1/financial-summary?asOf=2026-09-30",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "description": "Full financials: budget, actual, EAC, alerts, monthly trend."
+      }
+    },
+    {
+      "name": "E — Dashboard KPIs",
+      "request": {
+        "method": "GET",
+        "url": "{{base}}/dashboard/kpis",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "description": "Acceptance E: 16 executive KPIs."
+      }
+    },
+    {
+      "name": "E — Dashboard project health",
+      "request": {
+        "method": "GET",
+        "url": "{{base}}/dashboard/project-health",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+      }
+    },
+    {
+      "name": "E — Dashboard budget vs actual",
+      "request": {
+        "method": "GET",
+        "url": "{{base}}/dashboard/budget-vs-actual-eac",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+      }
+    },
+    {
+      "name": "H — 401 without token",
+      "request": {
+        "method": "GET",
+        "url": "{{base}}/projects",
+        "description": "Acceptance H: no token → 401 UNAUTHENTICATED."
+      }
+    },
+    {
+      "name": "H — 403 contributor mutation",
+      "request": {
+        "method": "POST",
+        "url": "{{base}}/projects",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"X\",\"departmentId\":1,\"ownerId\":1,\"status\":\"active\",\"startDate\":\"2026-01-01\",\"endDate\":\"2026-12-31\",\"initialBudget\":1000}"
+        },
+        "description": "Acceptance H: contributor cannot create project → 403."
+      }
+    },
+    {
+      "name": "H — Audit events (admin)",
+      "request": {
+        "method": "GET",
+        "url": "{{base}}/admin/audit-events?pageSize=5",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "description": "Acceptance H: audit trail visible to admin."
+      }
+    }
+  ]
+}

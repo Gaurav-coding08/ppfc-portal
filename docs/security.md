@@ -168,3 +168,89 @@ Two separate rules protect against losing all admin access, enforced in `modules
 the same transaction as the mutation they record. If the mutation rolls back, the audit row rolls
 back with it; if it commits, the audit row is guaranteed to be there. `password_hash` /
 `passwordHash` fields are automatically stripped from before/after payloads.
+
+---
+
+## Backend hardening checklist (feature 14)
+
+### HTTP headers (helmet)
+
+`helmet()` is applied as the first middleware in `app.ts`. It sets:
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: SAMEORIGIN` (or CSP frame-ancestors)
+- `Strict-Transport-Security` (in production with HTTPS)
+- Removes `X-Powered-By` (verified in tests)
+
+### CORS allowlist + credentials
+
+`cors({ origin: env.corsOrigins, credentials: true })` — explicit origin list from env, never
+`*`. `credentials: true` lets the browser attach the `ppfc_token` cookie cross-origin.
+
+### Cookie flags
+
+- `httpOnly: true` — JS cannot read the token
+- `sameSite: 'lax'` — standard CSRF mitigation
+- `secure: COOKIE_SECURE` — env-controlled, `true` in production
+- `maxAge` matches `JWT_EXPIRES_IN`
+
+### Request body size limit
+
+`express.json({ limit: '100kb' })` — rejects payloads larger than 100 KB with 413.
+
+### Rate limiting
+
+`POST /auth/login`: 10 requests / 15 minutes per IP. See section above.
+
+### Parameterized SQL
+
+Every SQL query uses positional `$1` parameters. Dynamic identifiers (sort columns, scope
+columns) pass through whitelisted `Record<ZodEnum, string>` maps — never user input.
+Verified: `grep -rn '\${' backend/src/modules/ --include="*.repository.ts"` finds only
+static `orderColumn`/`orderDir` values resolved from typed allowlists, and `scopedProjectIdsSql`
+which validates its `column` argument against `ALLOWED_SCOPE_COLUMNS`.
+
+### Sort / identifier whitelists
+
+- Sort columns: `SORT_COLUMNS` maps in `tasks.repository.ts`, `risks.repository.ts`,
+  `users.repository.ts`, `costs.repository.ts` — all typed as `Record<ZodEnum, string>`
+- Order direction: validated by zod to `'asc' | 'desc'`
+- Scope column: `ALLOWED_SCOPE_COLUMNS` set in `lib/access.ts`
+
+### No stack traces in responses
+
+`errorHandler.ts` catches all errors. Known errors (`AppError`, `ZodError`, mapped PG errors)
+produce the standard `{ error: { code, message, details?, requestId } }` body. Unknown errors
+log the full error server-side but respond with only `{ error: { code: "INTERNAL", message:
+"Internal server error", requestId } }` — no stack trace, no internal details.
+
+### Log redaction
+
+`pino` is configured with `redact: ['req.headers.authorization', 'req.headers.cookie',
+'*.password']` — these paths are replaced with `[Redacted]` in log output, preventing
+tokens and passwords from appearing in logs.
+
+### Secrets management
+
+- All secrets (`JWT_SECRET`, `DATABASE_URL`, etc.) come from env vars only
+- `.env` is in `.gitignore` — never committed
+- `.env.example` has placeholder values only
+- No real credentials in source code or seed data
+
+### Graceful failure
+
+When the database is unreachable, `GET /health` returns 503 with
+`{ data: { status: "degraded", db: "down" } }` instead of crashing or returning 500.
+Other routes return 503 `INTERNAL` as JSON, not an unhandled exception.
+
+### Read-only DB role
+
+`docker/postgres/init.sql` creates a `ppfc_reader` role with `SELECT`-only grants on all
+tables — for BI tools and reporting connections that should never mutate data.
+
+### Automated security tests
+
+- `route-guard.test.ts` — every route except `/health` and `/auth/login` returns 401 without a token (70 tests)
+- `rbac-matrix.test.ts` — contributor is blocked from all mutation routes (23 tests)
+- `id-escalation.test.ts` — PM cannot access resources from another project via ID (23 tests)
+- `logging.test.ts` — responses carry requestId, no stack traces leak
+- `health-down.test.ts` — 503 when DB is unreachable

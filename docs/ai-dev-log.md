@@ -376,3 +376,11 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
     all drill functions.
   - The integrity tests cover the assignment's mandatory demo: KPIs change after a task
     update and a cost post, drill-down totals equal the KPI, and there is no join fan-out.
+
+### 14 Backend hardening, API documentation & quality sweep — 2026-10-18
+- **Goal:** Close the backend phase with route-guard tests, RBAC matrix tests, cross-project ID escalation tests, OpenAPI spec, Postman collection, manual E2E checklist, security review, log redaction, graceful DB failure, README, and coverage report.
+- **Prompt/approach:** /run-feature 14 with feature spec + CLAUDE.md
+- **First output issue:** Route extractor using Express 4 regexp parsing was fragile — mount paths included unstripped regex fragments like `/?(?=/|$)` that broke URL matching in tests. Two iterations of regex parsing both had edge cases.
+- **Refinement:** Replaced fragile router-introspection approach with an explicit route inventory in the test file (derived from api-routes.md). Added a `routes:check` script that cross-references the test inventory against the doc to catch drift. This is more maintainable and serves double duty as documentation verification.
+- **Verification:** `npm run typecheck` clean, `npm run lint` clean, `npm test` 417/417 pass (29 files), `npm run routes:check` confirms 71 routes match, `npm run test:coverage` 91.25% statements / 80.72% branches / 95.04% functions.
+- **Human review:** TODO (owner)

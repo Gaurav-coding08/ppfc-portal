@@ -70,12 +70,12 @@ export function buildApp(): Express {
   app.use('/api/v1/finance', financeRoutes);
   app.use('/api/v1/dashboard', dashboardRoutes);
 
-  app.get('/api/v1/health', async (_req, res, next) => {
+  app.get('/api/v1/health', async (_req, res) => {
     try {
       await pool.query('SELECT 1');
       res.status(200).json({ data: { status: 'ok', db: 'up' } });
-    } catch (err) {
-      next(err);
+    } catch {
+      res.status(503).json({ data: { status: 'degraded', db: 'down' } });
     }
   });
 

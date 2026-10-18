@@ -20,7 +20,9 @@
     "data:generate": "tsx --env-file=.env scripts/generate-data.ts",
     "db:import": "tsx --env-file=.env scripts/import-csv.ts",
     "db:import:test": "tsx --env-file=.env scripts/import-csv.ts --test",
-    "db:reset": "npm run db:migrate && npm run db:import"
+    "db:reset": "npm run db:migrate && npm run db:import",
+    "test:coverage": "tsx --env-file=.env node_modules/.bin/vitest run --coverage --coverage.provider=v8",
+    "routes:check": "tsx scripts/routes-check.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -50,6 +52,7 @@
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^7.16.0",
     "@typescript-eslint/parser": "^7.16.0",
+    "@vitest/coverage-v8": "^2.1.9",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.3.2",

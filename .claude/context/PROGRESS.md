@@ -14,4 +14,4 @@
 | 11 | 11-finance-budgets-costs | done | 2026-10-18 | 34 |
 | 12 | 12-finance-forecasts-insights | done | 2026-10-18 | 13 |
 | 13 | 13-dashboard-analytics | done | 2026-10-18 | 19 |
-| 14 | 14-backend-hardening | pending | | |
+| 14 | 14-backend-hardening | done | 2026-10-18 | 120 |
