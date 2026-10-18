@@ -2,7 +2,7 @@
 | # | Feature file | Status | Date | Tests |
 |---|---|---|---|---|
 | 01 | 01-project-setup | done | 2026-10-18 | 6 |
-| 02 | 02-database-schema | pending | | |
+| 02 | 02-database-schema | done | 2026-10-18 | 6 |
 | 03 | 03-synthetic-data | pending | | |
 | 04 | 04-auth | pending | | |
 | 05 | 05-access-control-platform | pending | | |

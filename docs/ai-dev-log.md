@@ -5,6 +5,7 @@ what was asked, what the first attempt got wrong (if anything), how it was fixed
 was verified. Each entry ends with a `Human review` line for the project owner to fill in.
 
 ### 01 Project setup, Docker Compose & test harness — 2026-10-18
+
 - **Goal:** A runnable, empty-but-production-shaped backend: Express app factory, Postgres in
   Docker Compose (dev + test DB), env validation, request-id logging, the standard error
   format, and a working Vitest + supertest harness.
@@ -23,4 +24,21 @@ was verified. Each entry ends with a `Human review` line for the project owner t
   compiled output; `docker compose up -d db` brings up Postgres with `ppfc` + `ppfc_test`
   created; `docker compose --profile app build api` builds the containerized API image
   successfully (not run end-to-end in Compose — see context file for why).
+- **Human review:** Read app.ts, errorHandler and withTx. Verified health and 404 via curl,
+  confirmed x-request-id is echoed. No changes needed.
+
+### 02 Database schema, migrations & financial SQL functions — 2026-10-18
+
+- **Goal:** Complete relational model for all modules, a migration runner, financial KPI
+  functions (single SQL source of truth), convenience views for Power BI, and schema-level
+  tests including a full finance KPI fixture.
+- **Prompt/approach:** /run-feature 02 with feature spec + CLAUDE.md + feature 01 context.
+- **First output issue:** None found — all 8 migrations applied cleanly on both dev and test
+  DBs, and all 12 tests (6 new schema tests + 6 existing) passed on first run.
+- **Refinement:** N/A.
+- **Verification:** `npm run db:migrate` and `npm run db:migrate:test` both applied 8
+  migrations; `npm run typecheck && npm run lint && npm test` all pass (12 tests); ppfc_reader
+  can `SELECT * FROM v_project_financials` but cannot INSERT (permission denied); finance KPI
+  test verifies exact values (current_budget 1200, actual 300, remaining 900, utilization 0.25,
+  FTC 200, EAC 500, variance 700); zero-budget project returns null utilization.
 - **Human review:** TODO (owner)
