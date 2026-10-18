@@ -263,6 +263,7 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   - Non-member access returns [404/403], consistent with feature 07.
 
 ### 09 Risks & issues — 2026-10-18
+
 - **Goal:** Risk/issue register per project with exposure scoring, a cross-portfolio view,
   and a high-exposure drill-down, with the closed-high-exposure-risk-must-not-count-as-open
   edge case correct.
@@ -277,7 +278,7 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   isn't mistaken for a mistake later.
 - **Refinement:** None needed beyond that — typecheck/lint passed on the first pass, and all
   19 new tests passed on the first full run. Deliberately chose to re-run the
-  mitigation-required rule on *every* PATCH (not just when probability/impact/mitigation
+  mitigation-required rule on _every_ PATCH (not just when probability/impact/mitigation
   change), computed from the patch merged onto the current row — documented in the context
   file since it means the seeded `FORCE_OPEN_HIGH_EXPOSURE` fixture (score 20, no mitigation,
   left that way on purpose by the generator) can't be PATCHed at all, including just closing
@@ -291,4 +292,4 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   422 on both create and update (including when probability/impact are raised into the high
   band by a patch); an ineligible (non-member) owner is 422; closing sets `closedAt` and
   reopening clears it; a stale `version` is 409; every create/update is audited.
-- **Human review:** TODO (owner)
+- **Human review:** The mitigation rule (score ≥ 15) came from my feature spec, not the assignment. Claude Code applied it on every PATCH, which means the seeded unmitigated high risk can't be edited until a mitigation is added. Kept it as a governance rule.
