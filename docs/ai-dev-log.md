@@ -295,6 +295,7 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
 - **Human review:** The mitigation rule (score ≥ 15) came from my feature spec, not the assignment. Claude Code applied it on every PATCH, which means the seeded unmitigated high risk can't be edited until a mitigation is added. Kept it as a governance rule.
 
 ### 10 Change requests & approval workflow — 2026-10-18
+
 - **Goal:** Controlled approval workflow with explicit state machine, self-approval prevention,
   idempotent decisions and durable history — decision, history row and audit row commit
   atomically. Acceptance tests C and D.
@@ -310,4 +311,8 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   eligible CR: exactly one history row and one audit row added) and Acceptance D (contributor
   calls decision endpoint: 403, CR unchanged, no history row) both pass. Also verified that
   approving a CR leaves `fn_project_financials` values unchanged.
-- **Human review:** TODO (owner)
+- **Human review:**
+  - Reviewed the decision service: row lock (`FOR UPDATE`), status, history and audit
+    are all in one `withTx`, so any failure rolls back everything.
+  - Verified that a repeated decision with the same Idempotency-Key
+    writes exactly one history row.
