@@ -206,4 +206,4 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   tasks is 422, and a stray `initialBudget` field on PATCH is rejected (400) by the strict schema;
   member add/duplicate/remove rules hold, including "cannot remove the owner" and "cannot remove a
   member with an open assigned task" (asserted against the seeded contributor who actually has one).
-- **Human review:** TODO (owner)
+- **Human review:**: manually confirmed budget-headline fields populate correctly on a PM-managed (non-owned) project and PM list scope matches owned ∪ managed ∪ member.
