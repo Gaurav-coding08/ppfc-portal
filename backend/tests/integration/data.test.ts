@@ -188,3 +188,70 @@ describe('v_project_financials coverage', () => {
     expect(Number(r.zero_actual)).toBeGreaterThanOrEqual(1);
   });
 });
+
+describe('Business timestamp realism', () => {
+  // The only business timestamp in the whole seed that's allowed to fall
+  // after the default reporting date is the deliberate "posted cost after
+  // the cutoff" edge case on PRJ-007 (cost_transactions.txn_date/posted_at,
+  // and the audit_event it generates). Every other timestamped table must
+  // have nothing after 2026-09-30 — there's no story in this dataset for a
+  // record that "happened" in its own future.
+  test('no business timestamp is after the reporting date, except the documented post-cutoff cost', async () => {
+    expect(await count("SELECT count(*) FROM tasks WHERE completed_at::date > '2026-09-30'")).toBe(0);
+    expect(await count("SELECT count(*) FROM tasks WHERE created_at::date > '2026-09-30'")).toBe(0);
+    expect(await count("SELECT count(*) FROM milestones WHERE achieved_date > '2026-09-30'")).toBe(0);
+    expect(await count("SELECT count(*) FROM risks WHERE closed_at::date > '2026-09-30'")).toBe(0);
+    expect(await count("SELECT count(*) FROM change_requests WHERE submitted_at::date > '2026-09-30'")).toBe(0);
+    expect(await count("SELECT count(*) FROM change_requests WHERE decided_at::date > '2026-09-30'")).toBe(0);
+    expect(await count("SELECT count(*) FROM change_history WHERE created_at::date > '2026-09-30'")).toBe(0);
+    expect(await count("SELECT count(*) FROM budget_revisions WHERE created_at::date > '2026-09-30'")).toBe(0);
+    expect(await count("SELECT count(*) FROM budget_revisions WHERE decided_at::date > '2026-09-30'")).toBe(0);
+    expect(await count("SELECT count(*) FROM financial_forecasts WHERE updated_at::date > '2026-09-30'")).toBe(0);
+    expect(await count("SELECT count(*) FROM projects WHERE created_at::date > '2026-09-30'")).toBe(0);
+    expect(await count("SELECT count(*) FROM users WHERE created_at::date > '2026-09-30'")).toBe(0);
+
+    // The one documented exception: exactly one posted cost (and the
+    // matching audit event) after the cutoff.
+    expect(
+      await count("SELECT count(*) FROM cost_transactions WHERE txn_date > '2026-09-30'")
+    ).toBe(1);
+    expect(
+      await count("SELECT count(*) FROM cost_transactions WHERE posted_at::date > '2026-09-30'")
+    ).toBe(1);
+    expect(
+      await count("SELECT count(*) FROM audit_events WHERE created_at::date > '2026-09-30'")
+    ).toBe(1);
+  });
+
+  test('every change request has submitted_at strictly before decided_at', async () => {
+    const neverSubmitted = await count('SELECT count(*) FROM change_requests WHERE submitted_at IS NULL');
+    expect(neverSubmitted).toBe(0);
+
+    const outOfOrder = await count(
+      'SELECT count(*) FROM change_requests WHERE decided_at IS NOT NULL AND submitted_at >= decided_at'
+    );
+    expect(outOfOrder).toBe(0);
+  });
+
+  test('change_history rows are chronological within each change request', async () => {
+    const { rows } = await client.query<{ change_request_id: string; out_of_order: boolean }>(`
+      SELECT change_request_id,
+        array_agg(created_at ORDER BY id) <> array_agg(created_at ORDER BY created_at) AS out_of_order
+      FROM change_history
+      GROUP BY change_request_id
+    `);
+    expect(rows.length).toBeGreaterThan(0);
+    for (const row of rows) {
+      expect(row.out_of_order).toBe(false);
+    }
+  });
+
+  test('posted cost spend exists in every month from January through September 2026', async () => {
+    const { rows } = await client.query<{ n: string }>(`
+      SELECT count(DISTINCT date_trunc('month', txn_date)) n
+      FROM cost_transactions
+      WHERE status = 'posted' AND txn_date BETWEEN '2026-01-01' AND '2026-09-30'
+    `);
+    expect(Number(rows[0]!.n)).toBe(9);
+  });
+});

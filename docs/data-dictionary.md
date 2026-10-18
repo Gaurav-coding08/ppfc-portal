@@ -431,11 +431,34 @@ dataset being computed from fixed base dates — never `new Date()` with no argu
 "current" wall-clock time). Regenerating produces byte-identical CSVs every time.
 
 Business-rule-relevant fields (dates, amounts, statuses) are hand-picked, not left to
-faker — faker is only used for filler text (names, titles, descriptions) and the bulk
-"draft cost" filler rows that pad `cost_transactions` past its row-count minimum without
-touching any project's real spend total. IDs are explicit in the CSVs; `import-csv.ts`
-loads them with `OVERRIDING SYSTEM VALUE` (the id columns are `GENERATED ALWAYS`) and
-resets each identity sequence afterwards.
+faker — faker is only used for filler text (names, titles, descriptions). IDs are
+explicit in the CSVs; `import-csv.ts` loads them with `OVERRIDING SYSTEM VALUE` (the id
+columns are `GENERATED ALWAYS`) and resets each identity sequence afterwards.
+
+**Timestamp policy.** Every timestamp column with business meaning — every business
+table's `created_at`/`updated_at`, `change_requests.submitted_at`/`decided_at`,
+`change_history.created_at`, `audit_events.created_at`, `cost_transactions.posted_at`,
+`tasks.completed_at`, `risks.closed_at`, `milestones.achieved_date`,
+`budget_revisions.created_at`/`decided_at`, `financial_forecasts.updated_at` — is an
+explicit historical value in the CSV, computed from the fixed reporting date with
+`atTime`/`shiftTimestamp` (`backend/scripts/generate/dates.ts`). None of them are left
+blank to pick up the DB's `now()` default on import, and each one is consistent with its
+own record's story: a CR's `submitted_at` is always before its `decided_at`;
+`change_history` rows reuse those same two timestamps so they're chronological by
+construction; a task or risk can't be `done`/`closed` with a due date that's still in the
+future as of the reporting date. The **only** business timestamp anywhere in the dataset
+that falls after the reporting date is the one documented "posted cost after the cutoff"
+row below — everything else is historical.
+
+`cost_transactions` also carries filler rows beyond its 42 hand-placed fixtures, to clear
+its row-count minimum and spread posted spend realistically across the year. Two
+projects — PRJ-001 and PRJ-002 — are "amount-locked": a tested KPI depends on their exact
+posted-spend total (zero spend; 90-99% utilization), so their filler is always `draft`
+and never changes that total. The other six projects have no such constraint, so most of
+their filler is `posted`, cycling through every month January-September — that's what
+gets the dataset to roughly 75% posted overall and guarantees posted spend exists in
+every one of those nine months, not just the months the hand-placed fixtures happened to
+cover.
 
 ### Edge-case catalogue
 
@@ -443,9 +466,9 @@ Reporting date for all of these is the default, `2026-09-30`.
 
 | Edge case | Where |
 |---|---|
-| Project with no posted spend (drafts only) | PRJ-001 — 3 draft `cost_transactions`, 0 posted |
-| Project near budget (90-99% utilization) | PRJ-002 — budget 160,000, actual 150,000 (93.75%) |
-| Project forecast to exceed budget (EAC > budget) | PRJ-003 — budget 100,000, actual 70,000, FTC 40,000, EAC 110,000 |
+| Project with no posted spend (drafts only) | PRJ-001 — amount-locked; all its `cost_transactions` (pinned + filler) are drafts, 0 posted |
+| Project near budget (90-99% utilization) | PRJ-002 — amount-locked; budget 160,000, actual 150,000 (93.75%) |
+| Project forecast to exceed budget (EAC > budget) | PRJ-003 — budget 100,000, pinned actual 70,000 + forecast 40,000 already puts EAC at 110,000 > budget; posted filler only adds more actual spend on top, so it stays an overrun |
 | ≥ 5 overdue incomplete tasks (due < 2026-09-30, status ≠ done) | spread across all active projects by construction (42 in the generated dataset) |
 | Task due exactly 2026-09-30 | PRJ-001, task 10 |
 | Unassigned task | PRJ-003, task 6 (`assignee_id` null) |
@@ -456,8 +479,9 @@ Reporting date for all of these is the default, `2026-09-30`.
 | Rejected change request | PRJ-003's second CR |
 | Approved budget revision (affects budget) | PRJ-001/002/004/006/008 revisions |
 | Pending budget revision (must not affect budget) | PRJ-003 (+15,000) and PRJ-007 (+12,000) |
-| Posted and draft costs | every project has at least one draft; 8 projects have posted rows |
-| Posted cost after the cutoff (Oct 2026) | PRJ-007, posted 2026-10-05 — excluded from `actual_spend` as of the default reporting date |
-| Project without forecast rows (`forecastMissing`, EAC = actual) | PRJ-005 |
+| Posted and draft costs | every project has at least one draft; most have many posted rows (~75% of all `cost_transactions` are posted) |
+| Posted spend in every month Jan-Sep 2026 | guaranteed by the posted filler's month cycle, regardless of which months the pinned fixtures happen to cover |
+| Posted cost after the cutoff (Oct 2026) | PRJ-007, posted 2026-10-05 — excluded from `actual_spend` as of the default reporting date; the only business timestamp in the dataset after 2026-09-30 |
+| Project without forecast rows (`forecastMissing`, EAC = actual) | PRJ-005 — posted filler adds to its actual spend but never adds a forecast row |
 | Project with a reversal entry | PRJ-006 — 40,000 expense + 40,000 reversal, net 0 from that pair |
 | Records across all 3 departments, Jan-Sep 2026 | all 8 projects, department_id 1-3, cost/task dates spread Jan-Sep 2026 |

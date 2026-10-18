@@ -22,6 +22,7 @@ export function buildAuditEvents(
       project_id: cr.project_id,
       before: JSON.stringify({ status: 'submitted' }),
       after: JSON.stringify({ status: cr.status, decisionReason: cr.decision_reason }),
+      created_at: cr.decided_at!,
     });
   }
 
@@ -36,6 +37,7 @@ export function buildAuditEvents(
       project_id: cost.project_id,
       before: JSON.stringify({ status: 'draft' }),
       after: JSON.stringify({ status: 'posted', amount: cost.amount, entryType: cost.entry_type }),
+      created_at: cost.posted_at!,
     });
   }
 

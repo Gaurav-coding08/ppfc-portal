@@ -1,5 +1,10 @@
 import { faker } from '@faker-js/faker';
+import { atTime } from './dates.js';
 import type { UserRow } from './types.js';
+
+// All seeded users were "onboarded" before any project work starts — one
+// fixed historical timestamp, well before the reporting date, not now().
+const ONBOARDED_AT = atTime('2025-12-15');
 
 // bcrypt hash of 'Demo@1234' with a fixed salt, computed once offline and
 // hard-coded here. Hashing at generation time would call into bcrypt's
@@ -55,6 +60,8 @@ export function buildUsers(): UserRow[] {
       role,
       department_id: departmentId,
       is_active: true,
+      created_at: ONBOARDED_AT,
+      updated_at: ONBOARDED_AT,
     });
   }
 

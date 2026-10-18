@@ -1,4 +1,5 @@
 import { PROJECTS } from './projects.js';
+import { addDays, atTime, shiftTimestamp } from './dates.js';
 import type { BudgetRevisionRow, CostCategoryRow, ProjectBudgetRow } from './types.js';
 
 export function buildCostCategories(): CostCategoryRow[] {
@@ -39,7 +40,7 @@ export function buildProjectBudgets(): ProjectBudgetRow[] {
 // self-approval CHECK (decided_by <> requested_by) is never at risk.
 export function buildBudgetRevisions(): BudgetRevisionRow[] {
   const admin = 1;
-  const rows: Omit<BudgetRevisionRow, 'id'>[] = [
+  const rows: Omit<BudgetRevisionRow, 'id' | 'created_at'>[] = [
     {
       project_id: 1,
       amount: 20000,
@@ -130,5 +131,12 @@ export function buildBudgetRevisions(): BudgetRevisionRow[] {
     },
   ];
 
-  return rows.map((row, i) => ({ id: i + 1, ...row }));
+  // created_at is when the revision was requested — always before its own
+  // decision (decided ones) or a couple of weeks ahead of its effective
+  // date (still-pending ones), and never after the reporting date.
+  return rows.map((row, i) => ({
+    id: i + 1,
+    ...row,
+    created_at: row.decided_at ? shiftTimestamp(row.decided_at, -3) : atTime(addDays(row.effective_date, -14)),
+  }));
 }

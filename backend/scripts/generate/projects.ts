@@ -1,4 +1,12 @@
+import { addDays, atTime } from './dates.js';
 import type { ProjectMemberRow, ProjectRow } from './types.js';
+
+// A project's record is created two weeks before its own kickoff — always
+// before the reporting date, since every seeded project starts in 2026.
+function projectTimestamps(startDate: string): { created_at: string; updated_at: string } {
+  const createdAt = atTime(addDays(startDate, -14));
+  return { created_at: createdAt, updated_at: createdAt };
+}
 
 // Each project is hand-picked to carry exactly one of the mandatory edge
 // cases from the feature spec (see docs/data-dictionary.md → "Edge-case
@@ -17,6 +25,7 @@ export const PROJECTS: ProjectRow[] = [
     start_date: '2026-01-05',
     end_date: '2027-03-31',
     created_by: 2,
+    ...projectTimestamps('2026-01-05'),
   },
   {
     id: 2,
@@ -29,6 +38,7 @@ export const PROJECTS: ProjectRow[] = [
     start_date: '2026-01-12',
     end_date: '2026-12-31',
     created_by: 3,
+    ...projectTimestamps('2026-01-12'),
   },
   {
     id: 3,
@@ -41,6 +51,7 @@ export const PROJECTS: ProjectRow[] = [
     start_date: '2026-02-01',
     end_date: '2026-12-31',
     created_by: 4,
+    ...projectTimestamps('2026-02-01'),
   },
   {
     id: 4,
@@ -53,6 +64,7 @@ export const PROJECTS: ProjectRow[] = [
     start_date: '2026-01-10',
     end_date: '2026-06-30',
     created_by: 2,
+    ...projectTimestamps('2026-01-10'),
   },
   {
     id: 5,
@@ -65,6 +77,7 @@ export const PROJECTS: ProjectRow[] = [
     start_date: '2026-03-01',
     end_date: '2027-01-31',
     created_by: 3,
+    ...projectTimestamps('2026-03-01'),
   },
   {
     id: 6,
@@ -77,6 +90,7 @@ export const PROJECTS: ProjectRow[] = [
     start_date: '2026-01-20',
     end_date: '2026-11-30',
     created_by: 4,
+    ...projectTimestamps('2026-01-20'),
   },
   {
     id: 7,
@@ -89,6 +103,7 @@ export const PROJECTS: ProjectRow[] = [
     start_date: '2026-06-01',
     end_date: '2027-06-30',
     created_by: 2,
+    ...projectTimestamps('2026-06-01'),
   },
   {
     id: 8,
@@ -101,6 +116,7 @@ export const PROJECTS: ProjectRow[] = [
     start_date: '2026-04-01',
     end_date: '2026-10-31',
     created_by: 3,
+    ...projectTimestamps('2026-04-01'),
   },
 ];
 
@@ -125,9 +141,20 @@ export function buildProjects(): ProjectRow[] {
 export function buildProjectMembers(): ProjectMemberRow[] {
   const members: ProjectMemberRow[] = [];
   PROJECTS.forEach((project, i) => {
-    members.push({ project_id: project.id, user_id: project.owner_id, member_role: 'manager' });
+    // Members are added the moment the project itself is created.
+    members.push({
+      project_id: project.id,
+      user_id: project.owner_id,
+      member_role: 'manager',
+      added_at: project.created_at,
+    });
     for (const userId of CONTRIBUTOR_SETS[i]!) {
-      members.push({ project_id: project.id, user_id: userId, member_role: 'contributor' });
+      members.push({
+        project_id: project.id,
+        user_id: userId,
+        member_role: 'contributor',
+        added_at: project.created_at,
+      });
     }
   });
   return members;

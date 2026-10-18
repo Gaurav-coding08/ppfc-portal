@@ -1,5 +1,5 @@
 import { PROJECTS } from './projects.js';
-import { addDays, daysBetween, isBeforeReportingDate } from './dates.js';
+import { addDays, atTime, daysBetween, isBeforeReportingDate } from './dates.js';
 import type { MilestoneRow } from './types.js';
 
 const NAMES = ['Requirements sign-off', 'Mid-point review', 'Go-live'];
@@ -12,9 +12,13 @@ export function buildMilestones(): MilestoneRow[] {
 
   for (const project of PROJECTS) {
     const span = daysBetween(project.start_date, project.end_date);
+    // Milestones are planned at project kickoff, same as the project record.
+    const createdAt = project.created_at;
+
     NAMES.forEach((name, i) => {
       const dueDate = addDays(project.start_date, Math.round(OFFSETS[i]! * span));
       const achieved = isBeforeReportingDate(dueDate);
+      const achievedAt = achieved ? atTime(dueDate) : null;
       milestones.push({
         id: id++,
         project_id: project.id,
@@ -22,6 +26,8 @@ export function buildMilestones(): MilestoneRow[] {
         due_date: dueDate,
         status: achieved ? 'achieved' : 'planned',
         achieved_date: achieved ? dueDate : null,
+        created_at: createdAt,
+        updated_at: achievedAt ?? createdAt,
       });
     });
   }

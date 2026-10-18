@@ -16,6 +16,8 @@ export interface UserRow {
   role: 'contributor' | 'project_manager' | 'admin';
   department_id: number;
   is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ProjectRow {
@@ -29,12 +31,15 @@ export interface ProjectRow {
   start_date: string;
   end_date: string;
   created_by: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ProjectMemberRow {
   project_id: number;
   user_id: number;
   member_role: 'manager' | 'contributor';
+  added_at: string;
 }
 
 export interface TaskRow {
@@ -50,6 +55,8 @@ export interface TaskRow {
   weight: number;
   progress: number;
   completed_at: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface MilestoneRow {
@@ -59,6 +66,8 @@ export interface MilestoneRow {
   due_date: string;
   status: 'planned' | 'achieved' | 'missed';
   achieved_date: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface RiskRow {
@@ -74,6 +83,8 @@ export interface RiskRow {
   due_date: string | null;
   status: 'open' | 'mitigating' | 'closed';
   closed_at: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ProgressSnapshotRow {
@@ -109,6 +120,7 @@ export interface BudgetRevisionRow {
   decided_at: string | null;
   decision_reason: string | null;
   effective_date: string;
+  created_at: string;
 }
 
 export interface CostTransactionRow {
@@ -125,6 +137,8 @@ export interface CostTransactionRow {
   created_by: number;
   posted_by: number | null;
   posted_at: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface FinancialForecastRow {
@@ -133,6 +147,7 @@ export interface FinancialForecastRow {
   month: string;
   amount: number;
   updated_by: number;
+  updated_at: string;
 }
 
 export interface ChangeRequestRow {
@@ -144,9 +159,12 @@ export interface ChangeRequestRow {
   impact_summary: string | null;
   requested_by: number;
   status: 'submitted' | 'approved' | 'rejected' | 'returned';
+  submitted_at: string;
   decided_by: number | null;
   decided_at: string | null;
   decision_reason: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ChangeHistoryRow {
@@ -156,6 +174,7 @@ export interface ChangeHistoryRow {
   to_status: string;
   actor_id: number;
   reason: string | null;
+  created_at: string;
 }
 
 export interface AuditEventRow {
@@ -167,6 +186,7 @@ export interface AuditEventRow {
   project_id: number | null;
   before: string | null;
   after: string | null;
+  created_at: string;
 }
 
 export interface AutomationRunRow {

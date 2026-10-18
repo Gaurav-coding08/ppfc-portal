@@ -1,43 +1,79 @@
-id,actor_id,entity_type,entity_id,action,project_id,before,after
-1,2,change_request,1,decide,1,"{""status"":""submitted""}","{""status"":""approved"",""decisionReason"":""Approved — within agreed scope.""}"
-2,3,change_request,3,decide,2,"{""status"":""submitted""}","{""status"":""approved"",""decisionReason"":""Approved — within agreed scope.""}"
-3,4,change_request,5,decide,3,"{""status"":""submitted""}","{""status"":""approved"",""decisionReason"":""Approved — within agreed scope.""}"
-4,4,change_request,6,decide,3,"{""status"":""submitted""}","{""status"":""rejected"",""decisionReason"":""Rejected — no funding available for this scope.""}"
-5,2,change_request,7,decide,4,"{""status"":""submitted""}","{""status"":""approved"",""decisionReason"":""Approved — within agreed scope.""}"
-6,3,change_request,9,decide,5,"{""status"":""submitted""}","{""status"":""approved"",""decisionReason"":""Approved — within agreed scope.""}"
-7,4,change_request,11,decide,6,"{""status"":""submitted""}","{""status"":""approved"",""decisionReason"":""Approved — within agreed scope.""}"
-8,4,change_request,12,decide,6,"{""status"":""submitted""}","{""status"":""returned"",""decisionReason"":""Returned — please quantify the schedule impact and resubmit.""}"
-9,2,change_request,13,decide,7,"{""status"":""submitted""}","{""status"":""approved"",""decisionReason"":""Approved — within agreed scope.""}"
-10,3,change_request,15,decide,8,"{""status"":""submitted""}","{""status"":""approved"",""decisionReason"":""Approved — within agreed scope.""}"
-11,3,cost_transaction,4,post,2,"{""status"":""draft""}","{""status"":""posted"",""amount"":30000,""entryType"":""expense""}"
-12,3,cost_transaction,5,post,2,"{""status"":""draft""}","{""status"":""posted"",""amount"":25000,""entryType"":""expense""}"
-13,3,cost_transaction,6,post,2,"{""status"":""draft""}","{""status"":""posted"",""amount"":20000,""entryType"":""expense""}"
-14,3,cost_transaction,7,post,2,"{""status"":""draft""}","{""status"":""posted"",""amount"":35000,""entryType"":""expense""}"
-15,3,cost_transaction,8,post,2,"{""status"":""draft""}","{""status"":""posted"",""amount"":20000,""entryType"":""expense""}"
-16,3,cost_transaction,9,post,2,"{""status"":""draft""}","{""status"":""posted"",""amount"":20000,""entryType"":""expense""}"
-17,4,cost_transaction,12,post,3,"{""status"":""draft""}","{""status"":""posted"",""amount"":20000,""entryType"":""expense""}"
-18,4,cost_transaction,13,post,3,"{""status"":""draft""}","{""status"":""posted"",""amount"":15000,""entryType"":""expense""}"
-19,4,cost_transaction,14,post,3,"{""status"":""draft""}","{""status"":""posted"",""amount"":20000,""entryType"":""expense""}"
-20,4,cost_transaction,15,post,3,"{""status"":""draft""}","{""status"":""posted"",""amount"":15000,""entryType"":""expense""}"
-21,2,cost_transaction,17,post,4,"{""status"":""draft""}","{""status"":""posted"",""amount"":20000,""entryType"":""expense""}"
-22,2,cost_transaction,18,post,4,"{""status"":""draft""}","{""status"":""posted"",""amount"":15000,""entryType"":""expense""}"
-23,2,cost_transaction,19,post,4,"{""status"":""draft""}","{""status"":""posted"",""amount"":25000,""entryType"":""expense""}"
-24,2,cost_transaction,20,post,4,"{""status"":""draft""}","{""status"":""posted"",""amount"":10000,""entryType"":""expense""}"
-25,2,cost_transaction,21,post,4,"{""status"":""draft""}","{""status"":""posted"",""amount"":10000,""entryType"":""expense""}"
-26,4,cost_transaction,22,post,5,"{""status"":""draft""}","{""status"":""posted"",""amount"":10000,""entryType"":""expense""}"
-27,4,cost_transaction,23,post,5,"{""status"":""draft""}","{""status"":""posted"",""amount"":10000,""entryType"":""expense""}"
-28,4,cost_transaction,24,post,5,"{""status"":""draft""}","{""status"":""posted"",""amount"":12000,""entryType"":""expense""}"
-29,4,cost_transaction,25,post,5,"{""status"":""draft""}","{""status"":""posted"",""amount"":8000,""entryType"":""expense""}"
-30,4,cost_transaction,27,post,6,"{""status"":""draft""}","{""status"":""posted"",""amount"":40000,""entryType"":""expense""}"
-31,4,cost_transaction,28,post,6,"{""status"":""draft""}","{""status"":""posted"",""amount"":40000,""entryType"":""reversal""}"
-32,4,cost_transaction,29,post,6,"{""status"":""draft""}","{""status"":""posted"",""amount"":10000,""entryType"":""expense""}"
-33,4,cost_transaction,30,post,6,"{""status"":""draft""}","{""status"":""posted"",""amount"":12000,""entryType"":""expense""}"
-34,4,cost_transaction,31,post,6,"{""status"":""draft""}","{""status"":""posted"",""amount"":8000,""entryType"":""expense""}"
-35,2,cost_transaction,33,post,7,"{""status"":""draft""}","{""status"":""posted"",""amount"":10000,""entryType"":""expense""}"
-36,2,cost_transaction,34,post,7,"{""status"":""draft""}","{""status"":""posted"",""amount"":8000,""entryType"":""expense""}"
-37,2,cost_transaction,35,post,7,"{""status"":""draft""}","{""status"":""posted"",""amount"":7000,""entryType"":""expense""}"
-38,2,cost_transaction,36,post,7,"{""status"":""draft""}","{""status"":""posted"",""amount"":5000,""entryType"":""expense""}"
-39,3,cost_transaction,38,post,8,"{""status"":""draft""}","{""status"":""posted"",""amount"":10000,""entryType"":""expense""}"
-40,3,cost_transaction,39,post,8,"{""status"":""draft""}","{""status"":""posted"",""amount"":10000,""entryType"":""expense""}"
-41,3,cost_transaction,40,post,8,"{""status"":""draft""}","{""status"":""posted"",""amount"":8000,""entryType"":""expense""}"
-42,3,cost_transaction,41,post,8,"{""status"":""draft""}","{""status"":""posted"",""amount"":7000,""entryType"":""expense""}"
+id,actor_id,entity_type,entity_id,action,project_id,before,after,created_at
+1,2,change_request,1,decide,1,"{""status"":""submitted""}","{""status"":""approved"",""decisionReason"":""Approved — within agreed scope.""}",2026-06-01T00:00:00Z
+2,3,change_request,3,decide,2,"{""status"":""submitted""}","{""status"":""approved"",""decisionReason"":""Approved — within agreed scope.""}",2026-06-01T00:00:00Z
+3,4,change_request,5,decide,3,"{""status"":""submitted""}","{""status"":""approved"",""decisionReason"":""Approved — within agreed scope.""}",2026-06-01T00:00:00Z
+4,4,change_request,6,decide,3,"{""status"":""submitted""}","{""status"":""rejected"",""decisionReason"":""Rejected — no funding available for this scope.""}",2026-07-15T00:00:00Z
+5,2,change_request,7,decide,4,"{""status"":""submitted""}","{""status"":""approved"",""decisionReason"":""Approved — within agreed scope.""}",2026-06-01T00:00:00Z
+6,3,change_request,9,decide,5,"{""status"":""submitted""}","{""status"":""approved"",""decisionReason"":""Approved — within agreed scope.""}",2026-06-01T00:00:00Z
+7,4,change_request,11,decide,6,"{""status"":""submitted""}","{""status"":""approved"",""decisionReason"":""Approved — within agreed scope.""}",2026-06-01T00:00:00Z
+8,4,change_request,12,decide,6,"{""status"":""submitted""}","{""status"":""returned"",""decisionReason"":""Returned — please quantify the schedule impact and resubmit.""}",2026-07-20T00:00:00Z
+9,2,change_request,13,decide,7,"{""status"":""submitted""}","{""status"":""approved"",""decisionReason"":""Approved — within agreed scope.""}",2026-06-01T00:00:00Z
+10,3,change_request,15,decide,8,"{""status"":""submitted""}","{""status"":""approved"",""decisionReason"":""Approved — within agreed scope.""}",2026-06-01T00:00:00Z
+11,3,cost_transaction,4,post,2,"{""status"":""draft""}","{""status"":""posted"",""amount"":30000,""entryType"":""expense""}",2026-01-21T00:00:00Z
+12,3,cost_transaction,5,post,2,"{""status"":""draft""}","{""status"":""posted"",""amount"":25000,""entryType"":""expense""}",2026-02-26T00:00:00Z
+13,3,cost_transaction,6,post,2,"{""status"":""draft""}","{""status"":""posted"",""amount"":20000,""entryType"":""expense""}",2026-04-06T00:00:00Z
+14,3,cost_transaction,7,post,2,"{""status"":""draft""}","{""status"":""posted"",""amount"":35000,""entryType"":""expense""}",2026-05-19T00:00:00Z
+15,3,cost_transaction,8,post,2,"{""status"":""draft""}","{""status"":""posted"",""amount"":20000,""entryType"":""expense""}",2026-07-03T00:00:00Z
+16,3,cost_transaction,9,post,2,"{""status"":""draft""}","{""status"":""posted"",""amount"":20000,""entryType"":""expense""}",2026-08-23T00:00:00Z
+17,4,cost_transaction,12,post,3,"{""status"":""draft""}","{""status"":""posted"",""amount"":20000,""entryType"":""expense""}",2026-03-11T00:00:00Z
+18,4,cost_transaction,13,post,3,"{""status"":""draft""}","{""status"":""posted"",""amount"":15000,""entryType"":""expense""}",2026-05-15T00:00:00Z
+19,4,cost_transaction,14,post,3,"{""status"":""draft""}","{""status"":""posted"",""amount"":20000,""entryType"":""expense""}",2026-07-09T00:00:00Z
+20,4,cost_transaction,15,post,3,"{""status"":""draft""}","{""status"":""posted"",""amount"":15000,""entryType"":""expense""}",2026-08-31T00:00:00Z
+21,2,cost_transaction,17,post,4,"{""status"":""draft""}","{""status"":""posted"",""amount"":20000,""entryType"":""expense""}",2026-01-26T00:00:00Z
+22,2,cost_transaction,18,post,4,"{""status"":""draft""}","{""status"":""posted"",""amount"":15000,""entryType"":""expense""}",2026-02-21T00:00:00Z
+23,2,cost_transaction,19,post,4,"{""status"":""draft""}","{""status"":""posted"",""amount"":25000,""entryType"":""expense""}",2026-04-11T00:00:00Z
+24,2,cost_transaction,20,post,4,"{""status"":""draft""}","{""status"":""posted"",""amount"":10000,""entryType"":""expense""}",2026-05-16T00:00:00Z
+25,2,cost_transaction,21,post,4,"{""status"":""draft""}","{""status"":""posted"",""amount"":10000,""entryType"":""expense""}",2026-06-26T00:00:00Z
+26,4,cost_transaction,22,post,5,"{""status"":""draft""}","{""status"":""posted"",""amount"":10000,""entryType"":""expense""}",2026-03-13T00:00:00Z
+27,4,cost_transaction,23,post,5,"{""status"":""draft""}","{""status"":""posted"",""amount"":10000,""entryType"":""expense""}",2026-05-09T00:00:00Z
+28,4,cost_transaction,24,post,5,"{""status"":""draft""}","{""status"":""posted"",""amount"":12000,""entryType"":""expense""}",2026-07-21T00:00:00Z
+29,4,cost_transaction,25,post,5,"{""status"":""draft""}","{""status"":""posted"",""amount"":8000,""entryType"":""expense""}",2026-08-15T00:00:00Z
+30,4,cost_transaction,27,post,6,"{""status"":""draft""}","{""status"":""posted"",""amount"":40000,""entryType"":""expense""}",2026-04-11T00:00:00Z
+31,4,cost_transaction,28,post,6,"{""status"":""draft""}","{""status"":""posted"",""amount"":40000,""entryType"":""reversal""}",2026-04-21T00:00:00Z
+32,4,cost_transaction,29,post,6,"{""status"":""draft""}","{""status"":""posted"",""amount"":10000,""entryType"":""expense""}",2026-02-06T00:00:00Z
+33,4,cost_transaction,30,post,6,"{""status"":""draft""}","{""status"":""posted"",""amount"":12000,""entryType"":""expense""}",2026-06-19T00:00:00Z
+34,4,cost_transaction,31,post,6,"{""status"":""draft""}","{""status"":""posted"",""amount"":8000,""entryType"":""expense""}",2026-08-10T00:00:00Z
+35,2,cost_transaction,33,post,7,"{""status"":""draft""}","{""status"":""posted"",""amount"":10000,""entryType"":""expense""}",2026-07-03T00:00:00Z
+36,2,cost_transaction,34,post,7,"{""status"":""draft""}","{""status"":""posted"",""amount"":8000,""entryType"":""expense""}",2026-07-21T00:00:00Z
+37,2,cost_transaction,35,post,7,"{""status"":""draft""}","{""status"":""posted"",""amount"":7000,""entryType"":""expense""}",2026-08-26T00:00:00Z
+38,2,cost_transaction,36,post,7,"{""status"":""draft""}","{""status"":""posted"",""amount"":5000,""entryType"":""expense""}",2026-10-06T00:00:00Z
+39,3,cost_transaction,38,post,8,"{""status"":""draft""}","{""status"":""posted"",""amount"":10000,""entryType"":""expense""}",2026-05-12T00:00:00Z
+40,3,cost_transaction,39,post,8,"{""status"":""draft""}","{""status"":""posted"",""amount"":10000,""entryType"":""expense""}",2026-06-23T00:00:00Z
+41,3,cost_transaction,40,post,8,"{""status"":""draft""}","{""status"":""posted"",""amount"":8000,""entryType"":""expense""}",2026-07-31T00:00:00Z
+42,3,cost_transaction,41,post,8,"{""status"":""draft""}","{""status"":""posted"",""amount"":7000,""entryType"":""expense""}",2026-08-18T00:00:00Z
+43,4,cost_transaction,55,post,3,"{""status"":""draft""}","{""status"":""posted"",""amount"":800,""entryType"":""expense""}",2026-01-02T09:00:00Z
+44,2,cost_transaction,56,post,4,"{""status"":""draft""}","{""status"":""posted"",""amount"":993,""entryType"":""expense""}",2026-02-03T09:00:00Z
+45,3,cost_transaction,57,post,5,"{""status"":""draft""}","{""status"":""posted"",""amount"":1186,""entryType"":""expense""}",2026-03-04T09:00:00Z
+46,4,cost_transaction,58,post,6,"{""status"":""draft""}","{""status"":""posted"",""amount"":1379,""entryType"":""expense""}",2026-04-05T09:00:00Z
+47,2,cost_transaction,59,post,7,"{""status"":""draft""}","{""status"":""posted"",""amount"":1572,""entryType"":""expense""}",2026-05-06T09:00:00Z
+48,3,cost_transaction,60,post,8,"{""status"":""draft""}","{""status"":""posted"",""amount"":1765,""entryType"":""expense""}",2026-06-07T09:00:00Z
+49,4,cost_transaction,61,post,3,"{""status"":""draft""}","{""status"":""posted"",""amount"":1958,""entryType"":""expense""}",2026-07-08T09:00:00Z
+50,2,cost_transaction,62,post,4,"{""status"":""draft""}","{""status"":""posted"",""amount"":2151,""entryType"":""expense""}",2026-08-09T09:00:00Z
+51,3,cost_transaction,63,post,5,"{""status"":""draft""}","{""status"":""posted"",""amount"":2344,""entryType"":""expense""}",2026-09-10T09:00:00Z
+52,4,cost_transaction,64,post,6,"{""status"":""draft""}","{""status"":""posted"",""amount"":2537,""entryType"":""expense""}",2026-01-11T09:00:00Z
+53,2,cost_transaction,65,post,7,"{""status"":""draft""}","{""status"":""posted"",""amount"":2730,""entryType"":""expense""}",2026-02-12T09:00:00Z
+54,3,cost_transaction,66,post,8,"{""status"":""draft""}","{""status"":""posted"",""amount"":2923,""entryType"":""expense""}",2026-03-13T09:00:00Z
+55,4,cost_transaction,67,post,3,"{""status"":""draft""}","{""status"":""posted"",""amount"":3116,""entryType"":""expense""}",2026-04-14T09:00:00Z
+56,2,cost_transaction,68,post,4,"{""status"":""draft""}","{""status"":""posted"",""amount"":3309,""entryType"":""expense""}",2026-05-15T09:00:00Z
+57,3,cost_transaction,69,post,5,"{""status"":""draft""}","{""status"":""posted"",""amount"":3502,""entryType"":""expense""}",2026-06-16T09:00:00Z
+58,4,cost_transaction,70,post,6,"{""status"":""draft""}","{""status"":""posted"",""amount"":3695,""entryType"":""expense""}",2026-07-17T09:00:00Z
+59,2,cost_transaction,71,post,7,"{""status"":""draft""}","{""status"":""posted"",""amount"":3888,""entryType"":""expense""}",2026-08-18T09:00:00Z
+60,3,cost_transaction,72,post,8,"{""status"":""draft""}","{""status"":""posted"",""amount"":4081,""entryType"":""expense""}",2026-09-19T09:00:00Z
+61,4,cost_transaction,73,post,3,"{""status"":""draft""}","{""status"":""posted"",""amount"":4274,""entryType"":""expense""}",2026-01-20T09:00:00Z
+62,2,cost_transaction,74,post,4,"{""status"":""draft""}","{""status"":""posted"",""amount"":4467,""entryType"":""expense""}",2026-02-21T09:00:00Z
+63,3,cost_transaction,75,post,5,"{""status"":""draft""}","{""status"":""posted"",""amount"":4660,""entryType"":""expense""}",2026-03-22T09:00:00Z
+64,4,cost_transaction,76,post,6,"{""status"":""draft""}","{""status"":""posted"",""amount"":4853,""entryType"":""expense""}",2026-04-23T09:00:00Z
+65,2,cost_transaction,77,post,7,"{""status"":""draft""}","{""status"":""posted"",""amount"":5046,""entryType"":""expense""}",2026-05-24T09:00:00Z
+66,3,cost_transaction,78,post,8,"{""status"":""draft""}","{""status"":""posted"",""amount"":5239,""entryType"":""expense""}",2026-06-25T09:00:00Z
+67,4,cost_transaction,79,post,3,"{""status"":""draft""}","{""status"":""posted"",""amount"":5432,""entryType"":""expense""}",2026-07-26T09:00:00Z
+68,2,cost_transaction,80,post,4,"{""status"":""draft""}","{""status"":""posted"",""amount"":5625,""entryType"":""expense""}",2026-08-27T09:00:00Z
+69,3,cost_transaction,81,post,5,"{""status"":""draft""}","{""status"":""posted"",""amount"":5818,""entryType"":""expense""}",2026-09-28T09:00:00Z
+70,4,cost_transaction,82,post,6,"{""status"":""draft""}","{""status"":""posted"",""amount"":6011,""entryType"":""expense""}",2026-01-02T09:00:00Z
+71,2,cost_transaction,83,post,7,"{""status"":""draft""}","{""status"":""posted"",""amount"":6204,""entryType"":""expense""}",2026-02-03T09:00:00Z
+72,3,cost_transaction,84,post,8,"{""status"":""draft""}","{""status"":""posted"",""amount"":6397,""entryType"":""expense""}",2026-03-04T09:00:00Z
+73,4,cost_transaction,85,post,3,"{""status"":""draft""}","{""status"":""posted"",""amount"":6590,""entryType"":""expense""}",2026-04-05T09:00:00Z
+74,2,cost_transaction,86,post,4,"{""status"":""draft""}","{""status"":""posted"",""amount"":6783,""entryType"":""expense""}",2026-05-06T09:00:00Z
+75,3,cost_transaction,87,post,5,"{""status"":""draft""}","{""status"":""posted"",""amount"":6976,""entryType"":""expense""}",2026-06-07T09:00:00Z
+76,4,cost_transaction,88,post,6,"{""status"":""draft""}","{""status"":""posted"",""amount"":7169,""entryType"":""expense""}",2026-07-08T09:00:00Z
+77,2,cost_transaction,89,post,7,"{""status"":""draft""}","{""status"":""posted"",""amount"":7362,""entryType"":""expense""}",2026-08-09T09:00:00Z
+78,3,cost_transaction,90,post,8,"{""status"":""draft""}","{""status"":""posted"",""amount"":7555,""entryType"":""expense""}",2026-09-10T09:00:00Z

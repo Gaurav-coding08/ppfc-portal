@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { CONTRIBUTOR_SETS, PROJECTS } from './projects.js';
-import { addDays } from './dates.js';
+import { addDays, atTime, REPORTING_DATE } from './dates.js';
 import type { RiskRow } from './types.js';
 
 const TYPE_CYCLE: RiskRow['type'][] = ['risk', 'issue', 'risk'];
@@ -23,6 +23,7 @@ export function buildRisks(): RiskRow[] {
 
   PROJECTS.forEach((project, projectIdx) => {
     const owner = CONTRIBUTOR_SETS[projectIdx]![0]!;
+    const createdAt = project.created_at;
 
     for (let i = 0; i < 3; i++) {
       let [probability, impact] = SCORE_CYCLE[i]!;
@@ -39,7 +40,13 @@ export function buildRisks(): RiskRow[] {
         impact = 4;
         status = 'open';
       }
+      // A risk can't already be "closed" on a date that hasn't happened yet
+      // as of the reporting date.
+      if (status === 'closed' && dueDate > REPORTING_DATE) {
+        status = 'mitigating';
+      }
 
+      const closedAt = status === 'closed' ? atTime(dueDate) : null;
       risks.push({
         id: id++,
         project_id: project.id,
@@ -52,7 +59,9 @@ export function buildRisks(): RiskRow[] {
         mitigation: status === 'open' ? null : faker.lorem.sentence(),
         due_date: dueDate,
         status,
-        closed_at: status === 'closed' ? `${dueDate}T00:00:00Z` : null,
+        closed_at: closedAt,
+        created_at: createdAt,
+        updated_at: closedAt ?? createdAt,
       });
     }
   });

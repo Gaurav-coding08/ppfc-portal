@@ -1,16 +1,16 @@
-id,email,full_name,password_hash,role,department_id,is_active
-1,garnet.wiegand@ppfc.demo,Garnet Wiegand,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,admin,3,true
-2,christelle.satterfield@ppfc.demo,Christelle Satterfield,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,project_manager,1,true
-3,lavinia.crist@ppfc.demo,Lavinia Crist,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,project_manager,2,true
-4,isabell.bradtke@ppfc.demo,Isabell Bradtke,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,project_manager,3,true
-5,anderson.streich@ppfc.demo,Anderson Streich,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,project_manager,1,true
-6,estell.conroy@ppfc.demo,Estell Conroy,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,contributor,1,true
-7,melissa.aufderhar@ppfc.demo,Melissa Aufderhar,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,contributor,2,true
-8,anabelle.reichertsipes@ppfc.demo,Anabelle Reichert-Sipes,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,contributor,3,true
-9,trevion.abbott@ppfc.demo,Trevion Abbott,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,contributor,1,true
-10,cheyenne.deckowmosciski@ppfc.demo,Cheyenne Deckow-Mosciski,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,contributor,2,true
-11,elliott.leffler@ppfc.demo,Elliott Leffler,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,contributor,3,true
-12,adaline.bahringer@ppfc.demo,Adaline Bahringer,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,contributor,1,true
-13,einar.moore@ppfc.demo,Einar Moore,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,contributor,2,true
-14,gregg.beahan@ppfc.demo,Gregg Beahan,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,contributor,3,true
-15,eladio.hilllfeest@ppfc.demo,Eladio Hilll-Feest,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,contributor,1,true
+id,email,full_name,password_hash,role,department_id,is_active,created_at,updated_at
+1,garnet.wiegand@ppfc.demo,Garnet Wiegand,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,admin,3,true,2025-12-15T09:00:00Z,2025-12-15T09:00:00Z
+2,christelle.satterfield@ppfc.demo,Christelle Satterfield,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,project_manager,1,true,2025-12-15T09:00:00Z,2025-12-15T09:00:00Z
+3,lavinia.crist@ppfc.demo,Lavinia Crist,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,project_manager,2,true,2025-12-15T09:00:00Z,2025-12-15T09:00:00Z
+4,isabell.bradtke@ppfc.demo,Isabell Bradtke,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,project_manager,3,true,2025-12-15T09:00:00Z,2025-12-15T09:00:00Z
+5,anderson.streich@ppfc.demo,Anderson Streich,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,project_manager,1,true,2025-12-15T09:00:00Z,2025-12-15T09:00:00Z
+6,estell.conroy@ppfc.demo,Estell Conroy,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,contributor,1,true,2025-12-15T09:00:00Z,2025-12-15T09:00:00Z
+7,melissa.aufderhar@ppfc.demo,Melissa Aufderhar,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,contributor,2,true,2025-12-15T09:00:00Z,2025-12-15T09:00:00Z
+8,anabelle.reichertsipes@ppfc.demo,Anabelle Reichert-Sipes,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,contributor,3,true,2025-12-15T09:00:00Z,2025-12-15T09:00:00Z
+9,trevion.abbott@ppfc.demo,Trevion Abbott,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,contributor,1,true,2025-12-15T09:00:00Z,2025-12-15T09:00:00Z
+10,cheyenne.deckowmosciski@ppfc.demo,Cheyenne Deckow-Mosciski,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,contributor,2,true,2025-12-15T09:00:00Z,2025-12-15T09:00:00Z
+11,elliott.leffler@ppfc.demo,Elliott Leffler,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,contributor,3,true,2025-12-15T09:00:00Z,2025-12-15T09:00:00Z
+12,adaline.bahringer@ppfc.demo,Adaline Bahringer,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,contributor,1,true,2025-12-15T09:00:00Z,2025-12-15T09:00:00Z
+13,einar.moore@ppfc.demo,Einar Moore,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,contributor,2,true,2025-12-15T09:00:00Z,2025-12-15T09:00:00Z
+14,gregg.beahan@ppfc.demo,Gregg Beahan,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,contributor,3,true,2025-12-15T09:00:00Z,2025-12-15T09:00:00Z
+15,eladio.hilllfeest@ppfc.demo,Eladio Hilll-Feest,$2a$10$DpWtftN2WrV1AdOh4/NwkuX3iE61vL2QBPJTfnEaF7LEa/TAiKZl6,contributor,1,true,2025-12-15T09:00:00Z,2025-12-15T09:00:00Z

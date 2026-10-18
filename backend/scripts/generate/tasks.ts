@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { CONTRIBUTOR_SETS, PROJECTS } from './projects.js';
-import { addDays, daysBetween, REPORTING_DATE } from './dates.js';
+import { addDays, atTime, daysBetween, REPORTING_DATE } from './dates.js';
 import type { TaskRow } from './types.js';
 
 const TASKS_PER_PROJECT = 12;
@@ -20,6 +20,9 @@ export function buildTasks(): TaskRow[] {
     const isCompletedProject = project.status === 'completed';
     const span = daysBetween(project.start_date, project.end_date);
     const contributors = CONTRIBUTOR_SETS[projectIdx]!;
+    // All of a project's tasks were created at kickoff — always before the
+    // reporting date, since no seeded project starts after 2026-09-30.
+    const createdAt = atTime(project.start_date);
 
     for (let i = 0; i < TASKS_PER_PROJECT; i++) {
       // Due dates spread proportionally across the project's own lifetime,
@@ -27,17 +30,25 @@ export function buildTasks(): TaskRow[] {
       const offsetDays = Math.round(((i + 1) / TASKS_PER_PROJECT) * span);
       let dueDate = addDays(project.start_date, offsetDays);
 
-      const status: TaskRow['status'] = isCompletedProject ? 'done' : STATUS_CYCLE[i % 4]!;
-      let assigneeId: number | null = contributors[i % contributors.length]!;
-
       if (project.id === FORCE_DUE_EXACTLY_ON_CUTOFF.projectId && i === FORCE_DUE_EXACTLY_ON_CUTOFF.index) {
         dueDate = REPORTING_DATE;
       }
+
+      let status: TaskRow['status'] = isCompletedProject ? 'done' : STATUS_CYCLE[i % 4]!;
+      // A task can't already be "done" if its due date hasn't happened yet
+      // as of the reporting date — that would mean completing it in the
+      // future. Downgrade it to a real in-flight status instead.
+      if (status === 'done' && dueDate > REPORTING_DATE) {
+        status = 'blocked';
+      }
+
+      let assigneeId: number | null = contributors[i % contributors.length]!;
       if (project.id === FORCE_UNASSIGNED.projectId && i === FORCE_UNASSIGNED.index) {
         assigneeId = null;
       }
 
       const progress = status === 'done' ? 100 : [0, 25, 50, 75][i % 4]!;
+      const completedAt = status === 'done' ? atTime(dueDate) : null;
       tasks.push({
         id: id++,
         project_id: project.id,
@@ -50,7 +61,9 @@ export function buildTasks(): TaskRow[] {
         due_date: dueDate,
         weight: (i % 5) + 1,
         progress,
-        completed_at: status === 'done' ? `${dueDate}T00:00:00Z` : null,
+        completed_at: completedAt,
+        created_at: createdAt,
+        updated_at: completedAt ?? createdAt,
       });
     }
   });

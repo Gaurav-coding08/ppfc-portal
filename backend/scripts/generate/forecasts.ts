@@ -1,4 +1,9 @@
+import { atTime } from './dates.js';
 import type { FinancialForecastRow } from './types.js';
+
+// All forecasts were entered during the same September planning cycle,
+// before the reporting date — not whenever the import happens to run.
+const FORECAST_UPDATED_AT = atTime('2026-09-15');
 
 // Monthly forecast amounts from October 2026 through each project's own end
 // month. Project 5 is deliberately left out entirely — that's the
@@ -67,6 +72,7 @@ export function buildFinancialForecasts(): FinancialForecastRow[] {
         month: entry.month,
         amount: entry.amount,
         updated_by: UPDATED_BY_PROJECT[projectId]!,
+        updated_at: FORECAST_UPDATED_AT,
       });
     }
   }

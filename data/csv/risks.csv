@@ -1,25 +1,25 @@
-id,project_id,type,title,description,owner_id,probability,impact,mitigation,due_date,status,closed_at
-1,1,risk,Streamlined actuating implementation,Cuppedia appello certus.,6,2,3,,2026-03-06,open,
-2,1,issue,Advanced 6th generation approach,Stultus torqueo explicabo xiphias tandem vulnus vereor itaque numquam.,6,3,2,Sursum vinco templum ulciscor crapula carmen caput defendo bardus.,2026-04-20,mitigating,
-3,1,risk,Cross-platform dedicated time-frame,Pecto beatus calco utrimque spectaculum.,6,4,3,Quae adipiscor contabesco censura amplitudo acerbitas speciosus deripio eius.,2026-06-04,closed,2026-06-04T00:00:00Z
-4,2,risk,Multi-layered reciprocal service-desk,Cohors ulterius totam ipsam volo laudantium alienus.,7,5,5,Textor culpo officia appello denego ad curiositas temeritas terreo quam.,2026-03-13,closed,2026-03-13T00:00:00Z
-5,2,issue,Proactive next generation projection,Venio approbo provident accedo.,7,3,2,Consequatur pecus officia repellendus cruciamentum itaque debitis alioqui ventito sursum.,2026-04-27,mitigating,
-6,2,risk,Future-proofed intermediate instruction set,Terra verbum crux coadunatio quasi error.,7,4,3,Subiungo vir theca arca degenero vester turbo deprimo tenus.,2026-06-11,closed,2026-06-11T00:00:00Z
-7,3,risk,Exclusive actuating hub,Vomer quas depromo.,8,2,3,,2026-04-02,open,
-8,3,issue,Future-proofed empowering concept,Nisi capto congregatio aestivus fuga aperiam degero antiquus.,8,3,2,Argentum cubo aptus subiungo saepe attero attonbitus.,2026-05-17,mitigating,
-9,3,risk,Quality-focused encompassing groupware,Utilis demitto dolorum sopor voluptate at pauper aurum caecus adhaero.,8,4,3,Asporto conitor cibo conqueror atqui addo alienus inflammatio animi.,2026-07-01,closed,2026-07-01T00:00:00Z
-10,4,risk,Operative high-level frame,Varius convoco aperiam desolo.,9,2,3,,2026-03-11,open,
-11,4,issue,Fundamental needs-based firmware,Aliquam thermae denique.,9,3,2,Sto aggredior doloremque uterque aro verumtamen cotidie aduro.,2026-04-25,mitigating,
-12,4,risk,Adaptive didactic strategy,Ago tamisium patria audacia vos bellum fuga correptius vesper.,9,4,3,Canto quae temporibus corporis excepturi delectatio.,2026-06-09,closed,2026-06-09T00:00:00Z
-13,5,risk,Re-contextualized optimizing application,Arceo casus apparatus.,10,5,4,,2026-04-30,open,
-14,5,issue,Realigned needs-based superstructure,Doloremque tamquam exercitationem adaugeo amita usque dedecor considero expedita.,10,3,2,Carcer amicitia censura tabula cotidie auctor.,2026-06-14,mitigating,
-15,5,risk,Ameliorated leading edge firmware,Beneficium alii complectus facere animadverto candidus validus conicio optio.,10,4,3,Spoliatio conspergo testimonium sodalitas deripio denego.,2026-07-29,closed,2026-07-29T00:00:00Z
-16,6,risk,Cloned maximized internet solution,Ocer labore tamdiu occaecati custodia magni antiquus cras.,11,2,3,,2026-03-21,open,
-17,6,issue,Face to face encompassing frame,Sint pectus molestias caries constans deripio vos comptus pecto victoria.,11,3,2,Absens ambitus caelum argumentum.,2026-05-05,mitigating,
-18,6,risk,Horizontal content-based infrastructure,Ullam audentia alias cinis.,11,4,3,Atavus adsidue vel turbo aggero admoneo error accusamus cunae.,2026-06-19,closed,2026-06-19T00:00:00Z
-19,7,risk,Quality-focused zero defect workforce,Vel cubicularis nemo.,12,2,3,,2026-07-31,open,
-20,7,issue,Versatile uniform strategy,Totidem voluptates causa.,12,3,2,Assumenda supra sordeo trado vetus supellex.,2026-09-14,mitigating,
-21,7,risk,Optional interactive local area network,Cibus tum tenus bardus audentia volo.,12,4,3,Sum cursim aveho distinctio tabgo.,2026-10-29,closed,2026-10-29T00:00:00Z
-22,8,risk,Ergonomic intangible array,Perferendis tenuis civitas alias nobis dicta arma vicissitudo.,13,2,3,,2026-05-31,open,
-23,8,issue,Multi-tiered eco-centric internet solution,Admoneo corporis conduco defetiscor appono inflammatio adversus.,13,3,2,Vox baiulus commodi stella tollo alias caterva.,2026-07-15,mitigating,
-24,8,risk,Customer-focused national ability,Angelus patior demergo demens pecto cupiditas thalassinus conscendo amissio.,13,4,3,Ullam triduana tamen vociferor cunabula ante victoria suus vulariter vigilo.,2026-08-29,closed,2026-08-29T00:00:00Z
+id,project_id,type,title,description,owner_id,probability,impact,mitigation,due_date,status,closed_at,created_at,updated_at
+1,1,risk,Streamlined actuating implementation,Cuppedia appello certus.,6,2,3,,2026-03-06,open,,2025-12-22T09:00:00Z,2025-12-22T09:00:00Z
+2,1,issue,Advanced 6th generation approach,Stultus torqueo explicabo xiphias tandem vulnus vereor itaque numquam.,6,3,2,Sursum vinco templum ulciscor crapula carmen caput defendo bardus.,2026-04-20,mitigating,,2025-12-22T09:00:00Z,2025-12-22T09:00:00Z
+3,1,risk,Cross-platform dedicated time-frame,Pecto beatus calco utrimque spectaculum.,6,4,3,Quae adipiscor contabesco censura amplitudo acerbitas speciosus deripio eius.,2026-06-04,closed,2026-06-04T09:00:00Z,2025-12-22T09:00:00Z,2026-06-04T09:00:00Z
+4,2,risk,Multi-layered reciprocal service-desk,Cohors ulterius totam ipsam volo laudantium alienus.,7,5,5,Textor culpo officia appello denego ad curiositas temeritas terreo quam.,2026-03-13,closed,2026-03-13T09:00:00Z,2025-12-29T09:00:00Z,2026-03-13T09:00:00Z
+5,2,issue,Proactive next generation projection,Venio approbo provident accedo.,7,3,2,Consequatur pecus officia repellendus cruciamentum itaque debitis alioqui ventito sursum.,2026-04-27,mitigating,,2025-12-29T09:00:00Z,2025-12-29T09:00:00Z
+6,2,risk,Future-proofed intermediate instruction set,Terra verbum crux coadunatio quasi error.,7,4,3,Subiungo vir theca arca degenero vester turbo deprimo tenus.,2026-06-11,closed,2026-06-11T09:00:00Z,2025-12-29T09:00:00Z,2026-06-11T09:00:00Z
+7,3,risk,Exclusive actuating hub,Vomer quas depromo.,8,2,3,,2026-04-02,open,,2026-01-18T09:00:00Z,2026-01-18T09:00:00Z
+8,3,issue,Future-proofed empowering concept,Nisi capto congregatio aestivus fuga aperiam degero antiquus.,8,3,2,Argentum cubo aptus subiungo saepe attero attonbitus.,2026-05-17,mitigating,,2026-01-18T09:00:00Z,2026-01-18T09:00:00Z
+9,3,risk,Quality-focused encompassing groupware,Utilis demitto dolorum sopor voluptate at pauper aurum caecus adhaero.,8,4,3,Asporto conitor cibo conqueror atqui addo alienus inflammatio animi.,2026-07-01,closed,2026-07-01T09:00:00Z,2026-01-18T09:00:00Z,2026-07-01T09:00:00Z
+10,4,risk,Operative high-level frame,Varius convoco aperiam desolo.,9,2,3,,2026-03-11,open,,2025-12-27T09:00:00Z,2025-12-27T09:00:00Z
+11,4,issue,Fundamental needs-based firmware,Aliquam thermae denique.,9,3,2,Sto aggredior doloremque uterque aro verumtamen cotidie aduro.,2026-04-25,mitigating,,2025-12-27T09:00:00Z,2025-12-27T09:00:00Z
+12,4,risk,Adaptive didactic strategy,Ago tamisium patria audacia vos bellum fuga correptius vesper.,9,4,3,Canto quae temporibus corporis excepturi delectatio.,2026-06-09,closed,2026-06-09T09:00:00Z,2025-12-27T09:00:00Z,2026-06-09T09:00:00Z
+13,5,risk,Re-contextualized optimizing application,Arceo casus apparatus.,10,5,4,,2026-04-30,open,,2026-02-15T09:00:00Z,2026-02-15T09:00:00Z
+14,5,issue,Realigned needs-based superstructure,Doloremque tamquam exercitationem adaugeo amita usque dedecor considero expedita.,10,3,2,Carcer amicitia censura tabula cotidie auctor.,2026-06-14,mitigating,,2026-02-15T09:00:00Z,2026-02-15T09:00:00Z
+15,5,risk,Ameliorated leading edge firmware,Beneficium alii complectus facere animadverto candidus validus conicio optio.,10,4,3,Spoliatio conspergo testimonium sodalitas deripio denego.,2026-07-29,closed,2026-07-29T09:00:00Z,2026-02-15T09:00:00Z,2026-07-29T09:00:00Z
+16,6,risk,Cloned maximized internet solution,Ocer labore tamdiu occaecati custodia magni antiquus cras.,11,2,3,,2026-03-21,open,,2026-01-06T09:00:00Z,2026-01-06T09:00:00Z
+17,6,issue,Face to face encompassing frame,Sint pectus molestias caries constans deripio vos comptus pecto victoria.,11,3,2,Absens ambitus caelum argumentum.,2026-05-05,mitigating,,2026-01-06T09:00:00Z,2026-01-06T09:00:00Z
+18,6,risk,Horizontal content-based infrastructure,Ullam audentia alias cinis.,11,4,3,Atavus adsidue vel turbo aggero admoneo error accusamus cunae.,2026-06-19,closed,2026-06-19T09:00:00Z,2026-01-06T09:00:00Z,2026-06-19T09:00:00Z
+19,7,risk,Quality-focused zero defect workforce,Vel cubicularis nemo.,12,2,3,,2026-07-31,open,,2026-05-18T09:00:00Z,2026-05-18T09:00:00Z
+20,7,issue,Versatile uniform strategy,Totidem voluptates causa.,12,3,2,Assumenda supra sordeo trado vetus supellex.,2026-09-14,mitigating,,2026-05-18T09:00:00Z,2026-05-18T09:00:00Z
+21,7,risk,Optional interactive local area network,Cibus tum tenus bardus audentia volo.,12,4,3,Sum cursim aveho distinctio tabgo.,2026-10-29,mitigating,,2026-05-18T09:00:00Z,2026-05-18T09:00:00Z
+22,8,risk,Ergonomic intangible array,Perferendis tenuis civitas alias nobis dicta arma vicissitudo.,13,2,3,,2026-05-31,open,,2026-03-18T09:00:00Z,2026-03-18T09:00:00Z
+23,8,issue,Multi-tiered eco-centric internet solution,Admoneo corporis conduco defetiscor appono inflammatio adversus.,13,3,2,Vox baiulus commodi stella tollo alias caterva.,2026-07-15,mitigating,,2026-03-18T09:00:00Z,2026-03-18T09:00:00Z
+24,8,risk,Customer-focused national ability,Angelus patior demergo demens pecto cupiditas thalassinus conscendo amissio.,13,4,3,Ullam triduana tamen vociferor cunabula ante victoria suus vulariter vigilo.,2026-08-29,closed,2026-08-29T09:00:00Z,2026-03-18T09:00:00Z,2026-08-29T09:00:00Z

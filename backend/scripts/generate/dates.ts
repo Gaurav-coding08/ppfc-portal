@@ -27,3 +27,22 @@ export function daysBetween(start: string, end: string): number {
   const b = new Date(`${end}T00:00:00Z`).getTime();
   return Math.round((b - a) / (1000 * 60 * 60 * 24));
 }
+
+// Builds a full `YYYY-MM-DDTHH:MM:SSZ` timestamp from a `YYYY-MM-DD` date and
+// a fixed time of day. Business timestamps (created_at, posted_at, etc.) are
+// always built this way so they stay anchored to a fixed date, not now().
+export function atTime(date: string, time = '09:00:00'): string {
+  return `${date}T${time}Z`;
+}
+
+// Shifts a `YYYY-MM-DDTHH:MM:SSZ` timestamp by `days`, keeping its time of day.
+export function shiftTimestamp(timestamp: string, days: number): string {
+  const [datePart, timePart] = timestamp.split('T');
+  return `${addDays(datePart!, days)}T${timePart}`;
+}
+
+// `YYYY-MM-DDTHH:MM:SSZ` -> true if strictly after the reporting date's end
+// of day. Used to spot business timestamps that leak past the cutoff.
+export function isAfterReportingDate(timestamp: string): boolean {
+  return timestamp.slice(0, 10) > REPORTING_DATE;
+}
