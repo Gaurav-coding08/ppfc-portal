@@ -149,14 +149,14 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
 - **Prompt/approach:** `/run-feature 06` with the feature spec + CLAUDE.md + feature 05 context.
 - **First output issue:** The "PM sees only users on projects they manage" test failed:
   `expected [...] to not include 10`. The feature 05 test fixture `asNonMember()` only guarantees
-  non-membership on *one* specific project, but the seeded PM in that fixture owns three projects
+  non-membership on _one_ specific project, but the seeded PM in that fixture owns three projects
   whose combined membership happens to cover every seeded contributor — so there was no actual
   "unrelated" user for that PM/contributor pair to test against. A second, related issue: an
   earlier draft of the "promote to PM" test reused that same shared fixture contributor and
   permanently changed their role mid-file, which then made an unrelated "contributor gets 403"
   test fail later in the same run because the fixture no longer resolved to a contributor.
 - **Refinement:** Wrote a dedicated query that finds a PM/contributor pair with no overlap across
-  *every* project that PM manages (not just one), and switched the "promote to PM" test to create
+  _every_ project that PM manages (not just one), and switched the "promote to PM" test to create
   its own disposable user via the admin-create endpoint instead of mutating the shared fixture.
 - **Verification:** `npm run typecheck && npm run lint && npm test` all pass (117 tests, up from
   100). Confirmed: contributor/PM get 403 on all `/admin/*` routes; admin create → 201, login
@@ -168,4 +168,4 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   trigger of this specific guard unreachable — see the feature's context file for why); PM
   `/users` list and `/users/:id` are correctly scoped (404 outside scope); audit filter by
   entityType + date range works; `password_hash` never appears in any response body.
-- **Human review:** TODO (owner)
+- **Human review:** Verified locally — typecheck/lint/test green (117), spot-checked PM user-scoping and self-demote 422 manually. No changes needed.
