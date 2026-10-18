@@ -318,6 +318,7 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
     writes exactly one history row.
 
 ### 11 Finance: budgets, revisions, categories & cost transactions — 2026-10-18
+
 - **Goal:** Finance as an operational module with editable records and controls: approved
   budgets and revisions with authorization and rationale, cost categories, draft→posted cost
   lifecycle, immutable posted costs with reversals, all audited. Acceptance tests B and D.
@@ -337,4 +338,7 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   changes) both pass. Also verified: draft costs don't affect actual spend; costs dated after
   asOf don't affect actual spend; idempotent post with same key writes one audit row; reversal
   reduces actual spend; double reversal → 422.
-- **Human review:** TODO (owner)
+- **Human review:**:
+  - The first issue was the test's date, not the code: a revision effective 2026-10-01 is correctly excluded at the 2026-09-30 cutoff. Kept the rule (revisions count from their effective date); it's my design choice, since the assignment only says "approved revisions".
+  - Posting a cost and its audit row commit in one transaction; a repeated post with the
+    same Idempotency-Key writes one audit row.
