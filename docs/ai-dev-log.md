@@ -115,6 +115,7 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   JWT); deactivation does revoke immediately because the user is re-read per request.
 
 ### 05 Access control & shared platform helpers — 2026-10-18
+
 - **Goal:** Reusable building blocks for every business module: role guards, project-scope
   checks, audit writer improvements, idempotency middleware, optimistic-lock helper,
   pagination/sort/filter parsing, and date/money helpers.
@@ -132,4 +133,10 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   views but can't manage (403); non-member contributor gets 404; idempotency replays stored
   response with header; stale version returns 409 with currentVersion; rolled-back audit leaves
   no row; password_hash stripped from audit payloads.
-- **Human review:** TODO (owner)
+- **Human review:** Checked the idempotency middleware against concurrent use, which the tests
+  didn't cover: the lookup → execute → store flow let two simultaneous requests with the same key
+  (a double-click) both run the handler, since ON CONFLICT only prevented the second _store_.
+  Added a concurrent-request test (failed: 2 rows), fixed by reserving the key as 'in_progress'
+  before executing (duplicate → 409, released on error). Noted that cost posting is also protected
+  by the draft→posted version check, so this is defence in depth. Confirmed `as unknown as` casts
+  exist only in tests, and that sort columns are whitelisted (no identifier injection).
