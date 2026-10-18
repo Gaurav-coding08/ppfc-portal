@@ -434,6 +434,7 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   diff tests); `npm run routes:check` still reports 71/71 matching.
 
 ### 15 Automation: overdue escalation + CR-approved notifications — 2026-10-18
+
 - **Goal:** A transactional-outbox automation with a real scheduled trigger (overdue task
   escalation) plus a transactional trigger (CR approval, resolving feature 10's TODO), a
   shared dispatcher with retry/backoff, and admin + notifications HTTP endpoints — feature
@@ -451,10 +452,10 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
      staying `pending` — traced to stale `data/csv/outbox.csv`: the seed generator's `outbox`
      event id 3 had been written as `status: 'pending'` before a later edit changed it to
      `'failed'` (so a pending seed row wouldn't be claimed the instant any test called
-     `dispatchPending()`), but the CSVs were regenerated and imported *before* that edit.
+     `dispatchPending()`), but the CSVs were regenerated and imported _before_ that edit.
      Re-ran `npm run data:generate && npm run db:import:test` after the edit.
   3. The CR-approved rollback test failed with "No suitable submitted CR found" — the first
-     three tests in that file each approved/rejected/returned the *same* fixture project's
+     three tests in that file each approved/rejected/returned the _same_ fixture project's
      one submitted CR (via the shared `asProjectManager()` helper), leaving none for the
      fourth. Rewrote the helper to pick a distinct, not-yet-used submitted CR per test
      (tracking used ids) and log in as that CR's own project owner instead of reusing one
@@ -464,7 +465,7 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
      TypeScript config — control-flow narrowing doesn't survive the closure boundary cleanly
      here. Replaced the mutated-outer-variable pattern with a typed `DeliveryFailure` error
      that carries the claimed event out of the rolled-back transaction.
-  5. While extending the seed generator for `outbox`/`notifications`, found a *pre-existing*
+  5. While extending the seed generator for `outbox`/`notifications`, found a _pre-existing_
      bug in `scripts/generate/importAll.ts`: `DATA_TABLES` and `SEQUENCE_TABLES` already
      listed `outbox`/`notifications` (apparently added speculatively in feature 03) but
      `IMPORT_ORDER` didn't — every import was truncating those tables and never reloading
@@ -486,4 +487,3 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   `db: "up"`; worker log confirmed a `trigger: "schedule"` run firing on its cron tick
   (temporarily set to `* * * * *` to observe within the session; reverted to the `*/5 * * * *`
   default in committed config).
-- **Human review:** TODO (owner)
