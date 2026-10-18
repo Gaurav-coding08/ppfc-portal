@@ -207,3 +207,47 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   member add/duplicate/remove rules hold, including "cannot remove the owner" and "cannot remove a
   member with an open assigned task" (asserted against the seeded contributor who actually has one).
 - **Human review:**: manually confirmed budget-headline fields populate correctly on a PM-managed (non-owned) project and PM list scope matches owned ∪ managed ∪ member.
+
+### 08 Tasks & milestones — 2026-10-18
+- **Goal:** Task and milestone CRUD with overdue/due-soon indicators, weighted project
+  progress recomputed from SQL, and field-level authorization so a contributor can only
+  change `progress`/`status` on their own assigned task.
+- **Prompt/approach:** /run-feature 08 with the feature spec + CLAUDE.md + feature 07's
+  context file.
+- **First output issue:** Two real bugs, not just a wrong first attempt.
+  (1) The list-query SQL built a `count(*) OVER()` column by string-appending it after a
+  shared `SELECT ... FROM ... JOIN ...` template — which puts the new column *after* the
+  FROM clause, a syntax error that only shows up at query time (500s on every tasks list
+  endpoint). Fixed by splitting the template into a column-list constant and a separate
+  FROM constant, so a caller composes `SELECT <columns>, count(*) OVER() ... FROM ...`
+  correctly.
+  (2) A latent, pre-existing bug surfaced by this feature's own tests: `pg` returns
+  Postgres `DATE` columns as JS `Date` objects, and `db/pool.ts` only overrides the BIGINT
+  type parser, not DATE's. `JSON.stringify`/`res.json()` then renders a `Date` as a full,
+  timezone-shifted ISO datetime (e.g. `2026-09-29T20:00:00.000Z` for a DB value of
+  `2026-09-30`), not the `YYYY-MM-DD` CLAUDE.md requires. This has been true since feature
+  07's `projects` module shipped, but nothing caught it because `projects.test.ts` only
+  does inequality date comparisons (which still pass lexicographically even with a time
+  suffix attached). Tests in this feature assert exact date-string equality (e.g. an
+  achieved milestone's `achievedDate`) and immediately failed.
+- **Refinement:** Fixed both at the root. The SQL template split is scoped to
+  `tasks.repository.ts`. The DATE type-parser fix is a one-line addition to `db/pool.ts`
+  (`pg.types.setTypeParser(1082, v => v)`), which is process-wide and therefore also fixes
+  `projects`' `startDate`/`endDate` — documented in this feature's context file as a
+  cross-cutting change, not scoped to tasks/milestones, so a future reader isn't confused
+  about why a date-parsing fix shipped in a tasks-feature commit.
+- **Verification:** `npm run typecheck && npm run lint && npm test` all pass (180 tests, up
+  from 144; 36 new, 24 tasks + 12 milestones). Confirmed against the seeded data: the
+  overdue filter returns PRJ-001's 6 overdue tasks and excludes the one due exactly on the
+  cutoff (2026-09-30); the unassigned filter returns PRJ-003's single unassigned task; a
+  contributor's progress update on their own task returns 200 with an incremented version
+  and the project's `progressPct` (re-fetched via `GET /projects/:id`) reflects a
+  hand-computed weighted average; the same contributor gets 403 with `details.fields`
+  listing `dueDate`/`assigneeId` when they try to change those on their own task, and plain
+  403 on another member's task; a non-member gets 404; a stale `version` is 409;
+  `status: 'done'` with `progress: 60` normalises to 100 with `completedAt` set, and
+  dropping progress back below 100 without an explicit status reverts to `in_progress` and
+  clears `completedAt`; deleting a task is blocked unless it's untouched (`todo`/`progress
+  0`); milestone creation/update enforce due-date-within-project-dates and
+  achieved-requires-achievedDate, both audited.
+- **Human review:** TODO (owner)

@@ -8,7 +8,7 @@
 | 05 | 05-access-control-platform | done | 2026-10-18 | 100 |
 | 06 | 06-admin-users-audit | done | 2026-10-18 | 117 |
 | 07 | 07-projects | done | 2026-10-18 | 27 |
-| 08 | 08-tasks-milestones | pending | | |
+| 08 | 08-tasks-milestones | done | 2026-10-18 | 36 |
 | 09 | 09-risks-issues | pending | | |
 | 10 | 10-change-requests | pending | | |
 | 11 | 11-finance-budgets-costs | pending | | |

@@ -18,6 +18,14 @@ import { env } from '../config/env.js';
 // https://github.com/brianc/node-pg-types for the OID table.
 pg.types.setTypeParser(20, (value: string) => parseInt(value, 10));
 
+// DATE columns (OID 1082) come back from `pg` as JS `Date` objects by
+// default, which `JSON.stringify`/`res.json()` then renders as a full
+// ISO datetime (e.g. "2026-01-05T05:00:00.000Z", shifted by the server's
+// local timezone) — not the "YYYY-MM-DD" CLAUDE.md requires everywhere.
+// Postgres already sends the value as a plain YYYY-MM-DD string over the
+// wire; returning it unparsed keeps that exact string end to end.
+pg.types.setTypeParser(1082, (value: string) => value);
+
 export const pool = new Pool({ connectionString: env.databaseUrl });
 
 export async function closePool(): Promise<void> {
