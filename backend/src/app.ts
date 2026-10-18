@@ -12,6 +12,7 @@ import { requestId } from './middleware/requestId.js';
 import { authRoutes } from './modules/auth/auth.routes.js';
 import { adminRoutes, projectActivityRoutes } from './modules/admin/admin.routes.js';
 import { departmentsRoutes, usersRoutes } from './modules/users/users.routes.js';
+import { projectsRoutes } from './modules/projects/projects.routes.js';
 
 // Builds the app without calling listen(), so tests can exercise it directly
 // via supertest without binding a real port.
@@ -39,6 +40,7 @@ export function buildApp(): Express {
   app.use('/api/v1/departments', departmentsRoutes);
   app.use('/api/v1/users', usersRoutes);
   app.use('/api/v1/admin', adminRoutes);
+  app.use('/api/v1/projects', projectsRoutes);
   app.use('/api/v1/projects', projectActivityRoutes);
 
   app.get('/api/v1/health', async (_req, res, next) => {

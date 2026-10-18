@@ -414,6 +414,13 @@ One row per project with: initial_budget, approved_revisions, current_budget, ac
 ### fn_project_progress() → TABLE
 One row per project: progress_pct (weighted), task_count, done_count.
 
+### fn_project_delivery_status(p_as_of DATE) → TABLE
+One row per project: `delivery_status` — `completed` (project status is completed), `at_risk` (an
+overdue incomplete task, a missed milestone, or an open risk/issue scoring ≥15), `behind`
+(elapsed-time% minus progress% > 15 points), else `on_track`. A milestone counts as "missed" when
+its own status is `missed`, or it's still `planned` with `due_date < p_as_of` — the generator and
+UI only ever set `planned`/`achieved` directly, so "missed" is otherwise derived relative to asOf.
+
 ### v_project_financials (view)
 `SELECT * FROM fn_project_financials(fn_reporting_date())` — for Power BI / Access.
 

@@ -169,3 +169,41 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   `/users` list and `/users/:id` are correctly scoped (404 outside scope); audit filter by
   entityType + date range works; `password_hash` never appears in any response body.
 - **Human review:** Verified locally — typecheck/lint/test green (117), spot-checked PM user-scoping and self-demote 422 manually. No changes needed.
+
+### 07 Projects & membership — 2026-10-18
+
+- **Goal:** Project portfolio CRUD with scoped visibility, membership management, a computed
+  delivery-status badge, and project-detail counts/budget headline — the feature's "PM creates a
+  project" journey plus everything the later finance/task features will read.
+- **Prompt/approach:** `/run-feature 07` with the feature spec + CLAUDE.md conventions, reusing
+  feature 05/06's access/versioning/pagination/audit helpers and feature 02's existing
+  `fn_project_progress`/`fn_project_financials` SQL functions.
+- **First output issue:** Two caught before running anything. (1) `scopedProjectIdsSql`
+  (feature 05) assumes the table being filtered has its own `project_id` FK column — fine for a
+  future tasks/risks/costs list, but the `projects` table's own scoping key is `id`, so reusing it
+  verbatim for the projects list would have silently scoped on the wrong column. Written as a
+  hand-rolled `owner_id = $u OR EXISTS (...)` condition instead. (2) A real mapping bug in
+  `projects.detail.repository.ts#findBudgetHeadline`: the SQL result has snake_case keys
+  (`current_budget`, `actual_spend`) but the function's declared return type used camelCase
+  (`currentBudget`, `actualSpend`), and the first draft returned `rows[0]` directly — every
+  financial-headline field would have been `undefined` at runtime despite type-checking fine
+  (`rows[0]` is typed as the query's generic, which TS doesn't cross-check against the function's
+  separately-declared return interface). Fixed by mapping the row explicitly before returning.
+- **Refinement:** Also split what would have been one ~310-line repository file and one
+  ~330-line service file into four repository files and three service files by concern (reads /
+  create-update writes / members / detail-only reads), each under CLAUDE.md's ~250-line limit, with
+  small shared helpers (`isEligibleOwner`, `viewScopeFor`) lifted into `projects.shared.ts` so the
+  two service files didn't duplicate them.
+- **Verification:** `npm run typecheck && npm run lint && npm test` all pass (144 tests, up from
+  117; 27 new). Confirmed: admin sees all 8+ seeded projects, a contributor's list exactly matches
+  their `project_members` rows, a PM's list matches owned ∪ managed ∪ member; department/status/
+  owner/date-range filters and name-sort/pagination meta are correct; a non-member contributor's
+  `GET /:id` is 404 and a member's `PATCH` is 403; `progressPct` matches a weighted average
+  hand-computed from the seeded `tasks` rows independently in the test; project create is one
+  transaction (owner membership + budget + audit row all exist, and a forced budget-insert failure
+  via a direct service call leaves no project row); a PM creating a project owned by someone else
+  is 403; PATCH stale version is 409, `endDate < startDate` is 422, completing a project with open
+  tasks is 422, and a stray `initialBudget` field on PATCH is rejected (400) by the strict schema;
+  member add/duplicate/remove rules hold, including "cannot remove the owner" and "cannot remove a
+  member with an open assigned task" (asserted against the seeded contributor who actually has one).
+- **Human review:** TODO (owner)
