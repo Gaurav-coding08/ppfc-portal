@@ -293,3 +293,21 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   band by a patch); an ineligible (non-member) owner is 422; closing sets `closedAt` and
   reopening clears it; a stale `version` is 409; every create/update is audited.
 - **Human review:** The mitigation rule (score ≥ 15) came from my feature spec, not the assignment. Claude Code applied it on every PATCH, which means the seeded unmitigated high risk can't be edited until a mitigation is added. Kept it as a governance rule.
+
+### 10 Change requests & approval workflow — 2026-10-18
+- **Goal:** Controlled approval workflow with explicit state machine, self-approval prevention,
+  idempotent decisions and durable history — decision, history row and audit row commit
+  atomically. Acceptance tests C and D.
+- **Prompt/approach:** /run-feature 10 with feature spec + CLAUDE.md
+- **First output issue:** Integration test for non-requester resubmit returned 404 instead of
+  403 — `asProjectMember()` resolves a contributor from a different project than the returned
+  CR's project (PRJ-006). The non-requester needs to be a member of the same project to get 403
+  instead of 404. Fixed by querying for another member of the CR's own project.
+- **Refinement:** Updated the test to dynamically find a project member of the returned CR's
+  project (not the requester) to verify the 403 response correctly.
+- **Verification:** `npm run typecheck && npm run lint && npm test` — 230 tests pass (16 new
+  unit tests for the state machine, 15 new integration tests). Acceptance C (PM approves
+  eligible CR: exactly one history row and one audit row added) and Acceptance D (contributor
+  calls decision endpoint: 403, CR unchanged, no history row) both pass. Also verified that
+  approving a CR leaves `fn_project_financials` values unchanged.
+- **Human review:** TODO (owner)
