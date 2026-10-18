@@ -2,7 +2,7 @@
 
 Internal PMO application for managing projects, tasks, milestones, risks, change-request
 approvals, project finance (budgets, costs, forecasts, EAC) and an executive analytics
-dashboard. Built as a take-home assignment; see `CLAUDE.md` for the full engineering spec.
+dashboard; see `CLAUDE.md` for the full engineering spec and requirements.
 
 ## Prerequisites
 

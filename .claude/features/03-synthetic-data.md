@@ -88,5 +88,5 @@ npm run typecheck && npm run lint && npm test
 ## Out of scope
 API endpoints.
 
-## Interview talking points
+## Design rationale
 Why generate → CSV → import (reproducible, auditable, same data in DB / tests / Power BI); why edge cases are hand-placed fixtures, not random; how a fixed seed + fixed reporting date makes output deterministic.

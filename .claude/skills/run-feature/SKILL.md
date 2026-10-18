@@ -32,6 +32,7 @@ Write a short plan in chat (files to create/modify, migrations, endpoints, tests
 - Write the tests listed in the feature's **Tests** section (more is fine, fewer is not).
 - Add/update route rows in `docs/api-routes.md` for every endpoint you add.
 - Comment non-obvious logic: SQL aggregations, authorization decisions, state transitions, transaction boundaries.
+- Keep wording neutral everywhere you write for humans — code comments, context files, docs, and commit messages. Never use "interview", "talking point(s)", "take-home", "assignment", or "candidate". Put the *why* behind a decision under a feature file's "## Design rationale" or a context file's "## Decisions & trade-offs" instead.
 
 ## 5. Verify (mandatory)
 

@@ -1,6 +1,6 @@
 # PPFC Portal — Project Portfolio & Financial Control Portal
 
-Internal PMO application: projects, tasks, milestones, risks, change-request approvals, project finance (budgets, costs, forecasts, EAC) and an executive analytics dashboard. Built as a take-home assignment. **Every line must be explainable by the human owner in a live interview**, so prefer clear, boring, well-commented code over clever code.
+Internal PMO application: projects, tasks, milestones, risks, change-request approvals, project finance (budgets, costs, forecasts, EAC) and an executive analytics dashboard. **Every line must be explainable by the human owner**, so prefer clear, boring, well-commented code over clever code.
 
 ## Stack (do not change without asking)
 

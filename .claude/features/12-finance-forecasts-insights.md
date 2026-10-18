@@ -41,5 +41,5 @@ Assignment 2 §4 (forecasting, cost tracking, financial insight), financial defi
 npm run typecheck && npm run lint && npm test
 ```
 
-## Interview talking points
+## Design rationale
 EAC/FTC definition and the remaining-period method; forecast-missing treatment; how the test's independent SQL guards against a wrong shared function; why monthly trend uses two aggregates joined on a month series.

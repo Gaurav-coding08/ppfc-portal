@@ -87,5 +87,5 @@ psql postgres://ppfc_reader:ppfc_reader_pw@localhost:5433/ppfc -c "select * from
 ## Out of scope
 Data generation (03). API endpoints.
 
-## Interview talking points
+## Design rationale
 Why NUMERIC not float for money; why KPI math lives in one SQL function (web dashboard + Power BI reconcile by construction); the fan-out problem; DB-level guards (checks, trigger, self-approval check) as defence in depth behind service rules; why `reporting_date` is a setting (production → `current_date`).

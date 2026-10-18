@@ -57,5 +57,5 @@ Assignment 2 §4 (all capabilities + financial definitions), §1 journey 4, §3.
 npm run typecheck && npm run lint && npm test
 ```
 
-## Interview talking points
+## Design rationale
 Draft vs posted as the approval rule; why posted rows are immutable and corrected via reversal (audit trail, accounting practice); why revisions are decided by admin and never by the requester; how idempotency stops double-posting from a double-click.

@@ -47,5 +47,5 @@ Initial budget is set only at creation. Later changes go through budget revision
 npm run typecheck && npm run lint && npm test
 ```
 
-## Interview talking points
+## Design rationale
 Why project + owner membership + budget are one transaction; how list scoping is a SQL filter (not post-filtering in JS); delivery-status rule and its thresholds; optimistic locking on edit.

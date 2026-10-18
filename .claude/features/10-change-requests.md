@@ -55,5 +55,5 @@ Decision reason required for approve, reject and return.
 npm run typecheck && npm run lint && npm test
 ```
 
-## Interview talking points
+## Design rationale
 State machine as a pure, unit-tested function; check ordering; how partial failure is prevented (single transaction, audit uses same client); `FOR UPDATE` vs optimistic version; DB check constraint as second line of defence against self-approval.

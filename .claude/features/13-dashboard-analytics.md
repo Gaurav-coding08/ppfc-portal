@@ -58,5 +58,5 @@ Timeframe semantics (document): tasks/milestones filtered by due date; costs by 
 npm run typecheck && npm run lint && npm test
 ```
 
-## Interview talking points
+## Design rationale
 The `filtered_projects` CTE pattern; why aggregates are computed per fact table then joined; how drill-downs prove the KPI; timeframe semantics per entity; how the same definitions feed Power BI.

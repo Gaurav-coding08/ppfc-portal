@@ -51,5 +51,5 @@ curl -i -X POST localhost:4000/api/v1/auth/login -H 'content-type: application/j
 ## Out of scope
 Role/permission checks per resource (05). User admin (06).
 
-## Interview talking points
+## Design rationale
 Why role isn't in the JWT; cookie vs bearer trade-off; how CORS + SameSite work together; why identical error messages; how you'd swap in an identity provider (Entra ID/Auth0) behind the same `authenticate` middleware.

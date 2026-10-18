@@ -35,5 +35,5 @@ Assignment 2 §2 module 03, §1 journey 3, §6 edge cases (closed high-exposure 
 npm run typecheck && npm run lint && npm test
 ```
 
-## Interview talking points
+## Design rationale
 Why score is a generated column; where the "high exposure" threshold lives and why it's defined once; why closed risks are excluded by status not by deleting.

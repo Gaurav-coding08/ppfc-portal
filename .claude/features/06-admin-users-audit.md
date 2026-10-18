@@ -43,5 +43,5 @@ npm run typecheck && npm run lint && npm test
 ## Out of scope
 Frontend admin screens (frontend phase).
 
-## Interview talking points
+## Design rationale
 Why the last-admin guard; why PM user visibility is scoped; how audit gives "who changed what, when, from which request".

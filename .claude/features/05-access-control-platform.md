@@ -57,5 +57,5 @@ npm run typecheck && npm run lint && npm test
 ## Out of scope
 Business endpoints.
 
-## Interview talking points
+## Design rationale
 404 vs 403 choice; why scope is checked on the **loaded resource's** project_id (prevents ID-based escalation); how idempotency prevents double posting; optimistic vs pessimistic locking trade-off; why audit must share the transaction client.

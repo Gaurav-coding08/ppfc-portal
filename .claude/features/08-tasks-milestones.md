@@ -49,5 +49,5 @@ Two clients load the same task (version 3); A saves → version 4; B saves with 
 npm run typecheck && npm run lint && npm test
 ```
 
-## Interview talking points
+## Design rationale
 Field-level authorization for contributors; why progress is derived not stored; overdue boundary (`<` vs `<=` and the task due exactly on the reporting date); optimistic locking flow.

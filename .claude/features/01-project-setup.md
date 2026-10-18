@@ -59,5 +59,5 @@ npm run dev   # then: curl -i localhost:4000/api/v1/health
 ## Out of scope
 Schema, auth, any business endpoint.
 
-## Interview talking points
+## Design rationale
 Why an app factory (`buildApp`) separate from `listen` (testability); how request IDs flow into logs and errors; why errors never leak stacks; why pg errors are mapped centrally.

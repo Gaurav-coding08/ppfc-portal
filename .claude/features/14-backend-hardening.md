@@ -37,5 +37,5 @@ docker compose --profile app up -d --build && curl -i localhost:4000/api/v1/heal
 ## Out of scope
 Frontend, automation worker, Power BI, Access (later phases — see `.claude/features/README.md`).
 
-## Interview talking points
+## Design rationale
 How you'd prove no route is unprotected (route-guard test); table-driven RBAC tests; log redaction; what happens when the DB goes down.
