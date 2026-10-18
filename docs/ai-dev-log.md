@@ -209,6 +209,7 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
 - **Human review:**: manually confirmed budget-headline fields populate correctly on a PM-managed (non-owned) project and PM list scope matches owned ∪ managed ∪ member.
 
 ### 08 Tasks & milestones — 2026-10-18
+
 - **Goal:** Task and milestone CRUD with overdue/due-soon indicators, weighted project
   progress recomputed from SQL, and field-level authorization so a contributor can only
   change `progress`/`status` on their own assigned task.
@@ -216,7 +217,7 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   context file.
 - **First output issue:** Two real bugs, not just a wrong first attempt.
   (1) The list-query SQL built a `count(*) OVER()` column by string-appending it after a
-  shared `SELECT ... FROM ... JOIN ...` template — which puts the new column *after* the
+  shared `SELECT ... FROM ... JOIN ...` template — which puts the new column _after_ the
   FROM clause, a syntax error that only shows up at query time (500s on every tasks list
   endpoint). Fixed by splitting the template into a column-list constant and a separate
   FROM constant, so a caller composes `SELECT <columns>, count(*) OVER() ... FROM ...`
@@ -248,6 +249,15 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   `status: 'done'` with `progress: 60` normalises to 100 with `completedAt` set, and
   dropping progress back below 100 without an explicit status reverts to `in_progress` and
   clears `completedAt`; deleting a task is blocked unless it's untouched (`todo`/`progress
-  0`); milestone creation/update enforce due-date-within-project-dates and
+0`); milestone creation/update enforce due-date-within-project-dates and
   achieved-requires-achievedDate, both audited.
-- **Human review:** TODO (owner)
+- **Human review:**
+  - Accepted the DATE type-parser fix as the root cause: `pg` parsed DATE as local
+    midnight, so on my machine (UTC+4) dates shifted a day. Grepped modules for date
+    arithmetic on DB fields; [none found / fixed X].
+  - Feature 07 missed this because its tests only used inequality checks. Date fields are
+    now asserted with exact equality.
+  - Checked the SQL template split: all filters are still bound parameters.
+  - Verified in DBeaver that PRJ-001 has 6 overdue tasks and the task due on 2026-09-30
+    is excluded.
+  - Non-member access returns [404/403], consistent with feature 07.
