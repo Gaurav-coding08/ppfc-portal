@@ -116,6 +116,44 @@ describe('Schema constraints', () => {
     }
   });
 
+  test('cost_transactions: deleting a posted cost fails (trigger)', async () => {
+    const f = await insertFinanceFixture(client);
+    try {
+      const { rows: [cost] } = await client.query<{ id: string }>(
+        `INSERT INTO cost_transactions
+           (project_id, category_id, txn_date, amount, description, status, posted_by, posted_at, created_by)
+         VALUES ($1, $2, '2026-06-01', 100, 'posted cost', 'posted', $3, now(), $3)
+         RETURNING id`,
+        [f.projectId, f.categoryId, f.userId1]
+      );
+
+      await expect(
+        client.query('DELETE FROM cost_transactions WHERE id = $1', [cost!.id])
+      ).rejects.toThrow(/immutable/i);
+    } finally {
+      await client.query('ALTER TABLE cost_transactions DISABLE TRIGGER trg_prevent_posted_cost_mutation');
+      await client.query('DELETE FROM cost_transactions WHERE project_id = $1', [f.projectId]);
+      await client.query('ALTER TABLE cost_transactions ENABLE TRIGGER trg_prevent_posted_cost_mutation');
+      await cleanupFinanceFixture(client, f);
+    }
+  });
+
+  test('budget_revisions: decided_by = requested_by violates self-approval check', async () => {
+    const f = await insertFinanceFixture(client);
+    try {
+      await expect(
+        client.query(
+          `INSERT INTO budget_revisions
+             (project_id, amount, rationale, status, requested_by, decided_by, decided_at, effective_date)
+           VALUES ($1, 100, 'self-approve', 'approved', $2, $2, now(), '2026-06-01')`,
+          [f.projectId, f.userId1]
+        )
+      ).rejects.toThrow(/check|constraint/i);
+    } finally {
+      await cleanupFinanceFixture(client, f);
+    }
+  });
+
   test('risks: score is computed as probability * impact', async () => {
     const f = await insertFinanceFixture(client);
     try {
@@ -249,6 +287,116 @@ describe('fn_project_financials', () => {
       expect(rows).toHaveLength(1);
       expect(rows[0]!.utilization).toBeNull();
     } finally {
+      await client.query('DELETE FROM project_budgets WHERE project_id = $1', [f.projectId]);
+      await cleanupFinanceFixture(client, f);
+    }
+  });
+
+  test('reversal entry reduces actual spend', async () => {
+    const f = await insertFinanceFixture(client);
+    try {
+      await client.query(
+        `INSERT INTO project_budgets (project_id, initial_amount) VALUES ($1, 1000)`,
+        [f.projectId]
+      );
+      // Post an expense of 300
+      const { rows: [expense] } = await client.query<{ id: string }>(
+        `INSERT INTO cost_transactions
+           (project_id, category_id, txn_date, amount, description, status, posted_by, posted_at, created_by)
+         VALUES ($1, $2, '2026-08-01', 300, 'Expense', 'posted', $3, now(), $3)
+         RETURNING id`,
+        [f.projectId, f.categoryId, f.userId1]
+      );
+      // Post a reversal of 300 against it
+      await client.query(
+        `INSERT INTO cost_transactions
+           (project_id, category_id, txn_date, amount, description, status, entry_type, reverses_id, posted_by, posted_at, created_by)
+         VALUES ($1, $2, '2026-08-15', 300, 'Reversal', 'posted', 'reversal', $3, $4, now(), $4)`,
+        [f.projectId, f.categoryId, expense!.id, f.userId1]
+      );
+
+      const { rows } = await client.query(
+        `SELECT * FROM fn_project_financials('2026-09-30'::date) WHERE project_id = $1`,
+        [f.projectId]
+      );
+      // 300 expense - 300 reversal = 0 actual spend
+      expect(Number(rows[0]!.actual_spend)).toBe(0);
+      expect(Number(rows[0]!.remaining_budget)).toBe(1000);
+    } finally {
+      await client.query('ALTER TABLE cost_transactions DISABLE TRIGGER trg_prevent_posted_cost_mutation');
+      await client.query('DELETE FROM cost_transactions WHERE project_id = $1', [f.projectId]);
+      await client.query('ALTER TABLE cost_transactions ENABLE TRIGGER trg_prevent_posted_cost_mutation');
+      await client.query('DELETE FROM project_budgets WHERE project_id = $1', [f.projectId]);
+      await cleanupFinanceFixture(client, f);
+    }
+  });
+
+  test('forecast in asOf month excluded from FTC', async () => {
+    const f = await insertFinanceFixture(client);
+    try {
+      const asOf = '2026-09-30';
+      await client.query(
+        `INSERT INTO project_budgets (project_id, initial_amount) VALUES ($1, 1000)`,
+        [f.projectId]
+      );
+      // Forecast for September (the asOf month) — should NOT count in FTC
+      await client.query(
+        `INSERT INTO financial_forecasts (project_id, month, amount, updated_by)
+         VALUES ($1, '2026-09-01', 500, $2)`,
+        [f.projectId, f.userId1]
+      );
+      // Forecast for October (after asOf month) — should count
+      await client.query(
+        `INSERT INTO financial_forecasts (project_id, month, amount, updated_by)
+         VALUES ($1, '2026-10-01', 200, $2)`,
+        [f.projectId, f.userId1]
+      );
+
+      const { rows } = await client.query(
+        `SELECT * FROM fn_project_financials($1::date) WHERE project_id = $2`,
+        [asOf, f.projectId]
+      );
+      // FTC should be 200 (October only), not 700 (Sep + Oct)
+      expect(Number(rows[0]!.forecast_to_complete)).toBe(200);
+    } finally {
+      await client.query('DELETE FROM financial_forecasts WHERE project_id = $1', [f.projectId]);
+      await client.query('DELETE FROM project_budgets WHERE project_id = $1', [f.projectId]);
+      await cleanupFinanceFixture(client, f);
+    }
+  });
+
+  test('approved revision effective after asOf excluded from current budget', async () => {
+    const f = await insertFinanceFixture(client);
+    try {
+      const asOf = '2026-06-30';
+      await client.query(
+        `INSERT INTO project_budgets (project_id, initial_amount) VALUES ($1, 1000)`,
+        [f.projectId]
+      );
+      // Approved revision effective BEFORE asOf — should count
+      await client.query(
+        `INSERT INTO budget_revisions
+           (project_id, amount, rationale, status, requested_by, decided_by, decided_at, effective_date)
+         VALUES ($1, 200, 'early', 'approved', $2, $3, now(), '2026-05-01')`,
+        [f.projectId, f.userId2, f.userId1]
+      );
+      // Approved revision effective AFTER asOf — should NOT count
+      await client.query(
+        `INSERT INTO budget_revisions
+           (project_id, amount, rationale, status, requested_by, decided_by, decided_at, effective_date)
+         VALUES ($1, 300, 'future', 'approved', $2, $3, now(), '2026-07-15')`,
+        [f.projectId, f.userId2, f.userId1]
+      );
+
+      const { rows } = await client.query(
+        `SELECT * FROM fn_project_financials($1::date) WHERE project_id = $2`,
+        [asOf, f.projectId]
+      );
+      // current_budget = 1000 + 200 = 1200, not 1500
+      expect(Number(rows[0]!.current_budget)).toBe(1200);
+      expect(Number(rows[0]!.approved_revisions)).toBe(200);
+    } finally {
+      await client.query('DELETE FROM budget_revisions WHERE project_id = $1', [f.projectId]);
       await client.query('DELETE FROM project_budgets WHERE project_id = $1', [f.projectId]);
       await cleanupFinanceFixture(client, f);
     }
