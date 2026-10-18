@@ -357,3 +357,14 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   than failing the whole request with 404.
 - No-forecast treatment: FTC = 0, so EAC = actual spend, and the project gets a
   FORECAST_MISSING alert so it isn't shown as falsely on-budget.
+
+### 13 Executive dashboard analytics API — 2026-10-18
+
+- **Goal:** Scope-aware, filterable analytics endpoints powering the executive dashboard: 16 KPI cards, 5+ visuals, cross-filters and paginated drill-downs, all recomputed from SQL on every request.
+- **Prompt/approach:** /run-feature 13 with feature spec + CLAUDE.md + context files from features 08–12
+- **First output issue:** Two bugs found during verification.
+  (1) Non-admin users (PM, contributor) got 500 on every dashboard endpoint. Root cause: `scopedProjectIdsSql()` returns `AND project_id IN (...)` designed for fact tables. The `filtered_projects` CTE queries `projects p` directly, where the column is `p.id` not `project_id`. PostgreSQL threw "column project_id does not exist". Fixed with `.replace('project_id', 'p.id')` in `buildFilteredProjectsCte`.
+  (2) `drill/tasks?kind=all` returned 500 for admin. Root cause: the function unconditionally pushed `cte.asOf` into the params array but only referenced it in SQL when `kind=overdue`. PostgreSQL rejects unreferenced positional parameters. Fixed by only pushing `asOf` when `kind=overdue` needs it, matching the pattern already used by `drillRisks` and `drillChangeRequests`.
+- **Refinement:** Both fixes were structural, not workarounds. The column-name rewrite is scoped to the CTE builder and commented. The param-push fix aligns all drill functions to the same "only push what you reference" pattern.
+- **Verification:** `npm run typecheck && npm run lint && npm test` — 296 tests pass (19 new). KPI structure test checks all 16 keys have valid units and drill endpoints. Integrity-after-mutation: contributor task update changes `portfolioProgressPct`; PM cost post increases `actualSpend` by the exact amount. Drill reconciliation: costs sum equals `actualSpend`; overdue tasks count matches; high-exposure risks count matches — both with and without department+status filters. Fan-out guard: single-project `actualSpend` equals direct SQL SUM. Contributor scoping: contributor KPIs equal admin KPIs filtered to those project IDs. Risk matrix total equals open risk count.
+- **Human review:** TODO (owner)

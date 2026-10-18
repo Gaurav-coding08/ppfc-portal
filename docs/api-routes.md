@@ -62,3 +62,16 @@ Base path: `/api/v1`. See `CLAUDE.md` for response shape, status code and error 
 | GET | /api/v1/projects/:projectId/financial-summary | view access | `?asOf`. Full `fn_project_financials` row + `spendByCategory[]` + `monthlyTrend[]` (month, actual, forecast) + `alerts[]`. |
 | GET | /api/v1/finance/alerts | any (scoped) | `?asOf&departmentId`. One row per triggered alert: `OVERRUN_FORECAST`, `NEAR_BUDGET`, `OVERSPENT`, `FORECAST_MISSING`. Severity + amounts. |
 | GET | /api/v1/finance/comparison | any (scoped) | `?projectIds=1,2,3&asOf` (max 10). Non-visible projects dropped to `excluded`. Side-by-side financial rows. |
+| GET | /api/v1/dashboard/kpis | any (scoped) | `?departmentId&projectId&managerId&status&from&to&categoryId&asOf`. 16 KPIs with unit + drill endpoint. Delivery, risk/governance and financial. |
+| GET | /api/v1/dashboard/project-health | any (scoped) | Per project: progress, deliveryStatus, utilization, eac, openHighRisks, overdueTasks. |
+| GET | /api/v1/dashboard/budget-vs-actual-eac | any (scoped) | Per project: currentBudget, actualSpend, eac. |
+| GET | /api/v1/dashboard/monthly-spend | any (scoped) | Month series: actual, forecast, cumulative. Respects `categoryId`. |
+| GET | /api/v1/dashboard/spend-by-category | any (scoped) | Per cost category. Respects `categoryId`. |
+| GET | /api/v1/dashboard/overdue-by-owner | any (scoped) | Per assignee (incl. "Unassigned") count of overdue incomplete tasks. |
+| GET | /api/v1/dashboard/risk-matrix | any (scoped) | 5×5 grid probability × impact with count + band. Includes `totalOpenRisks`. |
+| GET | /api/v1/dashboard/milestones | any (scoped) | `?withinDays=14`. Planned milestones with isOverdue, daysToDue. |
+| GET | /api/v1/dashboard/drill/costs | any (scoped) | `?drillProjectId&drillCategoryId&month&page&pageSize`. Posted costs ≤ asOf, paginated. |
+| GET | /api/v1/dashboard/drill/tasks | any (scoped) | `?kind=overdue\|blocked\|all&ownerId&drillProjectId&page&pageSize`. Paginated. |
+| GET | /api/v1/dashboard/drill/risks | any (scoped) | `?kind=high-exposure\|cell\|all&probability&impact&page&pageSize`. Open risks, paginated. |
+| GET | /api/v1/dashboard/drill/change-requests | any (scoped) | `?from&to&page&pageSize`. Pending CRs, paginated. |
+| GET | /api/v1/dashboard/filters | any (scoped) | Option lists: departments, projects, managers, statuses, categories — scoped to caller. |

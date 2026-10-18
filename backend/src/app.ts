@@ -22,6 +22,7 @@ import { costCategoriesRoutes } from './modules/finance/categories.routes.js';
 import { costsRoutes, projectCostRoutes } from './modules/finance/costs.routes.js';
 import { projectForecastRoutes } from './modules/finance/forecasts.routes.js';
 import { financeRoutes, projectSummaryRoutes } from './modules/finance/summary.routes.js';
+import { dashboardRoutes } from './modules/dashboard/dashboard.routes.js';
 
 // Builds the app without calling listen(), so tests can exercise it directly
 // via supertest without binding a real port.
@@ -67,6 +68,7 @@ export function buildApp(): Express {
   app.use('/api/v1/projects', projectForecastRoutes);
   app.use('/api/v1/projects', projectSummaryRoutes);
   app.use('/api/v1/finance', financeRoutes);
+  app.use('/api/v1/dashboard', dashboardRoutes);
 
   app.get('/api/v1/health', async (_req, res, next) => {
     try {
