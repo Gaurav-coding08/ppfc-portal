@@ -83,6 +83,7 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   completion is valid. Restored statuses with past completion dates and added a regression test.
 
 ### 04 Authentication — 2026-10-18
+
 - **Goal:** Real sign-in for seeded demo users: login/logout/me, httpOnly JWT cookie + Bearer
   fallback, role re-read from the DB on every request (not trusted from the token), no user
   enumeration, login rate limiting, login audit events.
@@ -105,4 +106,10 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   Manually exercised the full flow against the real dev server after the fix: login (cookie set,
   numeric `id`/`departmentId` in the body), `/me` via cookie and via Bearer, `/me` with no
   token (401), logout (cookie cleared, subsequent `/me` on the same agent back to 401).
-- **Human review:** TODO (owner)
+- **Human review:** Verified the bigint fix scope: ids and counts now parse to numbers, NUMERIC
+  money stays string; recorded the convention in CLAUDE.md so later features rely on it.
+  Manually checked security behaviour the tests don't cover: identical response for unknown
+  email vs wrong password; JWT payload contains only sub (no role); cookie HttpOnly +
+  SameSite=Lax; login rate limit returns 429 on the 11th attempt. Found a design limitation:
+  logout only clears the cookie, so a copied Bearer token stays valid until expiry (stateless
+  JWT); deactivation does revoke immediately because the user is re-read per request.
