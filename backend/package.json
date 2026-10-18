@@ -19,6 +19,7 @@
     "db:migrate:test": "tsx --env-file=.env scripts/migrate.ts --test",
     "data:generate": "tsx --env-file=.env scripts/generate-data.ts",
     "db:import": "tsx --env-file=.env scripts/import-csv.ts",
+    "db:import:test": "tsx --env-file=.env scripts/import-csv.ts --test",
     "db:reset": "npm run db:migrate && npm run db:import"
   },
   "dependencies": {

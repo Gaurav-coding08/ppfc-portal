@@ -3,7 +3,7 @@
 |---|---|---|---|---|
 | 01 | 01-project-setup | done | 2026-10-18 | 6 |
 | 02 | 02-database-schema | done | 2026-10-18 | 6 |
-| 03 | 03-synthetic-data | pending | | |
+| 03 | 03-synthetic-data | done | 2026-10-18 | 50 |
 | 04 | 04-auth | pending | | |
 | 05 | 05-access-control-platform | pending | | |
 | 06 | 06-admin-users-audit | pending | | |

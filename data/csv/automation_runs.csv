@@ -1,0 +1,6 @@
+id,job_name,started_at,finished_at,status,items_found,items_created,error
+1,overdue-task-notifier,2026-02-01T06:00:00Z,2026-02-01T06:00:42Z,success,12,12,
+2,budget-threshold-check,2026-04-01T06:00:00Z,2026-04-01T06:00:11Z,success,3,3,
+3,milestone-reminder,2026-06-01T06:00:00Z,2026-06-01T06:00:19Z,success,5,5,
+4,cr-sla-check,2026-08-01T06:00:00Z,2026-08-01T06:00:30Z,failed,,,Connection to notification service timed out
+5,overdue-task-notifier,2026-09-01T06:00:00Z,2026-09-01T06:00:37Z,success,8,8,

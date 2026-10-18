@@ -1,0 +1,17 @@
+id,code,project_id,title,description,impact_summary,requested_by,status,decided_by,decided_at,decision_reason
+1,CR-001,1,PRJ-001: Multi-lateral discrete throughput,Arguo vere occaecati aptus dicta amaritudo perferendis.,Adds scope within the current phase; no schedule impact.,6,approved,2,2026-06-01T00:00:00Z,Approved — within agreed scope.
+2,CR-002,1,PRJ-001: Exclusive 24/7 parallelism,Optio vicissitudo ambulo maiores versus subito texo vesco acerbitas.,,6,submitted,,,
+3,CR-003,2,PRJ-002: Reactive multimedia capability,Nemo corrupti pectus aegrotatio curriculum aetas tabgo amicitia victus.,Adds scope within the current phase; no schedule impact.,7,approved,3,2026-06-01T00:00:00Z,Approved — within agreed scope.
+4,CR-004,2,PRJ-002: Switchable upward-trending support,Annus amplitudo canto vorax asperiores tumultus.,,7,submitted,,,
+5,CR-005,3,PRJ-003: Digitized bandwidth-monitored software,Conatus usus color earum calcar officiis pecus cubitum cras adopto.,Adds scope within the current phase; no schedule impact.,8,approved,4,2026-06-01T00:00:00Z,Approved — within agreed scope.
+6,CR-006,3,PRJ-003: Reduced empowering concept,Tertius abeo peccatus concido amplus cubicularis cuppedia fuga urbanus.,Would add unbudgeted scope with no funding identified.,8,rejected,4,2026-07-15T00:00:00Z,Rejected — no funding available for this scope.
+7,CR-007,4,PRJ-004: Universal upward-trending forecast,Conor denique tabula versus defero ocer.,Adds scope within the current phase; no schedule impact.,9,approved,2,2026-06-01T00:00:00Z,Approved — within agreed scope.
+8,CR-008,4,PRJ-004: Enhanced 4th generation hub,Aqua carmen atqui nesciunt deripio asperiores curatio ademptio vergo color.,,9,submitted,,,
+9,CR-009,5,PRJ-005: Horizontal reciprocal leverage,Ratione bonus abutor benevolentia somnus.,Adds scope within the current phase; no schedule impact.,10,approved,3,2026-06-01T00:00:00Z,Approved — within agreed scope.
+10,CR-010,5,PRJ-005: Open-architected client-driven utilisation,Degenero arcesso iusto cuppedia undique ait facere vulnus audacia desipio.,,10,submitted,,,
+11,CR-011,6,PRJ-006: Focused methodical extranet,Crux tandem curso.,Adds scope within the current phase; no schedule impact.,11,approved,4,2026-06-01T00:00:00Z,Approved — within agreed scope.
+12,CR-012,6,PRJ-006: Diverse responsive superstructure,Bardus delibero aufero quibusdam adfectus.,Impact on the migration schedule is not yet quantified.,11,returned,4,2026-07-20T00:00:00Z,Returned — please quantify the schedule impact and resubmit.
+13,CR-013,7,PRJ-007: Implemented holistic software,Ocer aedificium claudeo terga summopere defessus eum.,Adds scope within the current phase; no schedule impact.,12,approved,2,2026-06-01T00:00:00Z,Approved — within agreed scope.
+14,CR-014,7,PRJ-007: Open-source intangible help-desk,Cui derideo laborum teneo armarium ambulo.,,12,submitted,,,
+15,CR-015,8,PRJ-008: Digitized empowering standardization,Vindico tardus corroboro.,Adds scope within the current phase; no schedule impact.,13,approved,3,2026-06-01T00:00:00Z,Approved — within agreed scope.
+16,CR-016,8,PRJ-008: Extended didactic superstructure,Et cunabula thesaurus acies volutabrum armarium tumultus sumptus.,,13,submitted,,,

@@ -1,10 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import pg from 'pg';
+import { importAll } from '../../scripts/generate/importAll.js';
 
-// Runs before the entire test suite. Applies all migrations to the test DB
-// so every run starts with the full schema. Feature 03 will add CSV import
-// here so tests also have seeded data.
+// Runs before the entire test suite. Applies all migrations to the test DB,
+// then loads the seeded CSVs, so every test run starts with the full
+// schema and the same demo dataset.
 export async function setup(): Promise<void> {
   const connString = process.env.DATABASE_URL_TEST;
   if (!connString) throw new Error('DATABASE_URL_TEST is not set');
@@ -47,5 +48,6 @@ export async function setup(): Promise<void> {
     }
   }
 
+  await importAll(client);
   await client.end();
 }

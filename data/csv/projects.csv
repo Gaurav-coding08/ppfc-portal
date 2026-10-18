@@ -1,0 +1,9 @@
+id,code,name,description,department_id,owner_id,status,start_date,end_date,created_by
+1,PRJ-001,Digital Platforms Modernization,Replatform the internal portal stack onto the new shared services.,1,2,active,2026-01-05,2027-03-31,2
+2,PRJ-002,Core Network Refresh,Replace end-of-life core switches across primary sites.,2,3,active,2026-01-12,2026-12-31,3
+3,PRJ-003,Enterprise ERP Upgrade,Upgrade the finance and HR ERP modules to the current major version.,3,4,active,2026-02-01,2026-12-31,4
+4,PRJ-004,Field Mobility App,Mobile app for field technicians to close work orders on site.,1,2,completed,2026-01-10,2026-06-30,2
+5,PRJ-005,Security Operations Uplift,Stand up 24/7 SOC monitoring and incident response tooling.,2,3,active,2026-03-01,2027-01-31,3
+6,PRJ-006,Data Center Migration,Migrate the legacy data center to the new regional facility.,3,4,active,2026-01-20,2026-11-30,4
+7,PRJ-007,Customer Portal Revamp,Redesign the self-service customer portal.,1,2,planning,2026-06-01,2027-06-30,2
+8,PRJ-008,Identity & Access Management,Roll out centralized SSO and access reviews.,2,3,on_hold,2026-04-01,2026-10-31,3

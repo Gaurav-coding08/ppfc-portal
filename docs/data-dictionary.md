@@ -419,3 +419,45 @@ One row per project: progress_pct (weighted), task_count, done_count.
 
 ### v_project_progress (view)
 `SELECT * FROM fn_project_progress()` — for Power BI / Access.
+
+---
+
+## Data generation (feature 03)
+
+`backend/scripts/generate-data.ts` builds the whole demo dataset in memory
+(`backend/scripts/generate/`) and writes it to `data/csv/*.csv`. Determinism comes from
+two things: `faker.seed(42)` at the start of every generation run, and every date in the
+dataset being computed from fixed base dates — never `new Date()` with no arguments (the
+"current" wall-clock time). Regenerating produces byte-identical CSVs every time.
+
+Business-rule-relevant fields (dates, amounts, statuses) are hand-picked, not left to
+faker — faker is only used for filler text (names, titles, descriptions) and the bulk
+"draft cost" filler rows that pad `cost_transactions` past its row-count minimum without
+touching any project's real spend total. IDs are explicit in the CSVs; `import-csv.ts`
+loads them with `OVERRIDING SYSTEM VALUE` (the id columns are `GENERATED ALWAYS`) and
+resets each identity sequence afterwards.
+
+### Edge-case catalogue
+
+Reporting date for all of these is the default, `2026-09-30`.
+
+| Edge case | Where |
+|---|---|
+| Project with no posted spend (drafts only) | PRJ-001 — 3 draft `cost_transactions`, 0 posted |
+| Project near budget (90-99% utilization) | PRJ-002 — budget 160,000, actual 150,000 (93.75%) |
+| Project forecast to exceed budget (EAC > budget) | PRJ-003 — budget 100,000, actual 70,000, FTC 40,000, EAC 110,000 |
+| ≥ 5 overdue incomplete tasks (due < 2026-09-30, status ≠ done) | spread across all active projects by construction (42 in the generated dataset) |
+| Task due exactly 2026-09-30 | PRJ-001, task 10 |
+| Unassigned task | PRJ-003, task 6 (`assignee_id` null) |
+| Completed project (all tasks done) | PRJ-004 — status `completed`, all 12 tasks `done` |
+| Closed high-exposure risk (score ≥ 15, status closed) | PRJ-002, risk 1 (probability 5 × impact 5 = 25, closed) |
+| Open high-exposure risk | PRJ-005, risk 1 (probability 5 × impact 4 = 20, open) |
+| Returned change request | PRJ-006's second CR |
+| Rejected change request | PRJ-003's second CR |
+| Approved budget revision (affects budget) | PRJ-001/002/004/006/008 revisions |
+| Pending budget revision (must not affect budget) | PRJ-003 (+15,000) and PRJ-007 (+12,000) |
+| Posted and draft costs | every project has at least one draft; 8 projects have posted rows |
+| Posted cost after the cutoff (Oct 2026) | PRJ-007, posted 2026-10-05 — excluded from `actual_spend` as of the default reporting date |
+| Project without forecast rows (`forecastMissing`, EAC = actual) | PRJ-005 |
+| Project with a reversal entry | PRJ-006 — 40,000 expense + 40,000 reversal, net 0 from that pair |
+| Records across all 3 departments, Jan-Sep 2026 | all 8 projects, department_id 1-3, cost/task dates spread Jan-Sep 2026 |

@@ -1,0 +1,97 @@
+id,project_id,title,description,assignee_id,status,priority,start_date,due_date,weight,progress,completed_at
+1,1,PRJ-001 task 1: You can't generate the microchip without generating the neural API interface!,Visionary maximized implementation,6,todo,low,2026-01-29,2026-02-12,1,0,
+2,1,"PRJ-001 task 2: If we back up the microchip, we can get to the UDP system through the wireless SAS protocol!",User-centric value-added toolset,7,in_progress,medium,2026-03-07,2026-03-21,2,25,
+3,1,"PRJ-001 task 3: Use the cross-platform TCP driver, then you can compress the virtual bandwidth!",Public-key content-based help-desk,8,blocked,high,2026-04-14,2026-04-28,3,50,
+4,1,"PRJ-001 task 4: The CLI transmitter is down, reboot the online driver so we can index the SAS microchip!",Exclusive client-server monitoring,9,done,critical,2026-05-21,2026-06-04,4,100,2026-06-04T00:00:00Z
+5,1,"PRJ-001 task 5: connecting the microchip won't do anything, we need to quantify the redundant HDD hard drive!",Digitized 4th generation toolset,6,todo,low,2026-06-28,2026-07-12,5,0,
+6,1,"PRJ-001 task 6: parsing the interface won't do anything, we need to reboot the online SSL circuit!",Persistent object-oriented synergy,7,in_progress,medium,2026-08-04,2026-08-18,1,25,
+7,1,"PRJ-001 task 7: Try to back up the API microchip, maybe it will parse the multi-byte firewall!",Function-based static functionalities,8,blocked,high,2026-09-11,2026-09-25,2,50,
+8,1,"PRJ-001 task 8: The FTP pixel is down, copy the neural array so we can quantify the PNG matrix!",Optimized didactic budgetary management,9,done,critical,2026-10-18,2026-11-01,3,100,2026-11-01T00:00:00Z
+9,1,"PRJ-001 task 9: Try to parse the TCP protocol, maybe it will index the back-end driver!",Robust fault-tolerant complexity,6,todo,low,2026-11-25,2026-12-09,4,0,
+10,1,"PRJ-001 task 10: Try to synthesize the ADP transmitter, maybe it will synthesize the auxiliary microchip!",Re-contextualized regional product,7,in_progress,medium,2027-01-01,2026-09-30,5,25,
+11,1,"PRJ-001 task 11: Use the solid state API alarm, then you can reboot the cross-platform bandwidth!",Synergistic static middleware,8,blocked,high,2027-02-08,2027-02-22,1,50,
+12,1,PRJ-001 task 12: You can't synthesize the array without bypassing the primary HDD card!,Function-based multi-tasking parallelism,9,done,critical,2027-03-17,2027-03-31,2,100,2027-03-31T00:00:00Z
+13,2,"PRJ-002 task 1: Use the open-source SCSI hard drive, then you can navigate the optical sensor!",Cross-group zero administration paradigm,7,todo,low,2026-01-27,2026-02-10,1,0,
+14,2,"PRJ-002 task 2: connecting the program won't do anything, we need to compress the wireless SSD application!",Networked 5th generation interface,8,in_progress,medium,2026-02-26,2026-03-12,2,25,
+15,2,"PRJ-002 task 3: The IP system is down, back up the auxiliary bandwidth so we can reboot the ASCII microchip!",Proactive homogeneous extranet,9,blocked,high,2026-03-27,2026-04-10,3,50,
+16,2,"PRJ-002 task 4: Use the wireless PCI panel, then you can quantify the solid state program!",Inverse interactive pricing structure,10,done,critical,2026-04-26,2026-05-10,4,100,2026-05-10T00:00:00Z
+17,2,PRJ-002 task 5: We need to quantify the solid state DRAM protocol!,Face to face neutral capacity,7,todo,low,2026-05-25,2026-06-08,5,0,
+18,2,"PRJ-002 task 6: I'll program the neural VGA card, that should alarm the SCSI bandwidth!",Multi-channelled scalable conglomeration,8,in_progress,medium,2026-06-24,2026-07-08,1,25,
+19,2,PRJ-002 task 7: We need to generate the solid state IP circuit!,Function-based scalable attitude,9,blocked,high,2026-07-23,2026-08-06,2,50,
+20,2,"PRJ-002 task 8: I'll calculate the solid state HEX bandwidth, that should port the HDD program!",Managed 24 hour secured line,10,done,critical,2026-08-21,2026-09-04,3,100,2026-09-04T00:00:00Z
+21,2,"PRJ-002 task 9: Try to generate the UDP driver, maybe it will generate the virtual panel!",Inverse homogeneous contingency,7,todo,low,2026-09-20,2026-10-04,4,0,
+22,2,"PRJ-002 task 10: The CLI program is down, copy the cross-platform capacitor so we can override the FTP microchip!",Open-architected leading edge orchestration,8,in_progress,medium,2026-10-19,2026-11-02,5,25,
+23,2,PRJ-002 task 11: You can't compress the port without parsing the primary HTTP matrix!,Exclusive neutral initiative,9,blocked,high,2026-11-18,2026-12-02,1,50,
+24,2,"PRJ-002 task 12: The GB matrix is down, quantify the virtual driver so we can parse the COM port!",Object-based fresh-thinking analyzer,10,done,critical,2026-12-17,2026-12-31,2,100,2026-12-31T00:00:00Z
+25,3,"PRJ-003 task 1: If we hack the alarm, we can get to the FTP program through the solid state HEX feed!",Operative human-resource hierarchy,8,todo,low,2026-02-15,2026-03-01,1,0,
+26,3,"PRJ-003 task 2: I'll navigate the multi-byte RAM feed, that should protocol the EXE application!",Enterprise-wide content-based parallelism,9,in_progress,medium,2026-03-15,2026-03-29,2,25,
+27,3,"PRJ-003 task 3: quantifying the matrix won't do anything, we need to index the online HTTP alarm!",Operative secondary archive,10,blocked,high,2026-04-11,2026-04-25,3,50,
+28,3,"PRJ-003 task 4: copying the firewall won't do anything, we need to synthesize the back-end TLS microchip!",Automated systematic matrices,11,done,critical,2026-05-09,2026-05-23,4,100,2026-05-23T00:00:00Z
+29,3,"PRJ-003 task 5: Try to generate the SMS driver, maybe it will transmit the digital monitor!",Enhanced even-keeled moderator,8,todo,low,2026-06-06,2026-06-20,5,0,
+30,3,"PRJ-003 task 6: If we reboot the interface, we can get to the CSS interface through the wireless VGA firewall!",Streamlined bi-directional neural-net,,in_progress,medium,2026-07-04,2026-07-18,1,25,
+31,3,"PRJ-003 task 7: Try to generate the SQL program, maybe it will program the back-end capacitor!",Quality-focused demand-driven contingency,10,blocked,high,2026-07-31,2026-08-14,2,50,
+32,3,"PRJ-003 task 8: The CSS hard drive is down, compress the mobile firewall so we can compress the THX firewall!",Vision-oriented asynchronous toolset,11,done,critical,2026-08-28,2026-09-11,3,100,2026-09-11T00:00:00Z
+33,3,"PRJ-003 task 9: I'll copy the optical RAM alarm, that should microchip the USB array!",Future-proofed neutral parallelism,8,todo,low,2026-09-25,2026-10-09,4,0,
+34,3,"PRJ-003 task 10: programming the interface won't do anything, we need to program the optical USB application!",Profit-focused static architecture,9,in_progress,medium,2026-10-23,2026-11-06,5,25,
+35,3,"PRJ-003 task 11: I'll back up the solid state COM feed, that should pixel the SSL hard drive!",Implemented attitude-oriented task-force,10,blocked,high,2026-11-19,2026-12-03,1,50,
+36,3,"PRJ-003 task 12: The XML panel is down, connect the virtual card so we can synthesize the ADP hard drive!",Monitored multimedia workforce,11,done,critical,2026-12-17,2026-12-31,2,100,2026-12-31T00:00:00Z
+37,4,PRJ-004 task 1: We need to compress the wireless CSS driver!,Networked eco-centric circuit,9,done,low,2026-01-10,2026-01-24,1,100,2026-01-24T00:00:00Z
+38,4,"PRJ-004 task 2: The HTTP bus is down, copy the 1080p monitor so we can quantify the SDD alarm!",Optimized asynchronous installation,10,done,medium,2026-01-25,2026-02-08,2,100,2026-02-08T00:00:00Z
+39,4,"PRJ-004 task 3: Try to quantify the SCSI port, maybe it will parse the open-source program!",Virtual fault-tolerant infrastructure,11,done,high,2026-02-08,2026-02-22,3,100,2026-02-22T00:00:00Z
+40,4,"PRJ-004 task 4: I'll calculate the redundant UTF8 transmitter, that should array the SCSI firewall!",Organized multi-tasking initiative,12,done,critical,2026-02-22,2026-03-08,4,100,2026-03-08T00:00:00Z
+41,4,"PRJ-004 task 5: calculating the sensor won't do anything, we need to quantify the open-source DNS port!",Ameliorated real-time moderator,9,done,low,2026-03-08,2026-03-22,5,100,2026-03-22T00:00:00Z
+42,4,"PRJ-004 task 6: If we reboot the sensor, we can get to the CSS capacitor through the solid state XSS port!",Team-oriented explicit portal,10,done,medium,2026-03-23,2026-04-06,1,100,2026-04-06T00:00:00Z
+43,4,"PRJ-004 task 7: If we quantify the system, we can get to the XML hard drive through the virtual UTF8 matrix!",Versatile zero defect solution,11,done,high,2026-04-06,2026-04-20,2,100,2026-04-20T00:00:00Z
+44,4,"PRJ-004 task 8: If we copy the microchip, we can get to the GB bus through the cross-platform GB port!",Multi-tiered client-driven framework,12,done,critical,2026-04-20,2026-05-04,3,100,2026-05-04T00:00:00Z
+45,4,"PRJ-004 task 9: Use the solid state IB feed, then you can quantify the optical capacitor!",Centralized asynchronous concept,9,done,low,2026-05-04,2026-05-18,4,100,2026-05-18T00:00:00Z
+46,4,"PRJ-004 task 10: Use the mobile SMS panel, then you can generate the cross-platform port!",Focused system-worthy firmware,10,done,medium,2026-05-19,2026-06-02,5,100,2026-06-02T00:00:00Z
+47,4,"PRJ-004 task 11: The TLS feed is down, generate the back-end monitor so we can copy the SMTP array!",Focused scalable Graphical User Interface,11,done,high,2026-06-02,2026-06-16,1,100,2026-06-16T00:00:00Z
+48,4,"PRJ-004 task 12: generating the circuit won't do anything, we need to generate the optical EXE protocol!",Adaptive hybrid migration,12,done,critical,2026-06-16,2026-06-30,2,100,2026-06-30T00:00:00Z
+49,5,"PRJ-005 task 1: bypassing the feed won't do anything, we need to transmit the bluetooth DNS interface!",Balanced tangible success,10,todo,low,2026-03-15,2026-03-29,1,0,
+50,5,"PRJ-005 task 2: Try to index the AGP hard drive, maybe it will quantify the cross-platform bandwidth!",Progressive 4th generation flexibility,11,in_progress,medium,2026-04-12,2026-04-26,2,25,
+51,5,PRJ-005 task 3: You can't quantify the port without parsing the haptic COM bus!,Synergistic 4th generation database,12,blocked,high,2026-05-10,2026-05-24,3,50,
+52,5,"PRJ-005 task 4: If we copy the array, we can get to the AGP firewall through the virtual THX panel!",Open-source solution-oriented product,13,done,critical,2026-06-07,2026-06-21,4,100,2026-06-21T00:00:00Z
+53,5,"PRJ-005 task 5: Try to bypass the DRAM pixel, maybe it will program the mobile system!",Balanced coherent internet solution,10,todo,low,2026-07-05,2026-07-19,5,0,
+54,5,PRJ-005 task 6: You can't hack the panel without quantifying the wireless PNG monitor!,Virtual well-modulated instruction set,11,in_progress,medium,2026-08-02,2026-08-16,1,25,
+55,5,"PRJ-005 task 7: The HDD interface is down, index the neural port so we can input the AGP system!",Centralized dedicated adapter,12,blocked,high,2026-08-30,2026-09-13,2,50,
+56,5,PRJ-005 task 8: We need to index the primary XML bus!,Quality-focused needs-based groupware,13,done,critical,2026-09-27,2026-10-11,3,100,2026-10-11T00:00:00Z
+57,5,"PRJ-005 task 9: If we generate the system, we can get to the CSS port through the back-end UTF8 program!",Compatible non-volatile collaboration,10,todo,low,2026-10-25,2026-11-08,4,0,
+58,5,"PRJ-005 task 10: The VGA capacitor is down, calculate the bluetooth firewall so we can generate the FTP monitor!",Mandatory mission-critical parallelism,11,in_progress,medium,2026-11-22,2026-12-06,5,25,
+59,5,PRJ-005 task 11: You can't input the array without generating the open-source AI panel!,Cross-platform 24/7 focus group,12,blocked,high,2026-12-20,2027-01-03,1,50,
+60,5,"PRJ-005 task 12: If we parse the driver, we can get to the API card through the primary AGP bus!",Reactive client-driven info-mediaries,13,done,critical,2027-01-17,2027-01-31,2,100,2027-01-31T00:00:00Z
+61,6,"PRJ-006 task 1: If we override the transmitter, we can get to the ASCII sensor through the online SSL array!",Multi-lateral global moderator,11,todo,low,2026-02-01,2026-02-15,1,0,
+62,6,PRJ-006 task 2: You can't back up the alarm without parsing the bluetooth AI circuit!,Expanded explicit access,12,in_progress,medium,2026-02-27,2026-03-13,2,25,
+63,6,"PRJ-006 task 3: The VGA bus is down, synthesize the haptic firewall so we can hack the PCI alarm!",Polarised analyzing throughput,13,blocked,high,2026-03-26,2026-04-09,3,50,
+64,6,"PRJ-006 task 4: The VGA pixel is down, transmit the optical alarm so we can quantify the AGP capacitor!",Progressive fault-tolerant local area network,14,done,critical,2026-04-21,2026-05-05,4,100,2026-05-05T00:00:00Z
+65,6,"PRJ-006 task 5: The CLI hard drive is down, calculate the neural transmitter so we can navigate the JSON capacitor!",Stand-alone well-modulated moderator,11,todo,low,2026-05-17,2026-05-31,5,0,
+66,6,"PRJ-006 task 6: I'll navigate the open-source DNS protocol, that should program the DNS bandwidth!",Advanced 4th generation archive,12,in_progress,medium,2026-06-12,2026-06-26,1,25,
+67,6,"PRJ-006 task 7: Use the cross-platform SMS alarm, then you can navigate the primary card!",Switchable national adapter,13,blocked,high,2026-07-08,2026-07-22,2,50,
+68,6,"PRJ-006 task 8: Try to hack the THX port, maybe it will synthesize the open-source sensor!",Quality-focused even-keeled migration,14,done,critical,2026-08-03,2026-08-17,3,100,2026-08-17T00:00:00Z
+69,6,"PRJ-006 task 9: I'll copy the 1080p UDP system, that should transmitter the AGP matrix!",Optimized client-driven hardware,11,todo,low,2026-08-30,2026-09-13,4,0,
+70,6,"PRJ-006 task 10: generating the matrix won't do anything, we need to index the neural RAM monitor!",Cross-platform explicit database,12,in_progress,medium,2026-09-25,2026-10-09,5,25,
+71,6,"PRJ-006 task 11: transmitting the capacitor won't do anything, we need to program the cross-platform RSS hard drive!",Enterprise-wide global neural-net,13,blocked,high,2026-10-21,2026-11-04,1,50,
+72,6,"PRJ-006 task 12: overriding the bandwidth won't do anything, we need to reboot the 1080p SSD interface!",Operative impactful initiative,14,done,critical,2026-11-16,2026-11-30,2,100,2026-11-30T00:00:00Z
+73,7,"PRJ-007 task 1: compressing the circuit won't do anything, we need to index the virtual IB bandwidth!",Balanced 24/7 time-frame,12,todo,low,2026-06-20,2026-07-04,1,0,
+74,7,"PRJ-007 task 2: I'll synthesize the cross-platform TLS card, that should capacitor the API capacitor!",User-friendly homogeneous local area network,13,in_progress,medium,2026-07-23,2026-08-06,2,25,
+75,7,PRJ-007 task 3: You can't quantify the bandwidth without indexing the primary SCSI card!,Function-based intermediate moratorium,14,blocked,high,2026-08-25,2026-09-08,3,50,
+76,7,PRJ-007 task 4: We need to transmit the mobile SSD application!,Seamless background archive,15,done,critical,2026-09-26,2026-10-10,4,100,2026-10-10T00:00:00Z
+77,7,"PRJ-007 task 5: I'll index the primary OCR matrix, that should hard drive the XML protocol!",Re-engineered tangible intranet,12,todo,low,2026-10-29,2026-11-12,5,0,
+78,7,"PRJ-007 task 6: Try to synthesize the SMTP matrix, maybe it will input the back-end panel!",Streamlined mobile strategy,13,in_progress,medium,2026-12-01,2026-12-15,1,25,
+79,7,"PRJ-007 task 7: If we index the feed, we can get to the TLS program through the redundant API protocol!",Stand-alone tertiary orchestration,14,blocked,high,2027-01-03,2027-01-17,2,50,
+80,7,PRJ-007 task 8: We need to compress the haptic API bandwidth!,Visionary logistical framework,15,done,critical,2027-02-05,2027-02-19,3,100,2027-02-19T00:00:00Z
+81,7,"PRJ-007 task 9: transmitting the program won't do anything, we need to reboot the optical HTTP capacitor!",Visionary maximized pricing structure,12,todo,low,2027-03-10,2027-03-24,4,0,
+82,7,"PRJ-007 task 10: Try to input the HTTP bandwidth, maybe it will navigate the wireless sensor!",Optional next generation hardware,13,in_progress,medium,2027-04-11,2027-04-25,5,25,
+83,7,PRJ-007 task 11: We need to index the virtual UTF8 bandwidth!,Networked dedicated access,14,blocked,high,2027-05-14,2027-05-28,1,50,
+84,7,PRJ-007 task 12: You can't input the monitor without backing up the multi-byte JSON bandwidth!,Cross-group solution-oriented moderator,15,done,critical,2027-06-16,2027-06-30,2,100,2027-06-30T00:00:00Z
+85,8,"PRJ-008 task 1: The SSD program is down, navigate the multi-byte matrix so we can connect the SMS interface!",Face to face asymmetric strategy,13,todo,low,2026-04-05,2026-04-19,1,0,
+86,8,"PRJ-008 task 2: Use the redundant DRAM transmitter, then you can parse the mobile driver!",Versatile leading edge alliance,14,in_progress,medium,2026-04-23,2026-05-07,2,25,
+87,8,"PRJ-008 task 3: Try to parse the USB firewall, maybe it will reboot the auxiliary capacitor!",Centralized dedicated knowledge user,15,blocked,high,2026-05-10,2026-05-24,3,50,
+88,8,"PRJ-008 task 4: The XML panel is down, synthesize the haptic alarm so we can copy the API program!",Multi-channelled zero tolerance migration,6,done,critical,2026-05-28,2026-06-11,4,100,2026-06-11T00:00:00Z
+89,8,"PRJ-008 task 5: The RSS monitor is down, copy the solid state protocol so we can parse the IB circuit!",User-friendly 6th generation success,13,todo,low,2026-06-15,2026-06-29,5,0,
+90,8,PRJ-008 task 6: You can't override the array without generating the primary JSON port!,Digitized multimedia implementation,14,in_progress,medium,2026-07-03,2026-07-17,1,25,
+91,8,PRJ-008 task 7: You can't navigate the port without generating the open-source HEX protocol!,Virtual demand-driven website,15,blocked,high,2026-07-20,2026-08-03,2,50,
+92,8,PRJ-008 task 8: You can't index the port without connecting the auxiliary SMTP card!,Sharable methodical open architecture,6,done,critical,2026-08-07,2026-08-21,3,100,2026-08-21T00:00:00Z
+93,8,"PRJ-008 task 9: Try to transmit the COM circuit, maybe it will reboot the back-end protocol!",User-centric full-range parallelism,13,todo,low,2026-08-25,2026-09-08,4,0,
+94,8,"PRJ-008 task 10: Use the solid state SAS protocol, then you can program the redundant capacitor!",Synergistic intermediate alliance,14,in_progress,medium,2026-09-12,2026-09-26,5,25,
+95,8,PRJ-008 task 11: We need to input the redundant AGP interface!,Sharable homogeneous website,15,blocked,high,2026-09-29,2026-10-13,1,50,
+96,8,"PRJ-008 task 12: I'll parse the multi-byte COM monitor, that should interface the HTTP interface!",Stand-alone static local area network,6,done,critical,2026-10-17,2026-10-31,2,100,2026-10-31T00:00:00Z
