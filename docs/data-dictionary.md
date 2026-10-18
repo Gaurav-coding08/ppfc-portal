@@ -421,6 +421,11 @@ overdue incomplete task, a missed milestone, or an open risk/issue scoring ≥15
 its own status is `missed`, or it's still `planned` with `due_date < p_as_of` — the generator and
 UI only ever set `planned`/`achieved` directly, so "missed" is otherwise derived relative to asOf.
 
+### fn_exposure_band(p_score SMALLINT) → TEXT
+`'high'` (score ≥ 15), `'medium'` (8–14), else `'low'`. Single definition of the exposure-band
+thresholds, mirrored by the JS constant in `modules/risks/risks.shared.ts` (needed before a risk
+row — and its generated `score` — exists, e.g. the create-time mitigation-required check).
+
 ### v_project_financials (view)
 `SELECT * FROM fn_project_financials(fn_reporting_date())` — for Power BI / Access.
 

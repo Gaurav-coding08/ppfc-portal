@@ -9,7 +9,7 @@
 | 06 | 06-admin-users-audit | done | 2026-10-18 | 117 |
 | 07 | 07-projects | done | 2026-10-18 | 27 |
 | 08 | 08-tasks-milestones | done | 2026-10-18 | 36 |
-| 09 | 09-risks-issues | pending | | |
+| 09 | 09-risks-issues | done | 2026-10-18 | 19 |
 | 10 | 10-change-requests | pending | | |
 | 11 | 11-finance-budgets-costs | pending | | |
 | 12 | 12-finance-forecasts-insights | pending | | |

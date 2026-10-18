@@ -261,3 +261,34 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   - Verified in DBeaver that PRJ-001 has 6 overdue tasks and the task due on 2026-09-30
     is excluded.
   - Non-member access returns [404/403], consistent with feature 07.
+
+### 09 Risks & issues — 2026-10-18
+- **Goal:** Risk/issue register per project with exposure scoring, a cross-portfolio view,
+  and a high-exposure drill-down, with the closed-high-exposure-risk-must-not-count-as-open
+  edge case correct.
+- **Prompt/approach:** /run-feature 09 with the feature spec + CLAUDE.md + feature 07's
+  context file (for `scopedProjectIdsSql`, left unused since feature 05, and
+  `findMemberRole`).
+- **First output issue:** The feature file names the new migration `009_risk_band.sql`, but
+  migrations 009–012 already exist (fixes/features from earlier in the project) by the time
+  this feature ran — the feature files were apparently written before those were added.
+  Not a bug to fix, just a stale literal filename in the spec; used `013_risk_band.sql`
+  (forward-only numbering) and noted the discrepancy in this feature's context file so it
+  isn't mistaken for a mistake later.
+- **Refinement:** None needed beyond that — typecheck/lint passed on the first pass, and all
+  19 new tests passed on the first full run. Deliberately chose to re-run the
+  mitigation-required rule on *every* PATCH (not just when probability/impact/mitigation
+  change), computed from the patch merged onto the current row — documented in the context
+  file since it means the seeded `FORCE_OPEN_HIGH_EXPOSURE` fixture (score 20, no mitigation,
+  left that way on purpose by the generator) can't be PATCHed at all, including just closing
+  it, until a mitigation is supplied in the same request.
+- **Verification:** `npm run typecheck && npm run lint && npm test` all pass (199 tests, up
+  from 180; 19 new). Confirmed against the seeded data: `/risks/high-exposure` includes
+  PRJ-005's open score-20 risk and excludes PRJ-002's closed score-25 risk; a contributor's
+  `/risks` and `/risks/high-exposure` are scoped to exactly their `project_members` rows; a
+  non-member's project-nested `GET` is 404 and a member's `POST`/`PATCH` is 403;
+  `probability: 6` is a 400 (schema), `probability*impact >= 15` with no `mitigation` is a
+  422 on both create and update (including when probability/impact are raised into the high
+  band by a patch); an ineligible (non-member) owner is 422; closing sets `closedAt` and
+  reopening clears it; a stale `version` is 409; every create/update is audited.
+- **Human review:** TODO (owner)

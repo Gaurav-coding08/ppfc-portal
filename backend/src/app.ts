@@ -15,6 +15,7 @@ import { departmentsRoutes, usersRoutes } from './modules/users/users.routes.js'
 import { projectsRoutes } from './modules/projects/projects.routes.js';
 import { projectTasksRoutes, tasksRoutes } from './modules/tasks/tasks.routes.js';
 import { milestonesRoutes, projectMilestonesRoutes } from './modules/milestones/milestones.routes.js';
+import { projectRisksRoutes, risksRoutes } from './modules/risks/risks.routes.js';
 
 // Builds the app without calling listen(), so tests can exercise it directly
 // via supertest without binding a real port.
@@ -48,6 +49,8 @@ export function buildApp(): Express {
   app.use('/api/v1/projects', projectMilestonesRoutes);
   app.use('/api/v1/tasks', tasksRoutes);
   app.use('/api/v1/milestones', milestonesRoutes);
+  app.use('/api/v1/projects', projectRisksRoutes);
+  app.use('/api/v1/risks', risksRoutes);
 
   app.get('/api/v1/health', async (_req, res, next) => {
     try {
