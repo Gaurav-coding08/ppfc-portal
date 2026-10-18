@@ -81,3 +81,28 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   the fix, rejected the AI's workaround of downgrading done tasks / closed risks with future due
   dates to blocked/mitigating: the real rule is completed_at ≤ reporting date, and early
   completion is valid. Restored statuses with past completion dates and added a regression test.
+
+### 04 Authentication — 2026-10-18
+- **Goal:** Real sign-in for seeded demo users: login/logout/me, httpOnly JWT cookie + Bearer
+  fallback, role re-read from the DB on every request (not trusted from the token), no user
+  enumeration, login rate limiting, login audit events.
+- **Prompt/approach:** /run-feature 04 with feature spec + CLAUDE.md.
+- **First output issue:** Manually curling the finished endpoint (not just the test suite) to
+  check the acceptance command surfaced a real bug the tests had silently papered over: `pg`
+  returns `BIGINT` columns as strings by default, so `POST /auth/login` returned
+  `"id": "1"` (a string) even though every repository type in the module declared `id: number`.
+  The integration tests still passed because both sides of every id comparison (e.g.
+  `res.body.data.user.id` against another id read the same way) were consistently strings, so
+  the mismatch never tripped an assertion — it would only have surfaced later, e.g. in feature
+  05's authorization checks comparing a loaded resource's numeric owner_id to req.user.id.
+- **Refinement:** Registered a `pg` type parser for OID 20 (int8/bigint) in `src/db/pool.ts`,
+  safe here because every id in this schema is a small sequential IDENTITY value, not a
+  precision-sensitive value like money (which deliberately stays string-typed). Added
+  `setupFiles: ['src/db/pool.ts']` to `vitest.config.ts` so the parser is registered before any
+  test file's own raw `pg.Client` queries run too — `globalSetup` runs in a separate
+  process/context from the actual test workers, so doing it there wouldn't have reached them.
+- **Verification:** `npm run typecheck && npm run lint && npm test` (68 tests, up from 55).
+  Manually exercised the full flow against the real dev server after the fix: login (cookie set,
+  numeric `id`/`departmentId` in the body), `/me` via cookie and via Bearer, `/me` with no
+  token (401), logout (cookie cleared, subsequent `/me` on the same agent back to 401).
+- **Human review:** TODO (owner)

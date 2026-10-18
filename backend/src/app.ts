@@ -9,6 +9,7 @@ import { logger } from './lib/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFoundHandler } from './middleware/notFound.js';
 import { requestId } from './middleware/requestId.js';
+import { authRoutes } from './modules/auth/auth.routes.js';
 
 // Builds the app without calling listen(), so tests can exercise it directly
 // via supertest without binding a real port.
@@ -31,6 +32,8 @@ export function buildApp(): Express {
       genReqId: (req) => req.id,
     }),
   );
+
+  app.use('/api/v1/auth', authRoutes);
 
   app.get('/api/v1/health', async (_req, res, next) => {
     try {

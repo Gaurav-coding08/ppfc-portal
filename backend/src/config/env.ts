@@ -33,13 +33,36 @@ function loadEnv() {
   return parsed.data;
 }
 
+// express's res.cookie() wants a millisecond maxAge, but JWT_EXPIRES_IN is
+// written as a human string ("8h") to match jsonwebtoken's own `expiresIn`
+// option. Parsed once at boot so a typo fails fast like the rest of env.ts,
+// not on the first login request.
+function parseDurationMs(input: string): number {
+  const match = /^(\d+)(ms|s|m|h|d)$/.exec(input.trim());
+  if (!match) {
+    throw new Error(`Invalid duration "${input}" (expected e.g. "8h", "30m", "1d")`);
+  }
+  const unitMs: Record<string, number> = { ms: 1, s: 1000, m: 60_000, h: 3_600_000, d: 86_400_000 };
+  return Number(match[1]) * unitMs[match[2]!]!;
+}
+
 const raw = loadEnv();
+
+let jwtExpiresInMs: number;
+try {
+  jwtExpiresInMs = parseDurationMs(raw.JWT_EXPIRES_IN);
+} catch (err) {
+  // eslint-disable-next-line no-console
+  console.error((err as Error).message);
+  process.exit(1);
+}
 
 export const env = {
   ...raw,
   // NODE_ENV=test always talks to the dedicated test database, never the dev one.
   databaseUrl: raw.NODE_ENV === 'test' ? raw.DATABASE_URL_TEST : raw.DATABASE_URL,
   corsOrigins: raw.CORS_ORIGINS.split(',').map((origin) => origin.trim()),
+  jwtExpiresInMs,
 };
 
 export type Env = typeof env;
