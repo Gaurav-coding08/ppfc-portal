@@ -144,6 +144,24 @@ update; the UPDATE succeeds only when the row's version matches. A mismatch retu
 `VERSION_CONFLICT` with `{ currentVersion }` so the client can retry from the latest state. This
 avoids the overhead and deadlock risk of pessimistic locks while still preventing lost updates.
 
+### User directory scope (feature 06)
+
+`GET /users` and `GET /users/:id` are for assignee pickers, not a general directory: a
+project_manager sees only users who are members of a project that PM can manage (owns, or holds
+`member_role='manager'` on) — across *every* project that PM manages, not just one. An admin sees
+everyone. As with project scope, a user outside the PM's visibility returns 404 from `/users/:id`,
+never 403, so a PM can't enumerate user ids outside their own projects.
+
+### Last-active-admin guard (feature 06)
+
+Two separate rules protect against losing all admin access, enforced in `modules/admin/admin.service.ts`:
+- An admin can never change their own `role` or set their own `isActive` to `false` — checked on
+  whatever fields are submitted, independent of the current admin count.
+- Demoting or deactivating *any* admin is refused with 422 `BUSINESS_RULE` if doing so would leave
+  zero active admins. In practice this second rule is only reachable for an actor different from
+  the target, because the route itself requires the caller to already be an active admin — a
+  same-actor count can never drop below the actor's own row.
+
 ### Audit trail integrity
 
 `writeAudit` requires a `PoolClient`, not the pool — enforcing that audit rows are written inside

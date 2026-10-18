@@ -140,3 +140,32 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   before executing (duplicate → 409, released on error). Noted that cost posting is also protected
   by the draft→posted version check, so this is defence in depth. Confirmed `as unknown as` casts
   exist only in tests, and that sort columns are whitelisted (no identifier injection).
+
+### 06 Admin: departments, users, roles & audit review — 2026-10-18
+
+- **Goal:** Reference data (`departments`), a scoped user directory for assignee pickers, admin
+  user create/update with the password policy and last-active-admin safeguard, and audit/activity
+  review endpoints — every admin mutation atomic with its `audit_events` row.
+- **Prompt/approach:** `/run-feature 06` with the feature spec + CLAUDE.md + feature 05 context.
+- **First output issue:** The "PM sees only users on projects they manage" test failed:
+  `expected [...] to not include 10`. The feature 05 test fixture `asNonMember()` only guarantees
+  non-membership on *one* specific project, but the seeded PM in that fixture owns three projects
+  whose combined membership happens to cover every seeded contributor — so there was no actual
+  "unrelated" user for that PM/contributor pair to test against. A second, related issue: an
+  earlier draft of the "promote to PM" test reused that same shared fixture contributor and
+  permanently changed their role mid-file, which then made an unrelated "contributor gets 403"
+  test fail later in the same run because the fixture no longer resolved to a contributor.
+- **Refinement:** Wrote a dedicated query that finds a PM/contributor pair with no overlap across
+  *every* project that PM manages (not just one), and switched the "promote to PM" test to create
+  its own disposable user via the admin-create endpoint instead of mutating the shared fixture.
+- **Verification:** `npm run typecheck && npm run lint && npm test` all pass (117 tests, up from
+  100). Confirmed: contributor/PM get 403 on all `/admin/*` routes; admin create → 201, login
+  works, audit row's `request_id` matches the response header; duplicate email → 409; weak
+  password → 400; self role-change/deactivate → 422; stale version → 409 with `currentVersion`;
+  promoted user's existing token gains PM access on its very next request with no re-login; the
+  last-active-admin guard blocks a non-self demote/deactivate that would leave zero admins
+  (tested at the service layer, since the HTTP route's own admin-role gate makes a same-actor
+  trigger of this specific guard unreachable — see the feature's context file for why); PM
+  `/users` list and `/users/:id` are correctly scoped (404 outside scope); audit filter by
+  entityType + date range works; `password_hash` never appears in any response body.
+- **Human review:** TODO (owner)

@@ -10,6 +10,8 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { notFoundHandler } from './middleware/notFound.js';
 import { requestId } from './middleware/requestId.js';
 import { authRoutes } from './modules/auth/auth.routes.js';
+import { adminRoutes, projectActivityRoutes } from './modules/admin/admin.routes.js';
+import { departmentsRoutes, usersRoutes } from './modules/users/users.routes.js';
 
 // Builds the app without calling listen(), so tests can exercise it directly
 // via supertest without binding a real port.
@@ -34,6 +36,10 @@ export function buildApp(): Express {
   );
 
   app.use('/api/v1/auth', authRoutes);
+  app.use('/api/v1/departments', departmentsRoutes);
+  app.use('/api/v1/users', usersRoutes);
+  app.use('/api/v1/admin', adminRoutes);
+  app.use('/api/v1/projects', projectActivityRoutes);
 
   app.get('/api/v1/health', async (_req, res, next) => {
     try {
