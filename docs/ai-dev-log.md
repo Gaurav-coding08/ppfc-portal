@@ -64,9 +64,20 @@ was verified. Each entry ends with a `Human review` line for the project owner t
   double-read entirely.
 - **Verification:** `npm run data:generate` run twice — `diff -rq` on the two output
   directories is identical (determinism confirmed before writing the unit test). `npm run
-  db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case against
+db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case against
   `v_project_financials` and direct queries before trusting it to a test (near-budget 93.75%,
   forecast-exceed EAC 110,000 > budget 100,000, reversal net 0 on its pair, forecastMissing
   project has EAC = actual, etc.) — all matched the intended fixture numbers exactly.
   `npm run typecheck && npm run lint && npm test` all pass (50 tests, up from 17).
-- **Human review:** TODO (owner)
+- **Human review:** Reviewed the context file's "Decisions & trade-offs" and caught a design flaw
+  the AI had documented as intentional: business timestamps were omitted from the CSVs, so import
+  stamped them with now(). Impact: every CR appeared submitted on the import date (after the
+  2026-09-30 reporting date), so a Jan–Sep filter would return zero CRs; CR history and audit
+  events shared one timestamp (approved before submitted); the DB differed on every import,
+  breaking SQL/dashboard/Power BI reconciliation. Also flagged sparse monthly spend (~half the
+  costs were draft filler). Re-prompted for deterministic historical timestamps and ~75% posted
+  costs with pinned edge cases preserved. Result: 68/90 costs posted, posted spend in every month
+  Jan–Sep, all five financial edge cases unchanged, 4 new consistency tests (54 pass). Reviewing
+  the fix, rejected the AI's workaround of downgrading done tasks / closed risks with future due
+  dates to blocked/mitigating: the real rule is completed_at ≤ reporting date, and early
+  completion is valid. Restored statuses with past completion dates and added a regression test.
