@@ -2,6 +2,7 @@ import { describe, expect, it, beforeAll } from 'vitest';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import supertest from 'supertest';
+import http from 'node:http';
 import { randomUUID } from 'node:crypto';
 import { authenticate } from '../../src/middleware/authenticate.js';
 import { idempotent } from '../../src/middleware/idempotency.js';
@@ -14,16 +15,14 @@ import helmet from 'helmet';
 
 let admin: LoggedInUser;
 
-// Build a minimal test app with a POST route that uses the idempotency
-// middleware and inserts a row into a temporary table.
 function buildTestApp() {
   const app = express();
   app.use(helmet());
   app.use(express.json());
   app.use(cookieParser());
   app.use(requestId);
-  app.use('/api/v1/test/idempotent', authenticate, idempotent(), (req, res) => {
-    res.status(201).json({ data: { created: true, key: req.header('idempotency-key') } });
+  app.use('/api/v1/test/idempotent', authenticate, idempotent(), (_req, res) => {
+    res.status(201).json({ data: { created: true, key: _req.header('idempotency-key') } });
   });
   app.use(errorHandler);
   return app;
@@ -60,7 +59,7 @@ describe('idempotency middleware', () => {
     expect(res1.body.data.created).toBe(true);
     expect(res1.headers['idempotent-replay']).toBeUndefined();
 
-    // Wait briefly for the async INSERT to complete
+    // Wait briefly for the async UPDATE to finalize the reservation
     await new Promise((r) => setTimeout(r, 100));
 
     const res2 = await supertest(app)
@@ -77,7 +76,6 @@ describe('idempotency middleware', () => {
   it('returns 409 when key is reused for a different path', async () => {
     const key = randomUUID();
 
-    // First, store a key manually with a different path
     await pool.query(
       `INSERT INTO idempotency_keys (key, user_id, method, path, response_status, response_body)
        VALUES ($1, $2, $3, $4, $5, $6)`,
@@ -93,5 +91,64 @@ describe('idempotency middleware', () => {
 
     expect(res.status).toBe(409);
     expect(res.body.error.code).toBe('IDEMPOTENCY_CONFLICT');
+  });
+
+  it('concurrent POSTs with the same key insert exactly one row', async () => {
+    const tableName = `idem_race_${Date.now()}`;
+    await pool.query(`CREATE TABLE ${tableName} (id SERIAL PRIMARY KEY, v TEXT)`);
+
+    // The handler sleeps 200ms via pg_sleep so both requests enter the
+    // middleware and race on the reservation INSERT before either handler
+    // completes.
+    const app = express();
+    app.use(helmet());
+    app.use(express.json());
+    app.use(cookieParser());
+    app.use(requestId);
+    app.use('/api/v1/test/insert', authenticate, idempotent(), async (_req, res) => {
+      await pool.query(`SELECT pg_sleep(0.2)`);
+      await pool.query(`INSERT INTO ${tableName} (v) VALUES ('hit')`);
+      res.status(201).json({ data: { inserted: true } });
+    });
+    app.use(errorHandler);
+
+    // Use a single shared HTTP server so both requests hit the same
+    // event loop, maximizing the chance of true concurrency.
+    const server = http.createServer(app);
+    await new Promise<void>((resolve) => server.listen(0, resolve));
+    const port = (server.address() as { port: number }).port;
+
+    try {
+      const key = randomUUID();
+
+      const fire = () =>
+        fetch(`http://127.0.0.1:${port}/api/v1/test/insert`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${admin.token}`,
+            'Idempotency-Key': key,
+          },
+          body: '{}',
+        });
+
+      const [r1, r2] = await Promise.all([fire(), fire()]);
+      const statuses = [r1.status, r2.status].sort();
+
+      // One succeeds (201), the other gets 409 (reservation conflict)
+      expect(statuses).toEqual([201, 409]);
+
+      // Wait for async UPDATE to finalize the stored response
+      await new Promise((r) => setTimeout(r, 300));
+
+      // Only one row should have been inserted by the handler
+      const { rows } = await pool.query<{ count: string }>(
+        `SELECT count(*) FROM ${tableName}`,
+      );
+      expect(parseInt(rows[0]!.count, 10)).toBe(1);
+    } finally {
+      server.close();
+      await pool.query(`DROP TABLE IF EXISTS ${tableName}`);
+    }
   });
 });

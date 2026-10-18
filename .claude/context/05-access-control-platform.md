@@ -25,7 +25,8 @@ payloads. `docs/security.md` contains the full role × action matrix.
 - `backend/tests/unit/audit.test.ts` — 2 tests
 
 ## Database
-No schema changes. Uses existing `idempotency_keys` table (PK `(key, user_id)`) from migration 003.
+- Migration 010: `ALTER TABLE idempotency_keys ALTER COLUMN response_status DROP NOT NULL` — allows reservation rows with NULL status for the reserve-first idempotency pattern.
+- Uses existing `idempotency_keys` table (PK `(key, user_id)`) from migration 003.
 
 ## Endpoints
 No new endpoints (platform helpers only).
@@ -47,8 +48,8 @@ No new endpoints (platform helpers only).
 ## Decisions & trade-offs
 - **404 vs 403**: out-of-scope projects return 404, not 403, so non-members can't probe which project IDs exist. Only when the user *can* see the project but lacks the required level does it return 403.
 - **Scope checked on loaded resource's project_id**: prevents ID-based escalation where a caller sends a resource ID belonging to another project. The resource is loaded first, its `project_id` is extracted, and only then is scope checked.
-- **Idempotency key storage race**: two concurrent identical requests race to INSERT the key. The PK constraint `(key, user_id)` ensures exactly one INSERT wins; the other gets `ON CONFLICT DO NOTHING`, so the second request still returns the correct response — it just doesn't store a replay row. The comment in the code explains this.
-- **Async idempotency storage**: the INSERT into `idempotency_keys` runs after `res.json()` to avoid blocking the response. A storage failure is swallowed — the client already got the right answer, and the next retry simply executes afresh.
+- **Idempotency reserve-first pattern**: the middleware INSERTs a reservation row (NULL `response_status`) *before* running the handler. A concurrent duplicate hits the PK constraint and gets 409. On handler success the reservation is UPDATEd with the stored response; on handler error it's DELETEd so a retry gets a fresh attempt. Migration 010 made `response_status` nullable to support this.
+- **Async idempotency finalization**: the UPDATE (or DELETE on error) runs after `res.json()` to avoid blocking the response. A finalization failure is swallowed — the client already got the correct response.
 - **`selfApproval` is 422**: CLAUDE.md says 422 for business-rule violations. Self-approval is a business rule, not an authorization failure, so it uses 422 SELF_APPROVAL_FORBIDDEN rather than 403.
 - **`Client | PoolClient` in audit/access/versioning**: test files use raw `pg.Client` (not from the pool), so the function signatures accept both. The runtime always passes a `PoolClient` from `withTx`.
 - **Money shape**: every response that includes monetary values should carry `currency: 'AED'` at the object level, not per field — documented in `lib/money.ts`.
@@ -61,5 +62,5 @@ No new endpoints (platform helpers only).
 ## How to verify quickly
 ```
 cd backend
-npm run typecheck && npm run lint && npm test   # 99 tests pass
+npm run typecheck && npm run lint && npm test   # 100 tests pass
 ```
