@@ -1,8 +1,9 @@
 # Security
 
-How authentication is implemented and why, for feature 04 (`backend/src/middleware/authenticate.ts`,
-`backend/src/modules/auth/`). Authorization (role/resource checks) is feature 05's concern — see
-`CLAUDE.md`'s "Roles & authorization" section for that.
+How authentication and authorization are implemented and why.
+
+- **Authentication** (feature 04): `backend/src/middleware/authenticate.ts`, `backend/src/modules/auth/`
+- **Authorization** (feature 05): `backend/src/lib/access.ts` (role guards, project-scope checks)
 
 ## Token storage: httpOnly cookie, not localStorage
 
@@ -92,3 +93,60 @@ middleware — verify the IdP's token instead of our own JWT, then resolve/sync 
 row the same way (by email or by a stored external subject id) and attach the same `AuthUser`
 shape to `req.user`. Every controller, service, and the whole RBAC layer in feature 05 stays
 unchanged, because they only ever depend on `req.user`'s shape, never on how it got there.
+
+## Role × action matrix
+
+Every route checks authorization server-side. The table below is the single source of truth —
+later features must comply with it.
+
+| Action | Contributor | Project Manager | Admin |
+|---|---|---|---|
+| View project (own/member) | yes | yes | yes (all) |
+| View project (non-member) | no (404) | no (404) | yes |
+| Manage project | no | own projects only | yes |
+| Create task | no | own projects | yes |
+| Update own assigned task progress/status | yes (member) | yes | yes |
+| Update any task | no | own projects | yes |
+| Manage milestones | no | own projects | yes |
+| Manage risks | no | own projects | yes |
+| Submit change request | yes (member) | yes | yes |
+| Decide change request | no | own projects (not own CR) | yes (not own CR) |
+| Create draft cost | no | own projects | yes |
+| Post cost | no | own projects | yes |
+| Request budget revision | no | own projects | yes |
+| Decide budget revision | no | no | yes (not own) |
+| Manage cost categories | no | no | yes |
+| Manage users | no | no | yes |
+| View audit log | no | no | yes |
+
+### How scope is enforced
+
+Authorization checks run on the **loaded resource's** `project_id`, never on a caller-supplied
+project id alone. This prevents ID-based escalation: even if the caller knows the id of a resource
+in another project, `assertProjectAccess` verifies the project link from the DB row itself.
+
+- Out of scope → 404 (never reveals the resource exists to someone who shouldn't see the project).
+- In scope but role insufficient → 403.
+- Self-approval (CR decisions, budget-revision decisions) → 422 `SELF_APPROVAL_FORBIDDEN`.
+
+### Idempotency
+
+Mutating POST routes that could cause double submissions (cost posting, CR decisions, budget-revision
+decisions) require an `Idempotency-Key` header. The key is scoped to `(key, user_id)` and stored in
+`idempotency_keys`. A duplicate key with the same method + path replays the stored response; a
+duplicate key with a different path returns 409 `IDEMPOTENCY_CONFLICT`. Only 2xx responses are
+stored, so a retry after a transient error gets a fresh attempt.
+
+### Optimistic locking
+
+Mutable entities carry a `version` column. The client must send the current `version` on every
+update; the UPDATE succeeds only when the row's version matches. A mismatch returns 409
+`VERSION_CONFLICT` with `{ currentVersion }` so the client can retry from the latest state. This
+avoids the overhead and deadlock risk of pessimistic locks while still preventing lost updates.
+
+### Audit trail integrity
+
+`writeAudit` requires a `PoolClient`, not the pool — enforcing that audit rows are written inside
+the same transaction as the mutation they record. If the mutation rolls back, the audit row rolls
+back with it; if it commits, the audit row is guaranteed to be there. `password_hash` /
+`passwordHash` fields are automatically stripped from before/after payloads.

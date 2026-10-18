@@ -48,8 +48,8 @@ export function conflict(message: string, details?: unknown): AppError {
   return new AppError(409, 'IDEMPOTENCY_CONFLICT', message, details);
 }
 
-export function versionConflict(message = 'Resource was modified by someone else'): AppError {
-  return new AppError(409, 'VERSION_CONFLICT', message);
+export function versionConflict(message = 'Resource was modified by someone else', details?: unknown): AppError {
+  return new AppError(409, 'VERSION_CONFLICT', message, details);
 }
 
 export function invalidTransition(message: string): AppError {
@@ -57,7 +57,7 @@ export function invalidTransition(message: string): AppError {
 }
 
 export function selfApproval(message = 'You cannot approve your own request'): AppError {
-  return new AppError(403, 'SELF_APPROVAL_FORBIDDEN', message);
+  return new AppError(422, 'SELF_APPROVAL_FORBIDDEN', message);
 }
 
 export function businessRule(message: string, details?: unknown): AppError {

@@ -113,3 +113,23 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   SameSite=Lax; login rate limit returns 429 on the 11th attempt. Found a design limitation:
   logout only clears the cookie, so a copied Bearer token stays valid until expiry (stateless
   JWT); deactivation does revoke immediately because the user is re-read per request.
+
+### 05 Access control & shared platform helpers — 2026-10-18
+- **Goal:** Reusable building blocks for every business module: role guards, project-scope
+  checks, audit writer improvements, idempotency middleware, optimistic-lock helper,
+  pagination/sort/filter parsing, and date/money helpers.
+- **Prompt/approach:** /run-feature 05 with feature spec + CLAUDE.md + feature 04 context.
+- **First output issue:** Initial typecheck failed with 14 errors: `pg.Client` (used in tests)
+  is not assignable to `PoolClient` (which the function signatures required), and top-level
+  `await import()` inside `describe` blocks is not allowed outside async functions.
+- **Refinement:** Widened function signatures in `access.ts`, `audit.ts`, and `versioning.ts`
+  to accept `Client | PoolClient` (safe because both expose the same `.query()` interface; the
+  runtime always passes a PoolClient from `withTx`). Restructured test file to use top-level
+  imports instead of dynamic `await import()` inside describe blocks. Also fixed lint errors:
+  replaced `as any` casts with proper typed helpers (`toAuthUser()`, `as unknown as Request`).
+- **Verification:** `npm run typecheck && npm run lint && npm test` all pass (99 tests, up from
+  68). Confirmed: admin views any project; PM manages own, 404 on unrelated; member contributor
+  views but can't manage (403); non-member contributor gets 404; idempotency replays stored
+  response with header; stale version returns 409 with currentVersion; rolled-back audit leaves
+  no row; password_hash stripped from audit payloads.
+- **Human review:** TODO (owner)

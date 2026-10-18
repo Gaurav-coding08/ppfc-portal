@@ -5,7 +5,7 @@
 | 02 | 02-database-schema | done | 2026-10-18 | 6 |
 | 03 | 03-synthetic-data | done | 2026-10-18 | 50 |
 | 04 | 04-auth | done | 2026-10-18 | 68 |
-| 05 | 05-access-control-platform | pending | | |
+| 05 | 05-access-control-platform | done | 2026-10-18 | 99 |
 | 06 | 06-admin-users-audit | pending | | |
 | 07 | 07-projects | pending | | |
 | 08 | 08-tasks-milestones | pending | | |
