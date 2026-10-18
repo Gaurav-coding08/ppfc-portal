@@ -39,6 +39,15 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
   }
 
   if (isPgError(err)) {
+    // P0001 = raise_exception — the posted-cost immutability trigger fires
+    // this when an UPDATE/DELETE reaches a posted row past the service guard.
+    if (err.code === 'P0001' && err.message?.includes('immutable')) {
+      res
+        .status(409)
+        .json({ error: { code: 'INVALID_TRANSITION' satisfies ErrorCode, message: err.message, requestId: req.id } });
+      return;
+    }
+
     const mapped = mapPgErrorCode(err.code);
     if (mapped) {
       res

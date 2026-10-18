@@ -316,3 +316,25 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
     are all in one `withTx`, so any failure rolls back everything.
   - Verified that a repeated decision with the same Idempotency-Key
     writes exactly one history row.
+
+### 11 Finance: budgets, revisions, categories & cost transactions — 2026-10-18
+- **Goal:** Finance as an operational module with editable records and controls: approved
+  budgets and revisions with authorization and rationale, cost categories, draft→posted cost
+  lifecycle, immutable posted costs with reversals, all audited. Acceptance tests B and D.
+- **Prompt/approach:** /run-feature 11 with feature spec + CLAUDE.md
+- **First output issue:** Budget revision approval test failed because the test used
+  `effectiveDate: '2026-10-01'` which is after the default `asOf` of `2026-09-30` — the
+  `fn_project_financials` function correctly filters revisions by `effective_date <= asOf`,
+  so the approved revision wasn't included in the budget calculation. Fixed by changing the
+  test's effectiveDate to `2026-09-01`.
+- **Refinement:** Changed effectiveDate in the test helper from `2026-10-01` to `2026-09-01`
+  so the revision falls within the default reporting window. Also removed two unused imports
+  (`requireRole` in budgets.service.ts, `resolveAsOf` in costs.service.ts) caught by lint.
+- **Verification:** `npm run typecheck && npm run lint && npm test` — 264 tests pass (34 new:
+  18 budget/revision/category + 16 cost transaction). Acceptance B (PM creates draft → posts
+  it → actual spend increases by exactly the amount, remaining and utilization update) and
+  Acceptance D (contributor POST /costs/:id/post and POST /projects/:id/costs → 403, nothing
+  changes) both pass. Also verified: draft costs don't affect actual spend; costs dated after
+  asOf don't affect actual spend; idempotent post with same key writes one audit row; reversal
+  reduces actual spend; double reversal → 422.
+- **Human review:** TODO (owner)

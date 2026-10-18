@@ -17,6 +17,9 @@ import { projectTasksRoutes, tasksRoutes } from './modules/tasks/tasks.routes.js
 import { milestonesRoutes, projectMilestonesRoutes } from './modules/milestones/milestones.routes.js';
 import { projectRisksRoutes, risksRoutes } from './modules/risks/risks.routes.js';
 import { changeRequestsRoutes, projectCrRoutes } from './modules/change-requests/changeRequests.routes.js';
+import { budgetRevisionsRoutes, projectBudgetRoutes } from './modules/finance/budgets.routes.js';
+import { costCategoriesRoutes } from './modules/finance/categories.routes.js';
+import { costsRoutes, projectCostRoutes } from './modules/finance/costs.routes.js';
 
 // Builds the app without calling listen(), so tests can exercise it directly
 // via supertest without binding a real port.
@@ -54,6 +57,11 @@ export function buildApp(): Express {
   app.use('/api/v1/risks', risksRoutes);
   app.use('/api/v1/projects', projectCrRoutes);
   app.use('/api/v1/change-requests', changeRequestsRoutes);
+  app.use('/api/v1/projects', projectBudgetRoutes);
+  app.use('/api/v1/budget-revisions', budgetRevisionsRoutes);
+  app.use('/api/v1/cost-categories', costCategoriesRoutes);
+  app.use('/api/v1/projects', projectCostRoutes);
+  app.use('/api/v1/costs', costsRoutes);
 
   app.get('/api/v1/health', async (_req, res, next) => {
     try {
