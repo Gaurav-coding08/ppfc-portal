@@ -42,9 +42,15 @@ export function extractRoutes(app: Express): RouteEntry[] {
     const src: string | undefined = layer.regexp?.source;
     if (!src) return '';
 
+    // Express 4's actual mount regexp for a literal prefix (confirmed by
+    // inspecting layer.regexp.source directly, not the shape this helper
+    // originally assumed) is e.g. `^\/api\/v1\/projects\/?(?=\/|$)` — a bare
+    // `\/?(?=\/|$)` trailing lookahead, with no `(?:` wrapper around it. The
+    // previous regex here looked for that wrapper and never matched, so the
+    // lookahead fragment leaked into every extracted path.
     let path = src
       .replace(/^\^/, '')
-      .replace(/\(\?:\/\(\?=.*$/, '')
+      .replace(/\\\/\?\(\?=.*$/, '')
       .replace(/\/\?\$?$/, '')
       .replace(/\$$/, '')
       .replace(/\\\//g, '/')

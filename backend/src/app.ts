@@ -6,6 +6,7 @@ import { pinoHttp } from 'pino-http';
 import { env } from './config/env.js';
 import { pool } from './db/pool.js';
 import { logger } from './lib/logger.js';
+import { authGate } from './middleware/authGate.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFoundHandler } from './middleware/notFound.js';
 import { requestId } from './middleware/requestId.js';
@@ -45,6 +46,10 @@ export function buildApp(): Express {
       genReqId: (req) => req.id,
     }),
   );
+
+  // Single auth gate for everything under /api/v1 (see authGate.ts); routes
+  // below no longer carry their own `authenticate` middleware.
+  app.use('/api/v1', authGate);
 
   app.use('/api/v1/auth', authRoutes);
   app.use('/api/v1/departments', departmentsRoutes);

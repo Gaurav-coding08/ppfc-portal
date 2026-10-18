@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { api } from '../helpers/api.js';
+import { asAdmin } from '../helpers/auth.js';
 
 describe('logging: responses carry requestId and no sensitive data leaks', () => {
   it('error response contains requestId matching response header', async () => {
@@ -13,9 +14,11 @@ describe('logging: responses carry requestId and no sensitive data leaks', () =>
   });
 
   it('500 error response contains requestId, no stack trace', async () => {
-    // Hit a non-existent route — 404 from our handler, which always
-    // includes requestId and never a stack trace
-    const res = await api().get('/api/v1/no-such-route');
+    // Hit a non-existent route with a valid session — the global auth gate
+    // (authGate.ts) would otherwise turn an unauthenticated request away
+    // with 401 before it ever reaches notFoundHandler.
+    const admin = await asAdmin();
+    const res = await admin.agent.get('/api/v1/no-such-route');
     expect(res.status).toBe(404);
     expect(res.body.error.requestId).toBeTruthy();
     expect(res.body.error.stack).toBeUndefined();

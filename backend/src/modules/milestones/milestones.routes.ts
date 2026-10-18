@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { asyncHandler } from '../../lib/asyncHandler.js';
-import { authenticate } from '../../middleware/authenticate.js';
 import { validate } from '../../middleware/validate.js';
 import * as milestonesController from './milestones.controller.js';
 import {
@@ -18,14 +17,12 @@ export const projectMilestonesRoutes = Router();
 
 projectMilestonesRoutes.get(
   '/:projectId/milestones',
-  authenticate,
   validate({ params: projectIdParamsSchema, query: milestonesListQuerySchema }),
   asyncHandler(milestonesController.listProjectMilestones),
 );
 
 projectMilestonesRoutes.post(
   '/:projectId/milestones',
-  authenticate,
   validate({ params: projectIdParamsSchema, body: createMilestoneBodySchema }),
   asyncHandler(milestonesController.createMilestone),
 );
@@ -35,7 +32,6 @@ export const milestonesRoutes = Router();
 
 milestonesRoutes.patch(
   '/:id',
-  authenticate,
   validate({ params: milestoneIdParamsSchema, body: updateMilestoneBodySchema }),
   asyncHandler(milestonesController.updateMilestone),
 );

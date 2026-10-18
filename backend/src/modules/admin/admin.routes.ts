@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { asyncHandler } from '../../lib/asyncHandler.js';
 import { requireRole } from '../../lib/access.js';
-import { authenticate } from '../../middleware/authenticate.js';
 import { validate } from '../../middleware/validate.js';
 import * as adminController from './admin.controller.js';
 import {
@@ -15,7 +14,7 @@ import {
 
 // Mounted at /api/v1/admin — every route here is admin-only.
 export const adminRoutes = Router();
-adminRoutes.use(authenticate, requireRole('admin'));
+adminRoutes.use(requireRole('admin'));
 
 adminRoutes.post('/users', validate({ body: createUserBodySchema }), asyncHandler(adminController.createUser));
 
@@ -36,7 +35,6 @@ adminRoutes.get(
 export const projectActivityRoutes = Router();
 projectActivityRoutes.get(
   '/:projectId/activity',
-  authenticate,
   validate({ params: projectIdParamsSchema, query: activityQuerySchema }),
   asyncHandler(adminController.listProjectActivity),
 );

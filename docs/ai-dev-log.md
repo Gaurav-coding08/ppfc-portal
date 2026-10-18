@@ -378,9 +378,57 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
     update and a cost post, drill-down totals equal the KPI, and there is no join fan-out.
 
 ### 14 Backend hardening, API documentation & quality sweep — 2026-10-18
+
 - **Goal:** Close the backend phase with route-guard tests, RBAC matrix tests, cross-project ID escalation tests, OpenAPI spec, Postman collection, manual E2E checklist, security review, log redaction, graceful DB failure, README, and coverage report.
 - **Prompt/approach:** /run-feature 14 with feature spec + CLAUDE.md
 - **First output issue:** Route extractor using Express 4 regexp parsing was fragile — mount paths included unstripped regex fragments like `/?(?=/|$)` that broke URL matching in tests. Two iterations of regex parsing both had edge cases.
 - **Refinement:** Replaced fragile router-introspection approach with an explicit route inventory in the test file (derived from api-routes.md). Added a `routes:check` script that cross-references the test inventory against the doc to catch drift. This is more maintainable and serves double duty as documentation verification.
 - **Verification:** `npm run typecheck` clean, `npm run lint` clean, `npm test` 417/417 pass (29 files), `npm run routes:check` confirms 71 routes match, `npm run test:coverage` 91.25% statements / 80.72% branches / 95.04% functions.
-- **Human review:** TODO (owner)
+- **Human review:**
+  - Verified `/health` returns 503 when the DB is down.
+  - Deferred on purpose: OpenAPI-vs-response validation. The spec is maintained by hand
+    and checked through the Postman collection.
+  - Final: 417 tests, 91% statement coverage, 71 routes documented and guard-tested.
+
+### 14(b) Route-guard follow-up: close the "undocumented route" gap — 2026-10-18
+
+- **Goal:** Feature 14's `route-guard.test.ts`/`routes:check` pair only proved internal
+  consistency between `docs/api-routes.md` and a hand-maintained `ALL_ROUTES` array in the
+  test — both static. A route added to the app but never added to either source would pass
+  both checks while shipping unguarded. Close that gap for real, using the live Express app.
+- **Prompt/approach:** User walked through the exact failure mode (add a route, forget the
+  doc and the list, `routes:check` still passes) and asked to wire the dead
+  `tests/helpers/routeExtractor.ts` (a genuine `app._router.stack` walker, written in feature
+  14 but never called) into the guard test instead.
+- **First output issue:** The user's first-cut plan assumed auth was mounted globally in
+  `app.ts`, so an unmatched path would already 401 before reaching `notFoundHandler`. It
+  wasn't — `authenticate` was called per-route inside each `*.routes.ts` file, with no
+  app-level gate, so `GET /api/v1/does-not-exist` 404'd, not 401'd. Caught this before writing
+  the test it would have falsified, by reading `app.ts` and a sample routes file directly.
+- **Refinement:** Per the user's decision, added one global gate instead of patching around
+  the discrepancy: `src/middleware/authGate.ts`, mounted with `app.use('/api/v1', authGate)`
+  before every router, with an explicit `{ method, path }` allowlist for `POST /auth/login`
+  and `GET /health` (matched against `req.path`/`req.method` as seen _inside_ that middleware,
+  i.e. with `/api/v1` already stripped by Express's mount-path dispatch). Removed the
+  now-redundant per-route `authenticate` call from all 13 `*.routes.ts` files — authorization
+  (`requireRole`, `assertProjectAccess`, `assertNotSelf`) is untouched, since the gate only
+  answers "who are you," not "what can you do."
+- **Second output issue:** Wiring `extractRoutes()` into the test immediately surfaced the
+  real bug that feature 14's dev log entry had actually worked around rather than fixed: its
+  `getMountPath()` stripped Express 4's trailing optional-slash lookahead with a regex that
+  assumed a `(?:` wrapper around `\/(?=...` that Express 4 doesn't emit for a literal mount
+  prefix. Confirmed the real shape by inspecting `layer.regexp.source` directly
+  (`^\/api\/v1\/projects\/?(?=\/|$)`, no `(?:` group) instead of guessing again.
+- **Refinement:** Fixed the regex to strip the literal `\/?(?=...` fragment, and normalized
+  trailing slashes in the test's own `normalizePath()` (mount prefix + root route path `'/'`
+  produces e.g. `/api/v1/projects/`, which doesn't string-equal `/api/v1/projects` from
+  `ALL_ROUTES`). Added a fail-loud guard (`liveRoutes.length` must be `> 0` and
+  `>= ALL_ROUTES.length`) so a future Express upgrade that changes the internal stack shape
+  breaks this test instead of silently diffing two empty sets. The diff itself runs both
+  directions: live-but-undocumented and documented-but-not-live.
+- **Consequence:** Two pre-existing tests (`errors.test.ts`, `logging.test.ts`) asserted an
+  unauthenticated unknown route 404'd — now correctly 401 under the gate. Updated both to
+  authenticate first, so they still prove the 404 behavior for a session that is logged in.
+- **Verification:** `npm run typecheck && npm run lint` clean; `npm test` 423/423 pass (29
+  files, up from 417 — added the auth-gate 401/404/public-route tests and the live-vs-inventory
+  diff tests); `npm run routes:check` still reports 71/71 matching.
