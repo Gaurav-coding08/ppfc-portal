@@ -40,13 +40,15 @@ export function buildRisks(): RiskRow[] {
         impact = 4;
         status = 'open';
       }
-      // A risk can't already be "closed" on a date that hasn't happened yet
-      // as of the reporting date.
-      if (status === 'closed' && dueDate > REPORTING_DATE) {
-        status = 'mitigating';
-      }
-
-      const closedAt = status === 'closed' ? atTime(dueDate) : null;
+      // A risk can be closed even if its due date is still in the future
+      // as of the reporting date — it was resolved early. closed_at is
+      // still always historical: on the due date itself when that's
+      // already past, otherwise a deterministic day shortly before the
+      // reporting date, never after it.
+      const closedAt =
+        status === 'closed'
+          ? atTime(dueDate <= REPORTING_DATE ? dueDate : addDays(REPORTING_DATE, -((i % 5) + 1)))
+          : null;
       risks.push({
         id: id++,
         project_id: project.id,

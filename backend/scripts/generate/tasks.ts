@@ -34,21 +34,23 @@ export function buildTasks(): TaskRow[] {
         dueDate = REPORTING_DATE;
       }
 
-      let status: TaskRow['status'] = isCompletedProject ? 'done' : STATUS_CYCLE[i % 4]!;
-      // A task can't already be "done" if its due date hasn't happened yet
-      // as of the reporting date — that would mean completing it in the
-      // future. Downgrade it to a real in-flight status instead.
-      if (status === 'done' && dueDate > REPORTING_DATE) {
-        status = 'blocked';
-      }
+      const status: TaskRow['status'] = isCompletedProject ? 'done' : STATUS_CYCLE[i % 4]!;
 
       let assigneeId: number | null = contributors[i % contributors.length]!;
       if (project.id === FORCE_UNASSIGNED.projectId && i === FORCE_UNASSIGNED.index) {
         assigneeId = null;
       }
 
+      // A task can be done even if its due date is still in the future as
+      // of the reporting date — it was just finished early. completed_at
+      // is still always historical: on the due date itself when that's
+      // already past, otherwise a deterministic day shortly before the
+      // reporting date (early completion), never after it.
       const progress = status === 'done' ? 100 : [0, 25, 50, 75][i % 4]!;
-      const completedAt = status === 'done' ? atTime(dueDate) : null;
+      const completedAt =
+        status === 'done'
+          ? atTime(dueDate <= REPORTING_DATE ? dueDate : addDays(REPORTING_DATE, -((i % 5) + 1)))
+          : null;
       tasks.push({
         id: id++,
         project_id: project.id,

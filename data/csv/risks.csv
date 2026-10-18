@@ -19,7 +19,7 @@ id,project_id,type,title,description,owner_id,probability,impact,mitigation,due_
 18,6,risk,Horizontal content-based infrastructure,Ullam audentia alias cinis.,11,4,3,Atavus adsidue vel turbo aggero admoneo error accusamus cunae.,2026-06-19,closed,2026-06-19T09:00:00Z,2026-01-06T09:00:00Z,2026-06-19T09:00:00Z
 19,7,risk,Quality-focused zero defect workforce,Vel cubicularis nemo.,12,2,3,,2026-07-31,open,,2026-05-18T09:00:00Z,2026-05-18T09:00:00Z
 20,7,issue,Versatile uniform strategy,Totidem voluptates causa.,12,3,2,Assumenda supra sordeo trado vetus supellex.,2026-09-14,mitigating,,2026-05-18T09:00:00Z,2026-05-18T09:00:00Z
-21,7,risk,Optional interactive local area network,Cibus tum tenus bardus audentia volo.,12,4,3,Sum cursim aveho distinctio tabgo.,2026-10-29,mitigating,,2026-05-18T09:00:00Z,2026-05-18T09:00:00Z
+21,7,risk,Optional interactive local area network,Cibus tum tenus bardus audentia volo.,12,4,3,Sum cursim aveho distinctio tabgo.,2026-10-29,closed,2026-09-27T09:00:00Z,2026-05-18T09:00:00Z,2026-09-27T09:00:00Z
 22,8,risk,Ergonomic intangible array,Perferendis tenuis civitas alias nobis dicta arma vicissitudo.,13,2,3,,2026-05-31,open,,2026-03-18T09:00:00Z,2026-03-18T09:00:00Z
 23,8,issue,Multi-tiered eco-centric internet solution,Admoneo corporis conduco defetiscor appono inflammatio adversus.,13,3,2,Vox baiulus commodi stella tollo alias caterva.,2026-07-15,mitigating,,2026-03-18T09:00:00Z,2026-03-18T09:00:00Z
 24,8,risk,Customer-focused national ability,Angelus patior demergo demens pecto cupiditas thalassinus conscendo amissio.,13,4,3,Ullam triduana tamen vociferor cunabula ante victoria suus vulariter vigilo.,2026-08-29,closed,2026-08-29T09:00:00Z,2026-03-18T09:00:00Z,2026-08-29T09:00:00Z

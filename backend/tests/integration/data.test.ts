@@ -223,6 +223,13 @@ describe('Business timestamp realism', () => {
     ).toBe(1);
   });
 
+  test('a task can be done ahead of its due date — status is not forced by a future due date', async () => {
+    const n = await count(
+      "SELECT count(*) FROM tasks WHERE status = 'done' AND due_date > '2026-09-30' AND completed_at::date <= '2026-09-30'"
+    );
+    expect(n).toBeGreaterThanOrEqual(1);
+  });
+
   test('every change request has submitted_at strictly before decided_at', async () => {
     const neverSubmitted = await count('SELECT count(*) FROM change_requests WHERE submitted_at IS NULL');
     expect(neverSubmitted).toBe(0);

@@ -445,10 +445,13 @@ explicit historical value in the CSV, computed from the fixed reporting date wit
 blank to pick up the DB's `now()` default on import, and each one is consistent with its
 own record's story: a CR's `submitted_at` is always before its `decided_at`;
 `change_history` rows reuse those same two timestamps so they're chronological by
-construction; a task or risk can't be `done`/`closed` with a due date that's still in the
-future as of the reporting date. The **only** business timestamp anywhere in the dataset
-that falls after the reporting date is the one documented "posted cost after the cutoff"
-row below — everything else is historical.
+construction. A task or risk can be `done`/`closed` even when its due date is still in
+the future as of the reporting date — finishing early is a normal, valid outcome — but
+its `completed_at`/`closed_at` is never a future timestamp: it lands on the due date
+itself when that's already past, otherwise on a deterministic day shortly before the
+reporting date. The **only** business timestamp anywhere in the dataset that falls after
+the reporting date is the one documented "posted cost after the cutoff" row below —
+everything else is historical.
 
 `cost_transactions` also carries filler rows beyond its 42 hand-placed fixtures, to clear
 its row-count minimum and spread posted spend realistically across the year. Two
