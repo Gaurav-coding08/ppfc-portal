@@ -344,9 +344,16 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
     same Idempotency-Key writes one audit row.
 
 ### 12 Finance: forecasts, summaries, alerts & comparison — 2026-10-18
+
 - **Goal:** Forecast capture (upsert monthly forecasts), per-project financial summary (budget, actual, remaining, utilization, FTC, EAC, variance), spend by category, monthly trend, budget-overrun alerts, and project comparison — all from the SQL functions built in feature 02.
 - **Prompt/approach:** /run-feature 12 with feature spec + CLAUDE.md
 - **First output issue:** None found — all 277 tests passed on first run after fixing one lint warning (unused `categoryId` variable in the overrun-alert test).
 - **Refinement:** Removed unused variable declaration from the test. No code changes needed.
 - **Verification:** `npm run typecheck && npm run lint && npm test` — 277 tests pass (13 new). Summary-equals-independent-SQL test verifies budget/actual/FTC/EAC against raw queries that don't use `fn_project_financials`. asOf cutoff test confirms post-cutoff cost excluded at default 2026-09-30 but included at 2026-10-31. Forecast PUT past-month → 422, contributor → 403, upsert replaces value. Monthly trend actual sums equal summary actual spend (no fan-out). Comparison drops non-visible projects for contributor.
-- **Human review:** TODO (owner)
+- **Human review:**
+- Confirmed the summary test computes expected values with independent SQL, not by
+  calling `fn_project_financials`
+- Comparison drops projects the user can't see and lists them in `excluded`, rather
+  than failing the whole request with 404.
+- No-forecast treatment: FTC = 0, so EAC = actual spend, and the project gets a
+  FORECAST_MISSING alert so it isn't shown as falsely on-budget.
