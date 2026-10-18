@@ -365,6 +365,14 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
 - **First output issue:** Two bugs found during verification.
   (1) Non-admin users (PM, contributor) got 500 on every dashboard endpoint. Root cause: `scopedProjectIdsSql()` returns `AND project_id IN (...)` designed for fact tables. The `filtered_projects` CTE queries `projects p` directly, where the column is `p.id` not `project_id`. PostgreSQL threw "column project_id does not exist". Fixed with `.replace('project_id', 'p.id')` in `buildFilteredProjectsCte`.
   (2) `drill/tasks?kind=all` returned 500 for admin. Root cause: the function unconditionally pushed `cte.asOf` into the params array but only referenced it in SQL when `kind=overdue`. PostgreSQL rejects unreferenced positional parameters. Fixed by only pushing `asOf` when `kind=overdue` needs it, matching the pattern already used by `drillRisks` and `drillChangeRequests`.
-- **Refinement:** Both fixes were structural, not workarounds. The column-name rewrite is scoped to the CTE builder and commented. The param-push fix aligns all drill functions to the same "only push what you reference" pattern.
+- **Refinement:** Both fixes were structural, not workarounds. The param-push fix aligns all drill functions to the same "only push what you reference" pattern. The column-name mismatch was initially fixed with a `.replace('project_id', 'p.id')` in the CTE builder — a brittle string rewrite of SQL. Refactored `scopedProjectIdsSql` to accept an optional `column` parameter (typed as `'project_id' | 'p.id'`, validated against an allowlist) so the CTE builder passes `'p.id'` directly and the `.replace()` is eliminated. Added a unit test for the custom column variant.
 - **Verification:** `npm run typecheck && npm run lint && npm test` — 296 tests pass (19 new). KPI structure test checks all 16 keys have valid units and drill endpoints. Integrity-after-mutation: contributor task update changes `portfolioProgressPct`; PM cost post increases `actualSpend` by the exact amount. Drill reconciliation: costs sum equals `actualSpend`; overdue tasks count matches; high-exposure risks count matches — both with and without department+status filters. Fan-out guard: single-project `actualSpend` equals direct SQL SUM. Contributor scoping: contributor KPIs equal admin KPIs filtered to those project IDs. Risk matrix total equals open risk count.
-- **Human review:** TODO (owner)
+- **Human review:**
+  - Rejected the `.replace('project_id', 'p.id')` fix. Rewriting SQL text by string replace
+    is brittle: it changes only the first match, so a future edit to the scope helper could
+    silently break project scoping, which is an access-control bug. Refactored the helper to
+    take the column name (from an allowlist), so the CTE passes `p.id` explicitly.
+  - Accepted fix (2): only push params the SQL actually references, now consistent across
+    all drill functions.
+  - The integrity tests cover the assignment's mandatory demo: KPIs change after a task
+    update and a cost post, drill-down totals equal the KPI, and there is no join fan-out.

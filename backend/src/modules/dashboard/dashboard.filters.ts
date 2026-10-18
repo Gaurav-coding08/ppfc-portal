@@ -78,14 +78,12 @@ export function buildFilteredProjectsCte(
   user: AuthUser,
   filters: DashboardFilters,
 ): FilteredCte {
-  const scope = scopedProjectIdsSql(user);
+  const scope = scopedProjectIdsSql(user, 'p.id');
   const params: unknown[] = [...scope.params];
   const clauses: string[] = [];
 
   if (scope.sql) {
-    // scopedProjectIdsSql returns "AND project_id IN (...)" for use on fact
-    // tables. Here we query the projects table directly (p.id), so rewrite.
-    clauses.push(scope.sql.replace('project_id', 'p.id'));
+    clauses.push(scope.sql);
   }
 
   if (filters.departmentId) {

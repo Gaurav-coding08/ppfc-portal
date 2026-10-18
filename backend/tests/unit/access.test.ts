@@ -175,6 +175,13 @@ describe('scopedProjectIdsSql', () => {
     expect(result.sql).toContain('project_id IN');
     expect(result.params).toEqual([member.user.id]);
   });
+
+  it('accepts a custom column name for the projects table', () => {
+    const result = scopedProjectIdsSql(toAuthUser(member.user), 'p.id');
+    expect(result.sql).toContain('p.id IN');
+    expect(result.sql).not.toContain('project_id IN');
+    expect(result.params).toEqual([member.user.id]);
+  });
 });
 
 describe('assertNotSelf', () => {

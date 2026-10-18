@@ -81,16 +81,27 @@ export async function assertProjectAccess(
   }
 }
 
+const ALLOWED_SCOPE_COLUMNS = new Set(['project_id', 'p.id']);
+
 // Returns a SQL fragment + params for list/aggregate queries that must be
 // scoped to the caller's visible projects. Admin sees everything (no
 // restriction); others see only projects they own or are members of.
-export function scopedProjectIdsSql(user: AuthUser): { sql: string; params: unknown[] } {
+// `column` defaults to 'project_id' (fact tables); pass 'p.id' when
+// querying the projects table directly.
+export function scopedProjectIdsSql(
+  user: AuthUser,
+  column: 'project_id' | 'p.id' = 'project_id',
+): { sql: string; params: unknown[] } {
+  if (!ALLOWED_SCOPE_COLUMNS.has(column)) {
+    throw new Error(`scopedProjectIdsSql: invalid column "${column}"`);
+  }
+
   if (user.role === 'admin') {
     return { sql: '', params: [] };
   }
 
   return {
-    sql: `AND project_id IN (
+    sql: `AND ${column} IN (
       SELECT id FROM projects WHERE owner_id = $1
       UNION
       SELECT project_id FROM project_members WHERE user_id = $1

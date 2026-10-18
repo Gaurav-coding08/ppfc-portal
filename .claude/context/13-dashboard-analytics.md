@@ -38,6 +38,7 @@ No new tables, migrations, views or functions. Uses existing: `projects`, `tasks
 
 ## Reusable pieces (use these, don't rebuild)
 - `dashboardFiltersSchema` — zod schema for the shared filter contract, reuse on any new dashboard endpoint
+- `scopedProjectIdsSql(user, column?)` — now accepts optional `'p.id'` column for queries on the projects table directly (default `'project_id'` for fact tables)
 - `buildFilteredProjectsCte(user, filters)` → `{ sql, params, asOf }` — the filtered_projects CTE builder, start every dashboard query from this
 - `classifyFilters(filters, isFinanceEndpoint)` → `{ applied, ignored }` — consistent applied/ignored filter metadata
 - `withDashboardTx(fn)` — wraps any dashboard query in a transaction with 5s statement timeout
@@ -45,7 +46,7 @@ No new tables, migrations, views or functions. Uses existing: `projects`, `tasks
 
 ## Decisions & trade-offs
 - **Single KPI query** — all 16 KPIs computed in one SQL statement with 7 CTEs (proj, prog, task_stats, ms, risk_stats, cr_stats, fin) cross-joined. Avoids 16 round trips; the 5s timeout guards against runaway queries.
-- **`scopedProjectIdsSql` column rewrite** — the shared helper returns `AND project_id IN (...)` designed for fact tables, but the filtered_projects CTE queries `projects p` where the PK is `p.id`. The CTE builder does `.replace('project_id', 'p.id')` with a comment explaining why. This avoids changing the shared helper that all other modules use.
+- **`scopedProjectIdsSql` column parameter** — the shared helper defaults to `AND project_id IN (...)` for fact tables, but accepts an optional `column` argument (typed as `'project_id' | 'p.id'`, validated against an allowlist). The CTE builder passes `'p.id'` directly since it queries `projects p` where the PK is `p.id`.
 - **Drill params only pushed when referenced** — `drillTasks` only pushes `asOf` into the SQL params array when `kind=overdue` actually needs it. PostgreSQL rejects unreferenced positional parameters, so pushing it unconditionally caused 500s on `kind=all` and `kind=blocked`. Matches the pattern used by `drillRisks` and `drillChangeRequests`.
 - **No pagination on KPIs/visuals** — KPIs return a fixed set of 16 rows; visual endpoints return bounded result sets (one row per project, category or month). Only drill-down endpoints are paginated.
 - **categoryId applied/ignored** — finance endpoints (monthly-spend, spend-by-category, drill/costs, budget-vs-actual, kpis) honour categoryId in their SQL. Delivery endpoints (project-health, overdue-by-owner, risk-matrix, milestones, drill/tasks, drill/risks, drill/change-requests) report it in `meta.ignoredFilters`.
