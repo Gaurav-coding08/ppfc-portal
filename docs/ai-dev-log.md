@@ -342,3 +342,11 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   - The first issue was the test's date, not the code: a revision effective 2026-10-01 is correctly excluded at the 2026-09-30 cutoff. Kept the rule (revisions count from their effective date); it's my design choice, since the assignment only says "approved revisions".
   - Posting a cost and its audit row commit in one transaction; a repeated post with the
     same Idempotency-Key writes one audit row.
+
+### 12 Finance: forecasts, summaries, alerts & comparison — 2026-10-18
+- **Goal:** Forecast capture (upsert monthly forecasts), per-project financial summary (budget, actual, remaining, utilization, FTC, EAC, variance), spend by category, monthly trend, budget-overrun alerts, and project comparison — all from the SQL functions built in feature 02.
+- **Prompt/approach:** /run-feature 12 with feature spec + CLAUDE.md
+- **First output issue:** None found — all 277 tests passed on first run after fixing one lint warning (unused `categoryId` variable in the overrun-alert test).
+- **Refinement:** Removed unused variable declaration from the test. No code changes needed.
+- **Verification:** `npm run typecheck && npm run lint && npm test` — 277 tests pass (13 new). Summary-equals-independent-SQL test verifies budget/actual/FTC/EAC against raw queries that don't use `fn_project_financials`. asOf cutoff test confirms post-cutoff cost excluded at default 2026-09-30 but included at 2026-10-31. Forecast PUT past-month → 422, contributor → 403, upsert replaces value. Monthly trend actual sums equal summary actual spend (no fan-out). Comparison drops non-visible projects for contributor.
+- **Human review:** TODO (owner)

@@ -57,3 +57,8 @@ Base path: `/api/v1`. See `CLAUDE.md` for response shape, status code and error 
 | DELETE | /api/v1/costs/:id | manage access | Drafts only (posted → 422). 204. Audited `cost.delete`. |
 | POST | /api/v1/costs/:id/post | manage access | **Idempotent** (`Idempotency-Key`). Draft → posted. Sets `posted_by`/`posted_at`. Transaction: update + audit `cost.post`. Returns cost + refreshed `{ actualSpend, remainingBudget, utilization, currency }` from `fn_project_financials`. |
 | POST | /api/v1/costs/:id/reverse | manage access | Posted expense only, not already reversed (422). `{ reason, txnDate? }`. Creates a **posted** `reversal` row with `reverses_id`. Transaction + audit `cost.reverse`. |
+| GET | /api/v1/projects/:projectId/forecasts | view access | `?asOf`. Monthly forecast rows + `forecastToComplete` at asOf. |
+| PUT | /api/v1/projects/:projectId/forecasts | manage access | `{ months: [{ month: 'YYYY-MM', amount ≥ 0 }] }`. Upsert by (project, month) in one tx. Months must be after asOf month and ≤ project end month (422). Audited `forecast.upsert`. |
+| GET | /api/v1/projects/:projectId/financial-summary | view access | `?asOf`. Full `fn_project_financials` row + `spendByCategory[]` + `monthlyTrend[]` (month, actual, forecast) + `alerts[]`. |
+| GET | /api/v1/finance/alerts | any (scoped) | `?asOf&departmentId`. One row per triggered alert: `OVERRUN_FORECAST`, `NEAR_BUDGET`, `OVERSPENT`, `FORECAST_MISSING`. Severity + amounts. |
+| GET | /api/v1/finance/comparison | any (scoped) | `?projectIds=1,2,3&asOf` (max 10). Non-visible projects dropped to `excluded`. Side-by-side financial rows. |

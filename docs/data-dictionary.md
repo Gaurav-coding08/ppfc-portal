@@ -432,6 +432,38 @@ row — and its generated `score` — exists, e.g. the create-time mitigation-re
 ### v_project_progress (view)
 `SELECT * FROM fn_project_progress()` — for Power BI / Access.
 
+### v_spend_by_category (view)
+Posted cost totals grouped by project and category (reversals subtract), at `fn_reporting_date()`.
+
+### v_monthly_spend (view)
+Posted cost totals grouped by project and month (reversals subtract), at `fn_reporting_date()`.
+
+---
+
+## Financial definitions
+
+All money is `NUMERIC(14,2)` in the database. Money is summed and computed in SQL; the API returns it as a JS number rounded to 2 dp with `currency: "AED"`.
+
+| Term | Definition |
+|---|---|
+| Current approved budget | `initial_amount` (from `project_budgets`) + Σ `amount` of **approved** `budget_revisions` where `effective_date ≤ asOf`. Pending/rejected revisions have no effect. |
+| Actual spend | Σ posted `cost_transactions` where `txn_date ≤ asOf`. Expenses add, reversals subtract. Drafts excluded. |
+| Remaining budget | Current budget − actual spend. |
+| Utilization | Actual spend / NULLIF(current budget, 0) → `null` when budget is 0. |
+| Forecast-to-complete (FTC) | Σ `financial_forecasts.amount` for months **strictly after** the asOf month. |
+| Estimate at completion (EAC) | Actual spend + FTC. |
+| Projected variance | Current budget − EAC. Negative = overrun. |
+| Forecast missing | `true` when a project has no forecast rows at all. In this case FTC = 0, EAC = actual spend. |
+
+### Alert thresholds
+
+| Alert type | Condition | Severity |
+|---|---|---|
+| `OVERRUN_FORECAST` | EAC > current budget | critical |
+| `OVERSPENT` | Actual spend > current budget | critical |
+| `NEAR_BUDGET` | Utilization ≥ 90% and not overrun | warning |
+| `FORECAST_MISSING` | Active project with no forecast rows | info |
+
 ---
 
 ## Data generation (feature 03)
