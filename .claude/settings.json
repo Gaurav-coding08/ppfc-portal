@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)", "Bash(npm run:*)", "Bash(npm test:*)", "Bash(npx tsc:*)", "Bash(npx vitest:*)",
+      "Bash(docker compose:*)", "Bash(psql:*)",
+      "Bash(git status:*)", "Bash(git diff:*)", "Bash(git add:*)", "Bash(git commit:*)", "Bash(git log:*)"
+    ],
+    "deny": ["Bash(git push:*)", "Read(./backend/.env)"]
+  }
+}
