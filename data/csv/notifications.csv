@@ -1,0 +1,6 @@
+id,user_id,title,body,link,outbox_id,read_at,created_at
+1,6,Task overdue: PRJ-001 task 1,"PRJ-001: due 2026-02-12, 201 day(s) overdue",/projects/1/tasks/1,1,2026-09-02T09:00:00Z,2026-09-01T06:00:38Z
+2,2,Task overdue: PRJ-001 task 1,"PRJ-001: due 2026-02-12, 201 day(s) overdue",/projects/1/tasks/1,1,,2026-09-01T06:00:38Z
+3,7,Task overdue: PRJ-001 task 2,"PRJ-001: due 2026-03-21, 164 day(s) overdue",/projects/1/tasks/2,2,,2026-09-01T06:00:38Z
+4,2,Task overdue: PRJ-001 task 2,"PRJ-001: due 2026-03-21, 164 day(s) overdue",/projects/1/tasks/2,2,,2026-09-01T06:00:38Z
+5,6,Change request approved: CR-001,Approved: Approved — within agreed scope.,/projects/1/change-requests/1,4,2026-06-02T08:00:00Z,2026-06-01T00:00:05Z

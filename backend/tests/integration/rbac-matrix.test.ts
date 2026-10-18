@@ -61,6 +61,12 @@ describe('rbac-matrix: contributor is blocked from mutation routes', () => {
     ['create user', 'POST', '/api/v1/admin/users', { email: 'x@x.com', fullName: 'X', role: 'contributor', departmentId: 1, password: 'Demo@1234' }, 403],
     ['update user', 'PATCH', '/api/v1/admin/users/1', { fullName: 'X', version: 1 }, 403],
     ['view audit events', 'GET', '/api/v1/admin/audit-events', null, 403],
+
+    // Automation (admin only)
+    ['run overdue escalation', 'POST', '/api/v1/admin/automation/overdue-escalation/run', null, 403],
+    ['list automation runs', 'GET', '/api/v1/admin/automation/runs', null, 403],
+    ['list outbox', 'GET', '/api/v1/admin/automation/outbox', null, 403],
+    ['retry outbox event', 'POST', '/api/v1/admin/automation/outbox/1/retry', null, 403],
   ];
 
   it.each(

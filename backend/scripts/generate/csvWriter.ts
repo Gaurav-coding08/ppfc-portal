@@ -58,6 +58,13 @@ const COLUMNS: Record<keyof Dataset, string[]> = {
   automation_runs: [
     'id', 'job_name', 'started_at', 'finished_at', 'status', 'items_found', 'items_created', 'error',
   ],
+  outbox: [
+    'id', 'event_type', 'entity_type', 'entity_id', 'event_date', 'payload', 'status',
+    'attempts', 'last_error', 'created_at', 'processed_at',
+  ],
+  notifications: [
+    'id', 'user_id', 'title', 'body', 'link', 'outbox_id', 'read_at', 'created_at',
+  ],
 };
 
 // Table order matters for import (FK dependency order); CSV filenames don't
@@ -81,6 +88,8 @@ export const TABLE_ORDER: (keyof Dataset)[] = [
   'change_history',
   'audit_events',
   'automation_runs',
+  'outbox',
+  'notifications',
 ];
 
 function formatValue(value: unknown): string {

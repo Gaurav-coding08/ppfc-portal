@@ -27,8 +27,30 @@ services:
         condition: service_healthy
     env_file:
       - ./backend/.env
+    # backend/.env's DATABASE_URL points at localhost:5433 (correct for
+    # `npm run dev` on the host, where Postgres is published on that
+    # port). Inside the compose network, Postgres is reachable by its
+    # service name on the default port instead — override just this var.
+    environment:
+      DATABASE_URL: postgres://ppfc:ppfc_dev_pw@db:5432/ppfc
     ports:
       - "4000:4000"
+
+  # Same image as `api`, running the automation scheduler instead of the
+  # HTTP server (feature 15) — overdue-escalation producer + outbox
+  # dispatcher on AUTOMATION_CRON.
+  worker:
+    profiles: ["app"]
+    build:
+      context: ./backend
+    command: node dist/worker.js
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgres://ppfc:ppfc_dev_pw@db:5432/ppfc
 
 volumes:
   ppfc_pg_data:

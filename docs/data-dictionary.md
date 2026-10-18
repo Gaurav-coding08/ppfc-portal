@@ -362,10 +362,12 @@ Transactional outbox for async event dispatch.
 | status | TEXT | no | `pending`, `sent`, `failed` |
 | attempts | INT | no | Default 0 |
 | last_error | TEXT | yes | |
+| next_attempt_at | TIMESTAMPTZ | no | Default `now()`. Dispatcher only claims `pending` rows where this is `<= now()` (migration 015, feature 15) |
 | created_at | TIMESTAMPTZ | no | |
 | processed_at | TIMESTAMPTZ | yes | |
 
-UNIQUE on (event_type, entity_id, event_date).
+UNIQUE on (event_type, entity_id, event_date) — makes the producer idempotent (re-running it the same day queues nothing new for a task/CR it already queued).
+Partial index on (status, next_attempt_at) WHERE status = 'pending' — the dispatcher's claim query.
 
 ---
 
@@ -400,6 +402,8 @@ User-facing notifications (optionally linked to outbox events).
 | outbox_id | BIGINT FK outbox | yes | |
 | read_at | TIMESTAMPTZ | yes | null = unread |
 | created_at | TIMESTAMPTZ | no | |
+
+UNIQUE on (outbox_id, user_id) (migration 015, feature 15) — defence in depth: even if the dispatcher's own `ON CONFLICT DO NOTHING` logic were bypassed, the DB itself refuses a second notification for the same recipient on the same event.
 
 ---
 

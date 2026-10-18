@@ -1,0 +1,5 @@
+id,event_type,entity_type,entity_id,event_date,payload,status,attempts,last_error,created_at,processed_at
+1,TASK_OVERDUE,task,1,2026-09-01,"{""taskId"":1,""projectId"":1,""projectCode"":""PRJ-001"",""title"":""PRJ-001 task 1"",""dueDate"":""2026-02-12"",""daysOverdue"":201,""assigneeId"":6,""managerId"":2}",sent,0,,2026-09-01T06:00:01Z,2026-09-01T06:00:38Z
+2,TASK_OVERDUE,task,2,2026-09-01,"{""taskId"":2,""projectId"":1,""projectCode"":""PRJ-001"",""title"":""PRJ-001 task 2"",""dueDate"":""2026-03-21"",""daysOverdue"":164,""assigneeId"":7,""managerId"":2}",sent,0,,2026-09-01T06:00:01Z,2026-09-01T06:00:38Z
+3,TASK_OVERDUE,task,6,2026-09-01,"{""taskId"":6,""projectId"":1,""projectCode"":""PRJ-001"",""title"":""PRJ-001 task 6"",""dueDate"":""2026-08-18"",""daysOverdue"":14,""assigneeId"":7,""managerId"":2}",failed,3,simulated delivery failure (seed data),2026-09-01T06:00:01Z,
+4,CR_APPROVED,change_request,1,2026-06-01,"{""crId"":1,""code"":""CR-001"",""projectId"":1,""requesterId"":6,""decidedBy"":2,""reason"":""Approved — within agreed scope.""}",sent,0,,2026-06-01T00:00:01Z,2026-06-01T00:00:05Z

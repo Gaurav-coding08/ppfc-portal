@@ -74,6 +74,12 @@ const SORT_COLUMNS: Record<ProjectTasksQuery['sort'], string> = {
   title: 't.title',
 };
 
+// The one place the "overdue" rule is expressed as SQL — every consumer
+// (this file's columns/filter below, and the automation producer in
+// modules/automation/) interpolates this instead of re-deriving it.
+// Assumes the asOf date is bound as the query's parameter `$1`.
+export const OVERDUE_CONDITION_SQL = `t.status <> 'done' AND t.due_date < $1::date`;
+
 // Column list only (no FROM) so a caller can append `, count(*) OVER() AS
 // total_count` to the same SELECT before adding its own FROM/WHERE —
 // appending it after TASK_FROM would land it outside the SELECT list.
@@ -82,7 +88,7 @@ const TASK_COLUMNS = `
   u.full_name AS assignee_name,
   t.status, t.priority, t.start_date, t.due_date, t.weight, t.progress,
   t.completed_at, t.version,
-  (t.status <> 'done' AND t.due_date < $1::date) AS is_overdue,
+  (${OVERDUE_CONDITION_SQL}) AS is_overdue,
   (t.status <> 'done' AND t.due_date >= $1::date AND t.due_date <= ($1::date + 7)) AS is_due_soon
 `;
 
@@ -119,7 +125,7 @@ function buildCommonConditions(filters: CommonFilters, params: unknown[]): strin
     conditions.push(`t.priority = $${params.length}`);
   }
   if (filters.overdue) {
-    conditions.push(`t.status <> 'done' AND t.due_date < $1::date`);
+    conditions.push(OVERDUE_CONDITION_SQL);
   }
   if (filters.dueFrom) {
     params.push(filters.dueFrom);

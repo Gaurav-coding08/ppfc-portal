@@ -36,6 +36,8 @@ describe('Seed data row-count minimums', () => {
     ['cost_transactions', 80],
     ['progress_snapshots', 1],
     ['automation_runs', 5],
+    ['outbox', 4],
+    ['notifications', 5],
     ['audit_events', 1],
   ])('%s has at least %i rows', async (table, minimum) => {
     const n = await count(`SELECT count(*) FROM ${table}`);

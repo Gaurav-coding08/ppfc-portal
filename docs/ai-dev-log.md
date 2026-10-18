@@ -432,3 +432,58 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
 - **Verification:** `npm run typecheck && npm run lint` clean; `npm test` 423/423 pass (29
   files, up from 417 — added the auth-gate 401/404/public-route tests and the live-vs-inventory
   diff tests); `npm run routes:check` still reports 71/71 matching.
+
+### 15 Automation: overdue escalation + CR-approved notifications — 2026-10-18
+- **Goal:** A transactional-outbox automation with a real scheduled trigger (overdue task
+  escalation) plus a transactional trigger (CR approval, resolving feature 10's TODO), a
+  shared dispatcher with retry/backoff, and admin + notifications HTTP endpoints — feature
+  file 15.
+- **Prompt/approach:** `/run-feature 15` with the feature spec + CLAUDE.md + context files
+  from features 05, 08, 10, 14.
+- **First output issue:** `node-cron` wasn't in CLAUDE.md's stack table or `package.json`.
+  Asked the user before adding it (CLAUDE.md requires this for any new dependency); approved.
+- **Refinement (real bugs found during verification, not anticipated in the plan):**
+  1. `markOutboxRetryOrFailed`'s backoff UPDATE reused the same bound parameter (`$1`) as both
+     an `int` column assignment and a `power()` exponent without matching casts — Postgres
+     raised "inconsistent types deduced for parameter $1" the first time a dispatcher test
+     actually hit the failure path. Fixed with explicit `::int` casts at both occurrences.
+  2. The dispatcher integration tests initially failed with "0 notifications created" / status
+     staying `pending` — traced to stale `data/csv/outbox.csv`: the seed generator's `outbox`
+     event id 3 had been written as `status: 'pending'` before a later edit changed it to
+     `'failed'` (so a pending seed row wouldn't be claimed the instant any test called
+     `dispatchPending()`), but the CSVs were regenerated and imported *before* that edit.
+     Re-ran `npm run data:generate && npm run db:import:test` after the edit.
+  3. The CR-approved rollback test failed with "No suitable submitted CR found" — the first
+     three tests in that file each approved/rejected/returned the *same* fixture project's
+     one submitted CR (via the shared `asProjectManager()` helper), leaving none for the
+     fourth. Rewrote the helper to pick a distinct, not-yet-used submitted CR per test
+     (tracking used ids) and log in as that CR's own project owner instead of reusing one
+     fixture.
+  4. A `let claimed: ClaimedOutboxEvent | null = null` reassigned inside a `withTx` callback
+     and read in the `catch` block type-narrowed to `never` under this repo's strict
+     TypeScript config — control-flow narrowing doesn't survive the closure boundary cleanly
+     here. Replaced the mutated-outer-variable pattern with a typed `DeliveryFailure` error
+     that carries the claimed event out of the rolled-back transaction.
+  5. While extending the seed generator for `outbox`/`notifications`, found a *pre-existing*
+     bug in `scripts/generate/importAll.ts`: `DATA_TABLES` and `SEQUENCE_TABLES` already
+     listed `outbox`/`notifications` (apparently added speculatively in feature 03) but
+     `IMPORT_ORDER` didn't — every import was truncating those tables and never reloading
+     them. Only surfaced now because this is the first feature to actually populate CSVs for
+     them. Fixed by adding both to `IMPORT_ORDER`.
+  6. The Acceptance section's `docker compose --profile app up -d --build` step revealed that
+     `api`'s own container health check had silently never worked: `backend/.env`'s
+     `DATABASE_URL` (`localhost:5433`, correct for `npm run dev` on the host) isn't reachable
+     from inside the compose network, where Postgres is the `db` service on its default port.
+     This pre-dates feature 15 (feature 14's dev log already flagged the compose step as
+     "manual," i.e. never actually verified past "it starts") but blocked this feature's own
+     acceptance step, so fixed it: both `api` and `worker` now override `DATABASE_URL` in
+     `docker-compose.yml` to the in-network host.
+- **Verification:** `npm run typecheck && npm run lint && npm test` — 453/453 pass (33 files,
+  up from 433 — 20 new tests: 4 producer, 5 dispatcher, 4 CR-approved, 5 notifications, 2 seed
+  row-count minimums). `npm run routes:check` — 77/77 matching. `npm run automation:run` run
+  twice: `itemsCreated: 42` then `itemsCreated: 0` (idempotency evidence, captured in
+  `docs/automation.md`). `docker compose --profile app up -d --build` — API health returns
+  `db: "up"`; worker log confirmed a `trigger: "schedule"` run firing on its cron tick
+  (temporarily set to `* * * * *` to observe within the session; reverted to the `*/5 * * * *`
+  default in committed config).
+- **Human review:** TODO (owner)

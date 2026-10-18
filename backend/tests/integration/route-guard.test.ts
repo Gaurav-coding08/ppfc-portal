@@ -121,6 +121,16 @@ const ALL_ROUTES: { method: string; path: string; public?: boolean }[] = [
   { method: 'GET', path: '/api/v1/dashboard/drill/risks' },
   { method: 'GET', path: '/api/v1/dashboard/drill/change-requests' },
   { method: 'GET', path: '/api/v1/dashboard/filters' },
+
+  // Automation (admin)
+  { method: 'POST', path: '/api/v1/admin/automation/overdue-escalation/run' },
+  { method: 'GET', path: '/api/v1/admin/automation/runs' },
+  { method: 'GET', path: '/api/v1/admin/automation/outbox' },
+  { method: 'POST', path: '/api/v1/admin/automation/outbox/1/retry' },
+
+  // Notifications
+  { method: 'GET', path: '/api/v1/notifications' },
+  { method: 'PATCH', path: '/api/v1/notifications/1/read' },
 ];
 
 describe('route-guard: every route except public ones returns 401 without a token', () => {

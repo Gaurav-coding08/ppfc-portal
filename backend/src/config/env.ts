@@ -21,6 +21,14 @@ const envSchema = z.object({
 
   REPORTING_DATE: z.string().default('2026-09-30'),
   LOG_LEVEL: z.string().default('info'),
+
+  // Automation (feature 15): worker.ts schedule and retry policy.
+  AUTOMATION_CRON: z.string().default('*/5 * * * *'),
+  AUTOMATION_MAX_ATTEMPTS: z.coerce.number().int().positive().default(3),
+  AUTOMATION_ENABLED: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((v) => v === 'true'),
 });
 
 function loadEnv() {

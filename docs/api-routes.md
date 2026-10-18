@@ -75,3 +75,9 @@ Base path: `/api/v1`. See `CLAUDE.md` for response shape, status code and error 
 | GET | /api/v1/dashboard/drill/risks | any (scoped) | `?kind=high-exposure\|cell\|all&probability&impact&page&pageSize`. Open risks, paginated. |
 | GET | /api/v1/dashboard/drill/change-requests | any (scoped) | `?from&to&page&pageSize`. Pending CRs, paginated. |
 | GET | /api/v1/dashboard/filters | any (scoped) | Option lists: departments, projects, managers, statuses, categories — scoped to caller. |
+| POST | /api/v1/admin/automation/overdue-escalation/run | admin | Manual trigger: producer pass (finds overdue tasks, queues `TASK_OVERDUE` outbox events) + dispatcher pass in the same call. Returns `{ run, dispatch }`. Idempotent by design — a second call the same day queues 0 new events. Audited `automation.overdue_escalation.run`. |
+| GET | /api/v1/admin/automation/runs | admin | `?status&jobName&page&pageSize`. Newest first. |
+| GET | /api/v1/admin/automation/outbox | admin | `?status&eventType&page&pageSize`. Newest first. |
+| POST | /api/v1/admin/automation/outbox/:id/retry | admin | Only from `failed` → `pending`, `attempts=0`. Otherwise 422 `INVALID_TRANSITION` (CLAUDE.md maps this code to 422; see feature 10's same precedent). Audited `outbox.retry`. |
+| GET | /api/v1/notifications | any | `?unread=true&page&pageSize`. Caller's own rows only. Response includes `unreadCount`. |
+| PATCH | /api/v1/notifications/:id/read | any | Own only — another user's notification id → 404. Idempotent (already-read → 200 unchanged). |

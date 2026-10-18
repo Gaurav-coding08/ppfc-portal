@@ -48,11 +48,16 @@ and adjust as needed:
 | `COOKIE_SECURE` | `false` | Set `true` in production (HTTPS only) |
 | `REPORTING_DATE` | `2026-09-30` | Default asOf date for financial queries |
 | `LOG_LEVEL` | `info` | pino log level |
+| `AUTOMATION_CRON` | `*/5 * * * *` | Schedule for `npm run worker`'s overdue-escalation + dispatcher pass |
+| `AUTOMATION_MAX_ATTEMPTS` | `3` | Outbox delivery attempts before an event is marked `failed` |
+| `AUTOMATION_ENABLED` | `true` | Set `false` to start the worker process without scheduling anything |
 
 ## Available commands (run from `backend/`)
 
 ```bash
 npm run dev                    # Start dev server (tsx watch)
+npm run worker                 # Start the automation scheduler (tsx watch) — see docs/automation.md
+npm run automation:run         # One producer + dispatcher pass, prints the run summary
 npm run build                  # Compile TypeScript → dist/
 npm run start                  # Run compiled JS (production)
 npm run typecheck              # tsc --noEmit
@@ -105,7 +110,7 @@ deployment would use the current date or accept `?asOf=` on API calls.
 ```
 ppfc-portal/
 ├── CLAUDE.md                  # Engineering spec and conventions
-├── docker-compose.yml         # PostgreSQL + optional API container
+├── docker-compose.yml         # PostgreSQL + optional API/worker containers
 ├── docker/postgres/init.sql   # Creates ppfc_test DB + ppfc_reader role
 ├── data/csv/                  # Generated seed CSVs (committed)
 ├── docs/
@@ -118,20 +123,22 @@ ppfc-portal/
 │   ├── data-dictionary.md     # Schema, edge cases, seed data
 │   ├── demo-accounts.md       # Seeded user accounts
 │   ├── kpi-definitions.md     # Dashboard KPI definitions
+│   ├── automation.md          # Outbox/dispatcher: trigger, rules, retry, demo evidence
 │   └── ai-dev-log.md          # Build log
 ├── backend/
 │   ├── db/migrations/         # Forward-only numbered SQL migrations
-│   ├── scripts/               # migrate, generate-data, import-csv, routes-check
+│   ├── scripts/               # migrate, generate-data, import-csv, routes-check, automation-run
 │   ├── src/
 │   │   ├── app.ts             # buildApp() — no listen(); used by tests
-│   │   ├── server.ts          # listen()
+│   │   ├── server.ts          # listen() — the HTTP API
+│   │   ├── worker.ts          # Automation scheduler entrypoint (node-cron)
 │   │   ├── config/env.ts      # Validated environment
 │   │   ├── db/                # pool.ts, tx.ts
-│   │   ├── lib/               # errors, logger, audit, pagination, money, dates, access
+│   │   ├── lib/                # errors, logger, audit, pagination, money, dates, access
 │   │   ├── middleware/        # requestId, authenticate, authorize, validate, idempotency, rateLimit, errorHandler
 │   │   └── modules/           # auth, admin, users, projects, tasks, milestones, risks,
 │   │                          # change-requests, finance (budgets, costs, categories,
-│   │                          # forecasts, summary), dashboard
+│   │                          # forecasts, summary), dashboard, automation, notifications
 │   └── tests/
 │       ├── helpers/           # api(), loginAs(), resetDb(), routeExtractor
 │       └── integration/       # Feature tests, route-guard, rbac-matrix, id-escalation,
@@ -144,6 +151,7 @@ ppfc-portal/
 - **Route table**: [docs/api-routes.md](docs/api-routes.md)
 - **OpenAPI spec**: [docs/openapi.yaml](docs/openapi.yaml)
 - **Postman collection**: [docs/api-collection.json](docs/api-collection.json)
+- **Automation (feature 15)**: [docs/automation.md](docs/automation.md)
 
 Base path: `/api/v1`. All responses follow the conventions in CLAUDE.md.
 
@@ -188,11 +196,18 @@ npm run db:import:test
 
 Make sure `backend/.env` exists and has `DATABASE_URL_TEST`. Copy from `.env.example`.
 
-### Docker container for the API
+### Docker containers for the API and worker
 
 ```bash
 docker compose --profile app up -d --build
 curl -i localhost:4000/api/v1/health
+docker logs <worker-container-name>   # confirms the scheduled automation pass
 ```
 
-This builds the backend Dockerfile and runs the API container alongside the DB.
+This builds the backend Dockerfile once and runs it as two containers: `api`
+(the HTTP server) and `worker` (the automation scheduler, `node dist/worker.js`
+— see [docs/automation.md](docs/automation.md)). Both override `DATABASE_URL`
+in `docker-compose.yml` to point at the `db` service's internal hostname —
+`backend/.env`'s own `DATABASE_URL` is for the host (`npm run dev`), where
+Postgres is published on `localhost:5433`, which isn't reachable from inside
+the compose network.

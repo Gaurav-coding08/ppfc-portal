@@ -200,6 +200,31 @@ export interface AutomationRunRow {
   error: string | null;
 }
 
+export interface OutboxRow {
+  id: number;
+  event_type: string;
+  entity_type: string;
+  entity_id: number;
+  event_date: string | null;
+  payload: string;
+  status: 'pending' | 'sent' | 'failed';
+  attempts: number;
+  last_error: string | null;
+  created_at: string;
+  processed_at: string | null;
+}
+
+export interface NotificationRow {
+  id: number;
+  user_id: number;
+  title: string;
+  body: string | null;
+  link: string | null;
+  outbox_id: number | null;
+  read_at: string | null;
+  created_at: string;
+}
+
 export interface Dataset {
   departments: DepartmentRow[];
   users: UserRow[];
@@ -218,4 +243,6 @@ export interface Dataset {
   change_history: ChangeHistoryRow[];
   audit_events: AuditEventRow[];
   automation_runs: AutomationRunRow[];
+  outbox: OutboxRow[];
+  notifications: NotificationRow[];
 }

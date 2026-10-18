@@ -1,6 +1,7 @@
 import { withTx } from '../../db/tx.js';
 import { assertProjectAccess } from '../../lib/access.js';
 import { writeAudit } from '../../lib/audit.js';
+import { insertCrApprovedOutbox } from '../automation/automation.mutations.repository.js';
 import {
   forbidden,
   invalidTransition,
@@ -89,7 +90,26 @@ export async function decideCr(
       requestId,
     });
 
-    // TODO: outbox insert for approved-change notification (automation phase)
+    // Approval-only: an outbox event in the SAME transaction as the
+    // decision, so a requester is notified if and only if the approval
+    // itself committed (feature 15). Reject/return write nothing — per
+    // CLAUDE.md, approved CRs never auto-create anything else, but a
+    // notification about the decision is not a budget/cost side effect.
+    // If this insert throws, the whole decision (status + history + audit)
+    // rolls back with it, since withTx wraps all of it in one transaction.
+    if (body.decision === 'approve') {
+      await insertCrApprovedOutbox(
+        {
+          crId: id,
+          code: cr!.code,
+          projectId: raw.project_id,
+          requesterId: raw.requested_by,
+          decidedBy: caller.id,
+          reason: body.reason ?? null,
+        },
+        client,
+      );
+    }
 
     const history = await crRepo.findCrHistory(id, client);
     return { cr: cr!, history };

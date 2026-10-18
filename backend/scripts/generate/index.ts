@@ -11,7 +11,7 @@ import { buildCostTransactions } from './costs.js';
 import { buildFinancialForecasts } from './forecasts.js';
 import { buildChangeRequests, buildChangeHistory } from './governance.js';
 import { buildAuditEvents } from './audit.js';
-import { buildAutomationRuns } from './automation.js';
+import { buildAutomationRuns, buildOutboxEvents, buildNotifications } from './automation.js';
 import type { Dataset } from './types.js';
 
 // Re-seeds faker on every call so this is safe to call twice in the same
@@ -38,6 +38,8 @@ export function buildDataset(): Dataset {
   const change_history = buildChangeHistory(change_requests);
   const audit_events = buildAuditEvents(change_requests, cost_transactions);
   const automation_runs = buildAutomationRuns();
+  const outbox = buildOutboxEvents();
+  const notifications = buildNotifications();
 
   return {
     departments,
@@ -57,5 +59,7 @@ export function buildDataset(): Dataset {
     change_history,
     audit_events,
     automation_runs,
+    outbox,
+    notifications,
   };
 }

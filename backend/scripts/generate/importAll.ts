@@ -25,6 +25,7 @@ const IMPORT_ORDER = [
   'project_budgets', 'budget_revisions', 'tasks', 'milestones', 'risks',
   'cost_transactions', 'financial_forecasts', 'progress_snapshots',
   'change_requests', 'change_history', 'audit_events', 'automation_runs',
+  'outbox', 'notifications',
 ];
 
 const SEQUENCE_TABLES = [
