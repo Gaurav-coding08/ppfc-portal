@@ -1,4 +1,4 @@
-# PPFC Portal — Project Portfolio & Financial Control Portal
+# Keel — Portfolio & Financial Control
 
 Internal PMO application for managing projects, tasks, milestones, risks, change-request
 approvals, project finance (budgets, costs, forecasts, EAC) and an executive analytics

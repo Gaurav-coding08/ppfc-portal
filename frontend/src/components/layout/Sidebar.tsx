@@ -12,6 +12,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/auth/useAuth';
+import { KeelLogo } from '@/components/display/KeelLogo';
 import { NAV_GROUPS } from './nav';
 
 export function AppSidebar() {
@@ -23,9 +24,12 @@ export function AppSidebar() {
   return (
     <SidebarRoot collapsible="icon">
       <SidebarHeader className="px-3 py-3">
-        <span className="text-sm font-semibold tracking-tight group-data-[collapsible=icon]:hidden">
-          PPFC Portal
-        </span>
+        <div className="flex items-center gap-2">
+          <KeelLogo className="text-primary size-6 shrink-0" />
+          <span className="text-sm font-semibold tracking-tight group-data-[collapsible=icon]:hidden">
+            Keel
+          </span>
+        </div>
       </SidebarHeader>
       <SidebarContent>
         {NAV_GROUPS.filter((group) => group.visible?.(user) ?? true).map((group) => (

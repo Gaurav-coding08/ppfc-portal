@@ -705,3 +705,17 @@ build` — 14/14 tests pass, clean typecheck/lint, build succeeds (710 KB main c
   - Fresh (non-reused) logins verified through nginx.
   - The app-profile containers were stopped afterwards; `db` was left running.
 - **Human review:** - **Human review:** Clicked through the Docker build on :8080. At phone width the sidebar opens as a drawer and filters sit behind a "Filters" button; at tablet width the KPI cards show full AED values now. Walked login → project → task edit with the keyboard only and focus stayed inside the sheet; Esc brought it back to the Edit button. Dashboard drill for Digital Platforms showed [N] records, and the actual-spend figure matched my DBeaver query. Run now gave a Manual row and the PM bell picked up the overdue notifications. Accepted the 768 px drawer breakpoint over the 1024 in CLAUDE.md. The shared login limit behind nginx is fine but needs `trust proxy` before any real deployment.
+
+---
+
+## Feature 19 — UI polish
+
+### 19A — Brand & shell
+- **What changed:** Rebranded from "PPFC Portal" to "Keel" (tagline: "Portfolio & financial control"). Created a keel/hull-line SVG logomark (`KeelLogo.tsx`) used in the sidebar and favicon. Redesigned the login page with a split layout: left panel shows brand, tagline, 3 value points and a static KPI illustration; right panel has the login form and demo accounts. Updated `index.html` title and `README.md` heading.
+- **Decisions:**
+  - The SVG uses `currentColor` so the same component works on the dark login panel (indigo-400) and the sidebar (primary).
+  - The KPI illustration on the login page is purely decorative (hardcoded sample numbers). It's not connected to the API — the login page has no auth context.
+  - Kept repo/package names unchanged per spec.
+- **Verification:**
+  - Frontend gate: typecheck pass, lint pass, 89/89 tests pass, build pass.
+  - Backend and E2E: Docker/Postgres not running in this session; no backend or SQL changes were made, so these are infrastructure-only skips.

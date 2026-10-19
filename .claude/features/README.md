@@ -21,3 +21,12 @@ Run one at a time with `/run-feature` (next pending) or `/run-feature 07` (speci
 | 13  | 13-dashboard-analytics           | KPIs, visuals data, cross-filters, drill-downs, integrity tests                                       | **Opus**                    |
 | 14  | 14-backend-hardening             | Route guard, RBAC matrix, OpenAPI, security/logging pass, README, E2E checklist                       | Sonnet                      |
 | 15  | 15-automation-overdue-escalation | Outbox producer + dispatcher, retries, worker, notifications API                                      | Sonnet                      |     |
+
+## Phase 2 — Frontend
+
+| #   | File                                   | Builds                                                                                                | Suggested model |
+| --- | -------------------------------------- | ----------------------------------------------------------------------------------------------------- | --------------- |
+| 16  | 16-frontend-m1-foundation-delivery     | SPA scaffold, auth, layout, projects, tasks, milestones                                               | Sonnet          |
+| 17  | 17-frontend-m2-governance-finance      | Change requests, finance (costs, budgets, forecasts, summary)                                         | Sonnet          |
+| 18  | 18-frontend-m3-dashboard-admin-quality | Dashboard, admin (users, audit, automation), notifications, E2E, responsive/a11y                      | Sonnet          |
+| 19  | 19-ui-polish                           | Rebrand to Keel, dashboard glance band, project overview, guided tour, CSV export, milestone roadmap  | **Opus**        |
