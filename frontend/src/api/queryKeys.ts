@@ -41,6 +41,20 @@ export const milestones = {
   projectList: (projectId: number) => [...milestones.all, 'project-list', projectId] as const,
 };
 
+export const risks = {
+  all: ['risks'] as const,
+  projectList: (projectId: number, filters: Record<string, unknown>) =>
+    [...risks.all, 'project-list', projectId, filters] as const,
+  list: (filters: Record<string, unknown>) => [...risks.all, 'list', filters] as const,
+  highExposure: (filters: Record<string, unknown>) => [...risks.all, 'high-exposure', filters] as const,
+};
+
+export const changeRequests = {
+  all: ['change-requests'] as const,
+  list: (filters: Record<string, unknown>) => [...changeRequests.all, 'list', filters] as const,
+  detail: (id: number) => [...changeRequests.all, 'detail', id] as const,
+};
+
 // Dashboard is out of scope for M1's UI, but Part A reads
 // `GET /dashboard/kpis` once for the topbar's "Data as of" badge, since no
 // M1 endpoint otherwise exposes the reporting date (feature spec Part A.5).

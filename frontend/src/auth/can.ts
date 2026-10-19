@@ -44,6 +44,24 @@ export function canViewAdminNav(user: AuthUser | null): boolean {
   return isAdmin(user);
 }
 
+/**
+ * Who may decide (approve/reject/return) a change request:
+ * - 'eligible': can manage the CR's project and didn't raise it
+ * - 'own': could manage the project, but raised this CR themselves — the
+ *   backend refuses self-approval (422 SELF_APPROVAL_FORBIDDEN), so the UI
+ *   shows the panel disabled with an explanation
+ * - 'none': can't decide on this project at all (contributors, PMs from
+ *   other projects) — no panel
+ */
+export function canDecideChangeRequest(
+  user: AuthUser | null,
+  memberships: Membership[],
+  cr: { projectId: number; requestedBy: number },
+): 'eligible' | 'own' | 'none' {
+  if (!canManageProject(user, memberships, cr.projectId)) return 'none';
+  return cr.requestedBy === user!.id ? 'own' : 'eligible';
+}
+
 /** A contributor may edit only their own assigned task's progress/status. */
 export function canEditOwnTaskOnly(
   user: AuthUser | null,

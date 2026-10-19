@@ -9,7 +9,11 @@ import { ErrorState } from '@/components/data/ErrorState';
 import { LoadingState } from '@/components/data/LoadingState';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ChangeRequestsTab } from '@/features/change-requests/components/ChangeRequestsTab';
+import { CR_FILTER_KEYS } from '@/features/change-requests/types';
 import { MilestonesTab } from '@/features/milestones/components/MilestonesTab';
+import { RisksTab } from '@/features/risks/components/RisksTab';
+import { RISK_FILTER_KEYS } from '@/features/risks/types';
 import { TasksTab } from '@/features/tasks/components/TasksTab';
 import { TASK_FILTER_KEYS } from '@/features/tasks/types';
 import { ActivityTab } from '../components/ActivityTab';
@@ -33,10 +37,13 @@ const TABS = [
 ] as const;
 
 const COMING_LATER: Record<string, string> = {
-  risks: 'Risks & issues arrive with the governance screens.',
-  'change-requests': 'Change requests arrive with the governance screens.',
   finance: 'Project finance arrives with the finance screens.',
 };
+
+// URL keys owned by the tabs that keep their filters in the URL (several
+// share names like `status`/`page`). All are cleared on a tab switch so
+// one tab's filters never leak into another.
+const TAB_FILTER_KEYS = new Set([...TASK_FILTER_KEYS, ...RISK_FILTER_KEYS, ...CR_FILTER_KEYS]);
 
 export function ProjectDetailPage() {
   const { id: idParam } = useParams();
@@ -75,9 +82,7 @@ export function ProjectDetailPage() {
           setSearchParams(
             (prev) => {
               const next = new URLSearchParams(prev);
-              // The Tasks tab keeps its filters in the URL too; drop them
-              // when leaving it so they don't trail along on other tabs.
-              for (const key of TASK_FILTER_KEYS) next.delete(key);
+              for (const key of TAB_FILTER_KEYS) next.delete(key);
               if (value === 'overview') next.delete('tab');
               else next.set('tab', String(value));
               return next;
@@ -104,6 +109,12 @@ export function ProjectDetailPage() {
         </TabsContent>
         <TabsContent value="milestones" className="pt-4">
           <MilestonesTab project={project} canManage={canManage} />
+        </TabsContent>
+        <TabsContent value="risks" className="pt-4">
+          <RisksTab project={project} canManage={canManage} />
+        </TabsContent>
+        <TabsContent value="change-requests" className="pt-4">
+          <ChangeRequestsTab projectId={id} />
         </TabsContent>
         <TabsContent value="members" className="pt-4">
           <MembersTab project={project} canManage={canManage} />

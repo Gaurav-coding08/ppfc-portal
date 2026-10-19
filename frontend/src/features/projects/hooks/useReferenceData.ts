@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/api/client';
 import { toApiError } from '@/api/errors';
@@ -21,7 +22,10 @@ export function useDepartmentOptions() {
 
 // `GET /dashboard/filters` is the only option list every role may call
 // (`GET /users` is PM/admin only), and its `managers` list is exactly
-// "owners of the projects you can see" — what an owner filter needs.
+// "owners of the projects you can see" — what an owner filter needs. Its
+// `projects` list ("PRJ-001 — Name", scoped the same way) labels the
+// project column on the risk and change-request lists, whose rows carry
+// only a projectId.
 export function useProjectFilterOptions() {
   return useQuery({
     queryKey: queryKeys.dashboard.filters(),
@@ -33,6 +37,7 @@ export function useProjectFilterOptions() {
       return {
         departments: toOptions(data!.data?.departments),
         owners: toOptions(data!.data?.managers),
+        projects: toOptions(data!.data?.projects),
       };
     },
   });
@@ -71,4 +76,19 @@ export function useOwnerOptions(enabled: boolean) {
 /** Every active user in the caller's directory scope — candidates for project membership. */
 export function useMemberCandidates(enabled: boolean) {
   return useDirectory(undefined, enabled);
+}
+
+/**
+ * `projectId → "PRJ-001 — Name"` for lists whose rows carry only an id
+ * (risks, change requests). Falls back to "Project #id" while the options
+ * load or for a project outside the caller's option list.
+ */
+export function useProjectLabel() {
+  const options = useProjectFilterOptions();
+  const projects = options.data?.projects;
+  return useCallback(
+    (projectId: number) =>
+      projects?.find((p) => p.value === String(projectId))?.label ?? `Project #${projectId}`,
+    [projects],
+  );
 }

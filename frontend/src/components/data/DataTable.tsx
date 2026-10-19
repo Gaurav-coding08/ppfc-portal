@@ -30,6 +30,7 @@ export function DataTable<TData extends RowData>({
   onSortChange,
   onRowClick,
   getRowId,
+  getRowClassName,
   enableColumnVisibility = true,
 }: {
   columns: LegacyColumnDef<TData, unknown>[];
@@ -39,6 +40,8 @@ export function DataTable<TData extends RowData>({
   onSortChange?: (sort: string, order: 'asc' | 'desc') => void;
   onRowClick?: (row: TData) => void;
   getRowId?: (row: TData) => string;
+  /** Extra classes per row — e.g. muted styling for closed records. */
+  getRowClassName?: (row: TData) => string | undefined;
   enableColumnVisibility?: boolean;
 }) {
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({});
@@ -130,7 +133,10 @@ export function DataTable<TData extends RowData>({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className={cn(onRowClick && 'hover:bg-muted/50 cursor-pointer')}
+                  className={cn(
+                    onRowClick && 'hover:bg-muted/50 cursor-pointer',
+                    getRowClassName?.(row.original),
+                  )}
                   onClick={() => onRowClick?.(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (

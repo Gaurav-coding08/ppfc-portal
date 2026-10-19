@@ -124,7 +124,8 @@ components:
         type: { type: string, enum: [risk, issue] }
         title: { type: string }
         description: { type: string, nullable: true }
-        ownerId: { type: integer }
+        ownerId: { type: integer, nullable: true }
+        ownerName: { type: string, nullable: true }
         probability: { type: integer, minimum: 1, maximum: 5 }
         impact: { type: integer, minimum: 1, maximum: 5 }
         score: { type: integer }
@@ -132,6 +133,7 @@ components:
         mitigation: { type: string, nullable: true }
         dueDate: { type: string, format: date, nullable: true }
         status: { type: string, enum: [open, mitigating, closed] }
+        closedAt: { type: string, format: date-time, nullable: true }
         version: { type: integer }
 
     ChangeRequest:
@@ -458,6 +460,72 @@ components:
             statuses: { type: array, items: { type: string } }
             categories: { type: array, items: { $ref: '#/components/schemas/FilterOption' } }
 
+    # ── Added in feature 17 Part A (risks & change requests), from real
+    # responses against the seeded dev DB ──
+    RiskListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Risk' }
+        meta: { $ref: '#/components/schemas/PaginationMeta' }
+
+    RiskDetailResponse:
+      type: object
+      properties:
+        data: { $ref: '#/components/schemas/Risk' }
+
+    ChangeRequestRow:
+      allOf:
+        - $ref: '#/components/schemas/ChangeRequest'
+        - type: object
+          properties:
+            requesterName: { type: string }
+            submittedAt: { type: string, format: date-time }
+            deciderName: { type: string, nullable: true }
+
+    ChangeHistoryEntry:
+      type: object
+      properties:
+        id: { type: integer }
+        # null on the first entry (the original submission)
+        fromStatus:
+          type: string
+          nullable: true
+          enum: [submitted, approved, rejected, returned]
+        toStatus: { type: string, enum: [submitted, approved, rejected, returned] }
+        actorId: { type: integer }
+        actorName: { type: string }
+        reason: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    ChangeRequestDetail:
+      allOf:
+        - $ref: '#/components/schemas/ChangeRequestRow'
+        - type: object
+          properties:
+            history:
+              type: array
+              items: { $ref: '#/components/schemas/ChangeHistoryEntry' }
+
+    ChangeRequestListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/ChangeRequestRow' }
+        meta: { $ref: '#/components/schemas/PaginationMeta' }
+
+    ChangeRequestCreatedResponse:
+      type: object
+      properties:
+        data: { $ref: '#/components/schemas/ChangeRequestRow' }
+
+    ChangeRequestDetailResponse:
+      type: object
+      properties:
+        data: { $ref: '#/components/schemas/ChangeRequestDetail' }
+
   parameters:
     pageParam:
       name: page
@@ -491,6 +559,37 @@ components:
       name: sort
       in: query
       schema: { type: string, enum: [dueDate, priority, status, progress, title], default: dueDate }
+    # Shared by GET /projects/{projectId}/risks and GET /risks
+    # (backend risks.schemas.ts commonListFields).
+    riskTypeParam:
+      name: type
+      in: query
+      schema: { type: string, enum: [risk, issue] }
+    riskStatusParam:
+      name: status
+      in: query
+      schema: { type: string }
+      description: One status or a comma-separated list (open,mitigating,closed).
+    riskOwnerParam:
+      name: ownerId
+      in: query
+      schema: { type: integer }
+    riskMinScoreParam:
+      name: minScore
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 25 }
+    riskQParam:
+      name: q
+      in: query
+      schema: { type: string }
+    riskSortParam:
+      name: sort
+      in: query
+      schema: { type: string, enum: [score, dueDate, status], default: score }
+    riskOrderParam:
+      name: order
+      in: query
+      schema: { type: string, enum: [asc, desc], default: desc }
 
 security:
   - cookieAuth: []
@@ -1041,15 +1140,28 @@ paths:
               schema: { $ref: '#/components/schemas/MilestoneDetailResponse' }
 
   # ── Risks ──
+  # Params/bodies mirror backend risks.schemas.ts; responses enriched in
+  # feature 17 Part A from real responses.
   /projects/{projectId}/risks:
     get:
       summary: List project risks
       parameters:
         - { name: projectId, in: path, required: true, schema: { type: integer } }
+        - { $ref: '#/components/parameters/riskTypeParam' }
+        - { $ref: '#/components/parameters/riskStatusParam' }
+        - { $ref: '#/components/parameters/riskOwnerParam' }
+        - { $ref: '#/components/parameters/riskMinScoreParam' }
+        - { $ref: '#/components/parameters/riskQParam' }
+        - { $ref: '#/components/parameters/riskSortParam' }
+        - { $ref: '#/components/parameters/riskOrderParam' }
         - { $ref: '#/components/parameters/pageParam' }
         - { $ref: '#/components/parameters/pageSizeParam' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RiskListResponse' }
     post:
       summary: Create risk
       parameters:
@@ -1061,31 +1173,60 @@ paths:
             schema:
               type: object
               required: [type, title, ownerId, probability, impact]
+              description: >-
+                mitigation is required (422 BUSINESS_RULE) when
+                probability × impact >= 15. ownerId must be a project member.
               properties:
                 type: { type: string, enum: [risk, issue] }
                 title: { type: string }
+                description: { type: string }
                 ownerId: { type: integer }
                 probability: { type: integer, minimum: 1, maximum: 5 }
                 impact: { type: integer, minimum: 1, maximum: 5 }
                 mitigation: { type: string }
+                dueDate: { type: string, format: date }
+                status: { type: string, enum: [open, mitigating, closed] }
       responses:
-        '201': { description: Created }
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RiskDetailResponse' }
 
   /risks:
     get:
       summary: Cross-portfolio risks (scoped)
       parameters:
         - { name: projectId, in: query, schema: { type: integer } }
+        - { name: departmentId, in: query, schema: { type: integer } }
+        - { $ref: '#/components/parameters/riskTypeParam' }
+        - { $ref: '#/components/parameters/riskStatusParam' }
+        - { $ref: '#/components/parameters/riskOwnerParam' }
+        - { $ref: '#/components/parameters/riskMinScoreParam' }
+        - { $ref: '#/components/parameters/riskQParam' }
+        - { $ref: '#/components/parameters/riskSortParam' }
+        - { $ref: '#/components/parameters/riskOrderParam' }
         - { $ref: '#/components/parameters/pageParam' }
         - { $ref: '#/components/parameters/pageSizeParam' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RiskListResponse' }
 
   /risks/high-exposure:
     get:
-      summary: High-exposure open risks (scoped)
+      summary: High-exposure open risks (scoped; status <> closed, score >= 15, score desc)
+      parameters:
+        - { $ref: '#/components/parameters/pageParam' }
+        - { $ref: '#/components/parameters/pageSizeParam' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RiskListResponse' }
 
   /risks/{id}:
     get:
@@ -1093,7 +1234,11 @@ paths:
       parameters:
         - { name: id, in: path, required: true, schema: { type: integer } }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RiskDetailResponse' }
     patch:
       summary: Update risk
       parameters:
@@ -1105,14 +1250,26 @@ paths:
             schema:
               type: object
               required: [version]
+              description: >-
+                At least one field besides version. The mitigation rule is
+                re-checked against the merged (current + patch) state.
               properties:
+                type: { type: string, enum: [risk, issue] }
                 title: { type: string }
-                probability: { type: integer }
-                impact: { type: integer }
-                status: { type: string }
+                description: { type: string }
+                ownerId: { type: integer, nullable: true }
+                probability: { type: integer, minimum: 1, maximum: 5 }
+                impact: { type: integer, minimum: 1, maximum: 5 }
+                mitigation: { type: string, nullable: true }
+                dueDate: { type: string, format: date, nullable: true }
+                status: { type: string, enum: [open, mitigating, closed] }
                 version: { type: integer }
       responses:
-        '200': { description: Updated }
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RiskDetailResponse' }
 
   # ── Change Requests ──
   /projects/{projectId}/change-requests:
@@ -1132,17 +1289,33 @@ paths:
                 description: { type: string }
                 impactSummary: { type: string }
       responses:
-        '201': { description: Created }
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ChangeRequestCreatedResponse' }
 
   /change-requests:
     get:
-      summary: List CRs (scoped)
+      summary: List CRs (scoped; newest submission first)
       parameters:
-        - { name: status, in: query, schema: { type: string } }
+        - { name: projectId, in: query, schema: { type: integer } }
+        - name: status
+          in: query
+          schema: { type: string }
+          description: One status or a comma-separated list (submitted,returned,approved,rejected).
+        - { name: requestedBy, in: query, schema: { type: integer } }
+        - { name: mine, in: query, schema: { type: string, enum: ['true', 'false'] } }
+        - { name: from, in: query, schema: { type: string, format: date } }
+        - { name: to, in: query, schema: { type: string, format: date } }
         - { $ref: '#/components/parameters/pageParam' }
         - { $ref: '#/components/parameters/pageSizeParam' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ChangeRequestListResponse' }
 
   /change-requests/{id}:
     get:
@@ -1150,7 +1323,11 @@ paths:
       parameters:
         - { name: id, in: path, required: true, schema: { type: integer } }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ChangeRequestDetailResponse' }
 
   /change-requests/{id}/decision:
     post:
@@ -1170,12 +1347,18 @@ paths:
                 reason: { type: string }
                 version: { type: integer }
       responses:
-        '200': { description: Decided }
-        '422': { description: Self-approval or bad state }
+        '200':
+          description: Decided
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ChangeRequestDetailResponse' }
+        '403': { description: Role cannot decide on this project }
+        '409': { description: Version conflict or idempotency conflict }
+        '422': { description: Self-approval (SELF_APPROVAL_FORBIDDEN) or bad state (INVALID_TRANSITION) }
 
   /change-requests/{id}/resubmit:
     post:
-      summary: Resubmit returned CR
+      summary: Resubmit returned CR (requester only)
       parameters:
         - { name: id, in: path, required: true, schema: { type: integer } }
       requestBody:
@@ -1190,7 +1373,11 @@ paths:
                 description: { type: string }
                 version: { type: integer }
       responses:
-        '200': { description: Resubmitted }
+        '200':
+          description: Resubmitted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ChangeRequestDetailResponse' }
 
   # ── Budget ──
   /projects/{projectId}/budget:

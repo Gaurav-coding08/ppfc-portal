@@ -1231,6 +1231,14 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
+                    type?: components["parameters"]["riskTypeParam"];
+                    /** @description One status or a comma-separated list (open,mitigating,closed). */
+                    status?: components["parameters"]["riskStatusParam"];
+                    ownerId?: components["parameters"]["riskOwnerParam"];
+                    minScore?: components["parameters"]["riskMinScoreParam"];
+                    q?: components["parameters"]["riskQParam"];
+                    sort?: components["parameters"]["riskSortParam"];
+                    order?: components["parameters"]["riskOrderParam"];
                     page?: components["parameters"]["pageParam"];
                     pageSize?: components["parameters"]["pageSizeParam"];
                 };
@@ -1247,7 +1255,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["RiskListResponse"];
+                    };
                 };
             };
         };
@@ -1268,10 +1278,15 @@ export interface paths {
                         /** @enum {string} */
                         type: "risk" | "issue";
                         title: string;
+                        description?: string;
                         ownerId: number;
                         probability: number;
                         impact: number;
                         mitigation?: string;
+                        /** Format: date */
+                        dueDate?: string;
+                        /** @enum {string} */
+                        status?: "open" | "mitigating" | "closed";
                     };
                 };
             };
@@ -1281,7 +1296,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["RiskDetailResponse"];
+                    };
                 };
             };
         };
@@ -1303,6 +1320,15 @@ export interface paths {
             parameters: {
                 query?: {
                     projectId?: number;
+                    departmentId?: number;
+                    type?: components["parameters"]["riskTypeParam"];
+                    /** @description One status or a comma-separated list (open,mitigating,closed). */
+                    status?: components["parameters"]["riskStatusParam"];
+                    ownerId?: components["parameters"]["riskOwnerParam"];
+                    minScore?: components["parameters"]["riskMinScoreParam"];
+                    q?: components["parameters"]["riskQParam"];
+                    sort?: components["parameters"]["riskSortParam"];
+                    order?: components["parameters"]["riskOrderParam"];
                     page?: components["parameters"]["pageParam"];
                     pageSize?: components["parameters"]["pageSizeParam"];
                 };
@@ -1317,7 +1343,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["RiskListResponse"];
+                    };
                 };
             };
         };
@@ -1336,10 +1364,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** High-exposure open risks (scoped) */
+        /** High-exposure open risks (scoped; status <> closed, score >= 15, score desc) */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    page?: components["parameters"]["pageParam"];
+                    pageSize?: components["parameters"]["pageSizeParam"];
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -1351,7 +1382,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["RiskListResponse"];
+                    };
                 };
             };
         };
@@ -1387,7 +1420,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["RiskDetailResponse"];
+                    };
                 };
             };
         };
@@ -1409,10 +1444,18 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
+                        /** @enum {string} */
+                        type?: "risk" | "issue";
                         title?: string;
+                        description?: string;
+                        ownerId?: number | null;
                         probability?: number;
                         impact?: number;
-                        status?: string;
+                        mitigation?: string | null;
+                        /** Format: date */
+                        dueDate?: string | null;
+                        /** @enum {string} */
+                        status?: "open" | "mitigating" | "closed";
                         version: number;
                     };
                 };
@@ -1423,7 +1466,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["RiskDetailResponse"];
+                    };
                 };
             };
         };
@@ -1463,7 +1508,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ChangeRequestCreatedResponse"];
+                    };
                 };
             };
         };
@@ -1480,11 +1527,17 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List CRs (scoped) */
+        /** List CRs (scoped; newest submission first) */
         get: {
             parameters: {
                 query?: {
+                    projectId?: number;
+                    /** @description One status or a comma-separated list (submitted,returned,approved,rejected). */
                     status?: string;
+                    requestedBy?: number;
+                    mine?: "true" | "false";
+                    from?: string;
+                    to?: string;
                     page?: components["parameters"]["pageParam"];
                     pageSize?: components["parameters"]["pageSizeParam"];
                 };
@@ -1499,7 +1552,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ChangeRequestListResponse"];
+                    };
                 };
             };
         };
@@ -1535,7 +1590,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ChangeRequestDetailResponse"];
+                    };
                 };
             };
         };
@@ -1584,9 +1641,25 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
+                    content: {
+                        "application/json": components["schemas"]["ChangeRequestDetailResponse"];
+                    };
+                };
+                /** @description Role cannot decide on this project */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
                     content?: never;
                 };
-                /** @description Self-approval or bad state */
+                /** @description Version conflict or idempotency conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Self-approval (SELF_APPROVAL_FORBIDDEN) or bad state (INVALID_TRANSITION) */
                 422: {
                     headers: {
                         [name: string]: unknown;
@@ -1610,7 +1683,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Resubmit returned CR */
+        /** Resubmit returned CR (requester only) */
         post: {
             parameters: {
                 query?: never;
@@ -1635,7 +1708,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ChangeRequestDetailResponse"];
+                    };
                 };
             };
         };
@@ -2903,7 +2978,8 @@ export interface components {
             type?: "risk" | "issue";
             title?: string;
             description?: string | null;
-            ownerId?: number;
+            ownerId?: number | null;
+            ownerName?: string | null;
             probability?: number;
             impact?: number;
             score?: number;
@@ -2914,6 +2990,8 @@ export interface components {
             dueDate?: string | null;
             /** @enum {string} */
             status?: "open" | "mitigating" | "closed";
+            /** Format: date-time */
+            closedAt?: string | null;
             version?: number;
         };
         ChangeRequest: {
@@ -3148,6 +3226,44 @@ export interface components {
                 categories?: components["schemas"]["FilterOption"][];
             };
         };
+        RiskListResponse: {
+            data?: components["schemas"]["Risk"][];
+            meta?: components["schemas"]["PaginationMeta"];
+        };
+        RiskDetailResponse: {
+            data?: components["schemas"]["Risk"];
+        };
+        ChangeRequestRow: components["schemas"]["ChangeRequest"] & {
+            requesterName?: string;
+            /** Format: date-time */
+            submittedAt?: string;
+            deciderName?: string | null;
+        };
+        ChangeHistoryEntry: {
+            id?: number;
+            /** @enum {string|null} */
+            fromStatus?: "submitted" | "approved" | "rejected" | "returned" | null;
+            /** @enum {string} */
+            toStatus?: "submitted" | "approved" | "rejected" | "returned";
+            actorId?: number;
+            actorName?: string;
+            reason?: string | null;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        ChangeRequestDetail: components["schemas"]["ChangeRequestRow"] & {
+            history?: components["schemas"]["ChangeHistoryEntry"][];
+        };
+        ChangeRequestListResponse: {
+            data?: components["schemas"]["ChangeRequestRow"][];
+            meta?: components["schemas"]["PaginationMeta"];
+        };
+        ChangeRequestCreatedResponse: {
+            data?: components["schemas"]["ChangeRequestRow"];
+        };
+        ChangeRequestDetailResponse: {
+            data?: components["schemas"]["ChangeRequestDetail"];
+        };
     };
     responses: never;
     parameters: {
@@ -3160,6 +3276,14 @@ export interface components {
         taskPriorityParam: "low" | "medium" | "high" | "critical";
         taskOverdueParam: "true" | "false";
         taskSortParam: "dueDate" | "priority" | "status" | "progress" | "title";
+        riskTypeParam: "risk" | "issue";
+        /** @description One status or a comma-separated list (open,mitigating,closed). */
+        riskStatusParam: string;
+        riskOwnerParam: number;
+        riskMinScoreParam: number;
+        riskQParam: string;
+        riskSortParam: "score" | "dueDate" | "status";
+        riskOrderParam: "asc" | "desc";
     };
     requestBodies: never;
     headers: never;
