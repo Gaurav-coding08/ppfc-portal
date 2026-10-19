@@ -25,12 +25,12 @@ export function FinanceSummaryCards({
       <KpiCard
         label="Current approved budget"
         hint={KPI_DEFINITIONS.currentBudget}
-        value={<Money amount={financials.currentBudget ?? null} />}
+        value={<Money compact amount={financials.currentBudget ?? null} />}
       />
       <KpiCard
         label="Actual spend"
         hint={KPI_DEFINITIONS.actualSpend}
-        value={<Money amount={financials.actualSpend ?? null} />}
+        value={<Money compact amount={financials.actualSpend ?? null} />}
         onClick={onActualSpendClick}
         actionLabel="Actual spend: show the posted transactions behind this number"
       />
@@ -39,6 +39,7 @@ export function FinanceSummaryCards({
         hint={KPI_DEFINITIONS.remainingBudget}
         value={
           <Money
+            compact
             amount={financials.remainingBudget ?? null}
             className={negative(financials.remainingBudget)}
           />
@@ -53,15 +54,20 @@ export function FinanceSummaryCards({
       <KpiCard
         label="Forecast to complete"
         hint={KPI_DEFINITIONS.forecastToComplete}
-        value={<Money amount={financials.forecastToComplete ?? null} />}
+        value={<Money compact amount={financials.forecastToComplete ?? null} />}
       />
-      <KpiCard label="EAC" hint={KPI_DEFINITIONS.eac} value={<Money amount={financials.eac ?? null} />} />
+      <KpiCard
+        label="EAC"
+        hint={KPI_DEFINITIONS.eac}
+        value={<Money compact amount={financials.eac ?? null} />}
+      />
       <KpiCard
         label="Projected variance"
         hint={KPI_DEFINITIONS.projectedVariance}
         className={cn(financials.isOverrun && 'ring-1 ring-rose-200')}
         value={
           <Money
+            compact
             amount={financials.projectedVariance ?? null}
             className={negative(financials.projectedVariance)}
           />

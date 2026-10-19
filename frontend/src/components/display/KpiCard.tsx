@@ -31,7 +31,8 @@ export function KpiCard({
   const body = (
     <div className="min-w-0 text-left">
       <p className="text-muted-foreground text-xs font-medium">{label}</p>
-      <p className="mt-1 text-[28px] leading-tight font-semibold tabular-nums">{value}</p>
+      {/* truncate is a last-resort guard; money values use <Money compact> so they fit. */}
+      <p className="mt-1 truncate text-[28px] leading-tight font-semibold tabular-nums">{value}</p>
     </div>
   );
 

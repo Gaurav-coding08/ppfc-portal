@@ -11,8 +11,9 @@ import { categoryApplied, type Kpi, type KpiKey, type WidgetResult } from '../ty
 import { CategoryChip } from './Widget';
 
 /** A KPI value with its unit, exactly as the API returned it. */
-export function KpiValue({ kpi }: { kpi: Kpi }) {
-  if (kpi.unit === 'AED') return <Money amount={kpi.value} />;
+// `compact` on cards; the drill drawer shows the exact amount to reconcile.
+export function KpiValue({ kpi, compact = false }: { kpi: Kpi; compact?: boolean }) {
+  if (kpi.unit === 'AED') return <Money amount={kpi.value} compact={compact} />;
   if (kpi.unit === 'pct') return <Percent value={kpi.value} digits={1} />;
   return <span className="tabular-nums">{kpi.value ?? '—'}</span>;
 }
@@ -37,14 +38,14 @@ export function KpiSections({
     if (!kpi)
       return <Skeleton key={key} className="h-[104px] rounded-xl" aria-label={`Loading ${info.label}`} />;
 
-    let value: ReactNode = <KpiValue kpi={kpi} />;
+    let value: ReactNode = <KpiValue kpi={kpi} compact />;
     // The overrun card shows both overrun KPIs: the amount, and how many
     // projects it comes from.
     if (key === 'projectedOverrunAmount') {
       const count = byKey.get('projectedOverrunCount');
       value = (
         <>
-          <KpiValue kpi={kpi} />
+          <KpiValue kpi={kpi} compact />
           {count && (
             <span className="text-muted-foreground block text-xs font-medium">
               {count.value} {count.value === 1 ? 'project' : 'projects'} over budget

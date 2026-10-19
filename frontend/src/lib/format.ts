@@ -34,6 +34,21 @@ export function formatMoney(amount: number | string): string {
   return aedFormatter.format(n);
 }
 
+const aedCompactFormatter = new Intl.NumberFormat('en-AE', {
+  style: 'currency',
+  currency: 'AED',
+  notation: 'compact',
+  maximumFractionDigits: 1,
+});
+
+// Short form for KPI cards ("AED 375K", "AED 1.2M") so a value fits its
+// card however large it grows. Intl does the abbreviation; the exact amount
+// is always shown alongside it (tooltip + screen-reader text in <Money>).
+export function formatMoneyCompact(amount: number | string): string {
+  const n = typeof amount === 'string' ? Number(amount) : amount;
+  return aedCompactFormatter.format(n);
+}
+
 export function formatPercent(value: number | null | undefined, digits = 0): string {
   if (value === null || value === undefined) return '—';
   return `${value.toFixed(digits)}%`;

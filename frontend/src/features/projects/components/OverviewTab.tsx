@@ -28,8 +28,11 @@ export function OverviewTab({ project }: { project: ProjectDetail }) {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <KpiCard label="Current approved budget" value={<Money amount={budget?.currentBudget ?? null} />} />
-        <KpiCard label="Actual spend" value={<Money amount={budget?.actualSpend ?? null} />} />
+        <KpiCard
+          label="Current approved budget"
+          value={<Money compact amount={budget?.currentBudget ?? null} />}
+        />
+        <KpiCard label="Actual spend" value={<Money compact amount={budget?.actualSpend ?? null} />} />
         {/* `utilization` is null when the budget is 0 (CLAUDE.md), shown as —. */}
         <KpiCard label="Budget utilization" value={<Percent kind="ratio" value={budget?.utilization} />} />
       </div>
