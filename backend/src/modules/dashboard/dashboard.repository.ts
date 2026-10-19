@@ -159,7 +159,7 @@ export async function getKpis(
     { key: 'approvedBudget', value: toMoney(r.approved_budget), unit: 'AED', drill: { endpoint: '/api/v1/dashboard/budget-vs-actual-eac' } },
     { key: 'actualSpend', value: toMoney(r.actual_spend), unit: 'AED', drill: { endpoint: '/api/v1/dashboard/drill/costs' } },
     { key: 'remainingBudget', value: toMoney(r.remaining_budget), unit: 'AED', drill: { endpoint: '/api/v1/dashboard/budget-vs-actual-eac' } },
-    { key: 'utilizationPct', value: n(r.utilization_pct) !== null ? Math.round(n(r.utilization_pct)! * 10000) / 100 : null, unit: 'pct', drill: { endpoint: '/api/v1/dashboard/budget-vs-actual-eac' } },
+    { key: 'utilizationPct', value: r.utilization_pct !== null ? Math.round(parseFloat(r.utilization_pct) * 10000) / 100 : null, unit: 'pct', drill: { endpoint: '/api/v1/dashboard/budget-vs-actual-eac' } },
     { key: 'forecastEac', value: toMoney(r.forecast_eac), unit: 'AED', drill: { endpoint: '/api/v1/dashboard/budget-vs-actual-eac' } },
     { key: 'projectedOverrunCount', value: parseInt(r.projected_overrun_count), unit: 'count', drill: { endpoint: '/api/v1/dashboard/budget-vs-actual-eac' } },
     { key: 'projectedOverrunAmount', value: toMoney(r.projected_overrun_amount), unit: 'AED', drill: { endpoint: '/api/v1/dashboard/budget-vs-actual-eac' } },

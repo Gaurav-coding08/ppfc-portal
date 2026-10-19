@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, formatMoney } from './format';
+import { formatDate, formatMoney, formatPercent } from './format';
 
 describe('formatDate', () => {
   it('renders a YYYY-MM-DD string as its own calendar date regardless of the viewer timezone', () => {
@@ -19,5 +19,15 @@ describe('formatMoney', () => {
 
   it('formats a number as AED currency', () => {
     expect(formatMoney(0)).toBe('AED 0.00');
+  });
+});
+
+describe('formatPercent', () => {
+  it('rounds to one decimal without premature integer rounding (64.78 → "64.8%")', () => {
+    expect(formatPercent(64.78, 1)).toBe('64.8%');
+  });
+
+  it('returns em-dash for null', () => {
+    expect(formatPercent(null)).toBe('—');
   });
 });
