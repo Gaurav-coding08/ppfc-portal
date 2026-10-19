@@ -62,6 +62,19 @@ export function canDecideChangeRequest(
   return cr.requestedBy === user!.id ? 'own' : 'eligible';
 }
 
+/**
+ * Budget-revision decisions are admin-only (backend `requireRole('admin')`)
+ * and never on a revision the admin requested themselves (422
+ * SELF_APPROVAL_FORBIDDEN) — same three outcomes as change requests.
+ */
+export function canDecideBudgetRevision(
+  user: AuthUser | null,
+  revision: { requestedBy?: number },
+): 'eligible' | 'own' | 'none' {
+  if (!isAdmin(user)) return 'none';
+  return revision.requestedBy === user!.id ? 'own' : 'eligible';
+}
+
 /** A contributor may edit only their own assigned task's progress/status. */
 export function canEditOwnTaskOnly(
   user: AuthUser | null,

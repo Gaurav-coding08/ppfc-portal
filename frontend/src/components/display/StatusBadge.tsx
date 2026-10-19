@@ -43,6 +43,21 @@ const COST: Record<string, [Tone, string]> = {
   reversed: ['neutral', 'Reversed'],
 };
 
+// Budget revisions aren't in the CLAUDE.md map; they follow the CR pattern
+// (pending decision = info, approved = success, rejected = danger).
+const REVISION: Record<string, [Tone, string]> = {
+  pending: ['info', 'Pending'],
+  approved: ['success', 'Approved'],
+  rejected: ['danger', 'Rejected'],
+};
+
+// Finance alert severity (backend summary.repository.ts getAlerts).
+const ALERT_SEVERITY: Record<string, [Tone, string]> = {
+  critical: ['danger', 'Critical'],
+  warning: ['warning', 'Warning'],
+  info: ['info', 'Info'],
+};
+
 const DELIVERY: Record<string, [Tone, string]> = {
   on_track: ['success', 'On track'],
   behind: ['warning', 'Behind'],
@@ -57,6 +72,8 @@ const DOMAINS = {
   risk: RISK,
   changeRequest: CHANGE_REQUEST,
   cost: COST,
+  revision: REVISION,
+  alertSeverity: ALERT_SEVERITY,
   delivery: DELIVERY,
 } as const;
 

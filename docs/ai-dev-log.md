@@ -594,3 +594,37 @@ build` — 14/14 tests pass, clean typecheck/lint, build succeeds (710 KB main c
 - **Refinement:** INVALID_TRANSITION is matched by error code, not HTTP status (backend sends 422, spec says 409). The mitigation 422 has no `details`, so its message is matched to show it on the Mitigation field. Contributors get no decision panel at all; the disabled "own request" panel only appears for someone who could otherwise decide. The score preview is kept as form-only guidance because of CLAUDE.md's "no scores in the browser" rule; lists show the API's score.
 - **Verification:** `cd frontend && npm run typecheck && npm run lint && npm test && npm run build`: 57/57 tests (15 new), clean, build OK. `cd backend && npm test`: 453/453. Live curl: contributor `POST /change-requests/16/decision` → 403 FORBIDDEN with requestId. No browser check this run; owner click-through pending.
 - **Human review:** Checked it as the PM and as Estell. On PRJ-001's Risks tab, 5 × 3 showed "15 · High" and Mitigation went required; saving without one put the backend's message right under the field. Closing a risk asked first and the row went grey. As Estell I raised a CR and landed on it with no decision panel. Back as PM, Approve with no reason was blocked; with a reason it went to Approved with the finance note and exactly one new history entry. A double-click on confirm still recorded one decision. My own CR showed the panel disabled. Resubmitting a returned CR as Estell worked. Read through the decision panel's idempotency-key handling. The score preview being computed in the browser is fine by me since it's labelled and never saved.
+
+### 17B Frontend financial management — 2026-10-19
+
+- **Goal:** Project Finance tab, made of:
+  - KPI cards with definitions, an alerts strip and charts;
+  - budget and revisions (PM request, admin approve/reject with confirm and Idempotency-Key, never own);
+  - costs (draft → confirmed post with Idempotency-Key, reversal with reason, draft edit/delete);
+  - forecast grid (past months locked, one PUT);
+  - drill-down from Actual spend to its transactions.
+
+  Plus cost categories (admin), `/finance/alerts` and `/finance/comparison`. Every number is refetched after a write, never patched (feature 17 Part B).
+- **Prompt/approach:** /run-feature 17 (Part B) with the feature spec, CLAUDE.md, the 11/12/16/17A context files, the backend finance zod schemas, controllers and repositories, and the OpenAPI file. Captured live summary, budget, costs, categories, forecasts, alerts and comparison responses (PM, contributor, admin) and the 400/403/422 error shapes before writing schemas.
+- **First output issue:**
+  1. **Backend bug.** `GET /finance/alerts` returned 500 INTERNAL for every PM and contributor; only admin worked, and the existing tests only called it as admin. Cause: `scopedProjectIdsSql` hardcodes `$1` for the user id, but `getAlerts` put `asOf` at `$1`, so Postgres compared a date with `owner_id`. Fixed by putting scope params first (the rule the risks/costs repositories already follow) and added a regression test for PM and contributor. This is a bug fix in an existing endpoint, not a new route.
+  2. **OpenAPI drift.**
+     - No finance path had a response schema; the cost list was missing 8 query params.
+     - `CostTransaction` lacked its joined names and posting fields.
+     - `BudgetRevision` declared a `version` the API never returns (the table has none, though the decision body still requires one).
+     - `Forecast.month` is returned as `YYYY-MM-01`, not `YYYY-MM`.
+
+     Fixed in `docs/openapi.yaml` and regenerated types; `routes:check` still 77/77.
+  3. **Assertion failure.** The refetch test failed although the "expected" and "received" amounts printed identically. `toHaveTextContent` collapses the no-break space Intl puts after "AED" in the received text, but not in the expected string. Normalised the expected string in the test; the component was right.
+  4. **Lint.** Lint rejected a component defined inside the columns file (react-refresh). Moved the row actions to `CostRowActions.tsx`.
+- **Refinement:**
+  - The `financials` returned by `POST /costs/:id/post` are deliberately ignored, because they are as of the cost's date, not the reporting date.
+  - To prove the double-click test, I removed only the `inFlight` guard first: still one POST, because the dialog's pending-disable also blocks it. With both guards removed it recorded 2 POSTs and failed. Both restored.
+  - Verified the drill-down live: PRJ-004's posted costs ≤ 2026-09-30 are 11 rows summing to 103,328, exactly its actual spend.
+  - Original expenses don't show "reversed": the API has no such flag, and deriving one from the visible page would be wrong.
+- **Verification:**
+  - `cd frontend && npm run typecheck && npm run lint && npm test && npm run build`: 69/69 tests (12 new), clean, build OK.
+  - `cd backend && npm run typecheck && npm run lint && npm test`: 454/454 (1 new).
+  - Live read-only curls of every query shape the UI sends returned 200.
+  - No browser check this run; owner click-through pending.
+- **Human review:** TODO (owner)

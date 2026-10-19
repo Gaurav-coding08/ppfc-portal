@@ -35,6 +35,17 @@ const ChangeRequestDetailPage = lazy(() =>
     default: m.ChangeRequestDetailPage,
   })),
 );
+const FinanceAlertsPage = lazy(() =>
+  import('@/features/finance/pages/FinanceAlertsPage').then((m) => ({ default: m.FinanceAlertsPage })),
+);
+const FinanceComparisonPage = lazy(() =>
+  import('@/features/finance/pages/FinanceComparisonPage').then((m) => ({
+    default: m.FinanceComparisonPage,
+  })),
+);
+const CostCategoriesPage = lazy(() =>
+  import('@/features/finance/pages/CostCategoriesPage').then((m) => ({ default: m.CostCategoriesPage })),
+);
 
 // Plain <Routes> per CLAUDE.md ("data routers not required; plain <Routes>
 // is fine"). Every module gets a placeholder route from Part A onward
@@ -57,8 +68,9 @@ export function AppRoutes() {
           <Route path="risks/high-exposure" element={<HighExposurePage />} />
           <Route path="change-requests" element={<ChangeRequestsPage />} />
           <Route path="change-requests/:id" element={<ChangeRequestDetailPage />} />
-          <Route path="finance/alerts" element={<PlaceholderPage title="Finance alerts" />} />
-          <Route path="finance/comparison" element={<PlaceholderPage title="Finance comparison" />} />
+          <Route path="finance/alerts" element={<FinanceAlertsPage />} />
+          <Route path="finance/comparison" element={<FinanceComparisonPage />} />
+          <Route path="finance/categories" element={<CostCategoriesPage />} />
           <Route path="admin/users" element={<PlaceholderPage title="Users" />} />
           <Route path="admin/audit-log" element={<PlaceholderPage title="Audit log" />} />
           <Route path="admin/automation" element={<PlaceholderPage title="Automation" />} />

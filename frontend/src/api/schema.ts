@@ -1727,7 +1727,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Project budget */
+        /** Project budget (initial + approved revisions) and every revision */
         get: {
             parameters: {
                 query?: {
@@ -1747,7 +1747,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["BudgetSummaryResponse"];
+                    };
                 };
             };
         };
@@ -1768,7 +1770,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Request budget revision */
+        /** Request budget revision (manage; created pending) */
         post: {
             parameters: {
                 query?: never;
@@ -1781,6 +1783,7 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
+                        /** @description Non-zero; negative reduces the budget */
                         amount: number;
                         rationale: string;
                         /** Format: date */
@@ -1791,6 +1794,15 @@ export interface paths {
             responses: {
                 /** @description Created */
                 201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["BudgetRevisionResponse"];
+                    };
+                };
+                /** @description Would make the current budget negative (BUSINESS_RULE) */
+                422: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1813,7 +1825,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Decide budget revision (admin, idempotent) */
+        /** Decide budget revision (admin, idempotent, never own) */
         post: {
             parameters: {
                 query?: never;
@@ -1841,6 +1853,22 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
+                    content: {
+                        "application/json": components["schemas"]["BudgetRevisionResponse"];
+                    };
+                };
+                /** @description Not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Own revision (SELF_APPROVAL_FORBIDDEN) or not pending (INVALID_TRANSITION) */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
                     content?: never;
                 };
             };
@@ -1858,11 +1886,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List cost categories */
+        /** List cost categories (active only unless admin + includeInactive) */
         get: {
             parameters: {
                 query?: {
-                    includeInactive?: boolean;
+                    includeInactive?: "true" | "false";
                 };
                 header?: never;
                 path?: never;
@@ -1875,7 +1903,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["CostCategoryListResponse"];
+                    };
                 };
             };
         };
@@ -1902,7 +1932,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["CostCategoryResponse"];
+                    };
                 };
             };
         };
@@ -1925,7 +1957,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Update cost category (admin) */
+        /** Update cost category (admin); deactivation refused while drafts use it */
         patch: {
             parameters: {
                 query?: never;
@@ -1950,7 +1982,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["CostCategoryResponse"];
+                    };
                 };
             };
         };
@@ -1967,6 +2001,16 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
+                    /** @description One status or a comma-separated list (draft,posted). */
+                    status?: components["parameters"]["costStatusParam"];
+                    categoryId?: components["parameters"]["costCategoryParam"];
+                    from?: components["parameters"]["costFromParam"];
+                    to?: components["parameters"]["costToParam"];
+                    entryType?: components["parameters"]["costEntryTypeParam"];
+                    /** @description Matches description or vendor (ILIKE). */
+                    q?: components["parameters"]["costQParam"];
+                    sort?: components["parameters"]["costSortParam"];
+                    order?: components["parameters"]["costOrderParam"];
                     page?: components["parameters"]["pageParam"];
                     pageSize?: components["parameters"]["pageSizeParam"];
                 };
@@ -1983,7 +2027,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["CostListResponse"];
+                    };
                 };
             };
         };
@@ -2016,7 +2062,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["CostDetailResponse"];
+                    };
                 };
             };
         };
@@ -2033,12 +2081,25 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Cross-project costs (scoped) */
+        /**
+         * Cross-project costs (scoped)
+         * @description postedOnly=true&upToAsOf=true returns exactly the rows behind "actual spend" for the asOf date.
+         */
         get: {
             parameters: {
                 query?: {
                     projectId?: number;
-                    postedOnly?: boolean;
+                    departmentId?: number;
+                    postedOnly?: "true" | "false";
+                    upToAsOf?: "true" | "false";
+                    /** @description One status or a comma-separated list (draft,posted). */
+                    status?: components["parameters"]["costStatusParam"];
+                    categoryId?: components["parameters"]["costCategoryParam"];
+                    entryType?: components["parameters"]["costEntryTypeParam"];
+                    /** @description Matches description or vendor (ILIKE). */
+                    q?: components["parameters"]["costQParam"];
+                    sort?: components["parameters"]["costSortParam"];
+                    order?: components["parameters"]["costOrderParam"];
                     page?: components["parameters"]["pageParam"];
                     pageSize?: components["parameters"]["pageSizeParam"];
                     /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */
@@ -2055,7 +2116,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["CostListResponse"];
+                    };
                 };
             };
         };
@@ -2091,7 +2154,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["CostDetailResponse"];
+                    };
                 };
             };
         };
@@ -2138,7 +2203,7 @@ export interface paths {
                         txnDate?: string;
                         amount?: number;
                         description?: string;
-                        vendor?: string;
+                        vendor?: string | null;
                         version: number;
                     };
                 };
@@ -2146,6 +2211,22 @@ export interface paths {
             responses: {
                 /** @description Updated */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CostDetailResponse"];
+                    };
+                };
+                /** @description Version conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Posted cost (INVALID_TRANSITION) or inactive category */
+                422: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2183,6 +2264,15 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
+                    content: {
+                        "application/json": components["schemas"]["CostPostResponse"];
+                    };
+                };
+                /** @description Role cannot post costs on this project */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
                     content?: never;
                 };
             };
@@ -2202,7 +2292,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Reverse posted cost */
+        /** Reverse posted cost (adds a posted reversal entry) */
         post: {
             parameters: {
                 query?: never;
@@ -2224,6 +2314,15 @@ export interface paths {
             responses: {
                 /** @description Reversal created */
                 201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CostDetailResponse"];
+                    };
+                };
+                /** @description Not a posted expense */
+                422: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2264,14 +2363,19 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ForecastsResponse"];
+                    };
                 };
             };
         };
-        /** Upsert forecasts */
+        /** Upsert forecasts (months after the asOf month, up to project end) */
         put: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */
+                    asOf?: components["parameters"]["asOfParam"];
+                };
                 header?: never;
                 path: {
                     projectId: number;
@@ -2291,6 +2395,15 @@ export interface paths {
             responses: {
                 /** @description Upserted */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ForecastsResponse"];
+                    };
+                };
+                /** @description A month is not after the reporting month or is past project end */
+                422: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2332,7 +2445,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["FinancialSummaryResponse"];
+                    };
                 };
             };
         };
@@ -2370,7 +2485,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["FinanceAlertsResponse"];
+                    };
                 };
             };
         };
@@ -2389,10 +2506,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Side-by-side project comparison */
+        /** Side-by-side project comparison (1–10 ids; invisible ones listed in excluded) */
         get: {
             parameters: {
                 query: {
+                    /** @description Comma-separated project ids */
                     projectIds: string;
                     /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */
                     asOf?: components["parameters"]["asOfParam"];
@@ -2408,7 +2526,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["FinanceComparisonResponse"];
+                    };
                 };
             };
         };
@@ -3026,6 +3146,15 @@ export interface components {
             entryType?: "expense" | "reversal";
             reversesId?: number | null;
             version?: number;
+            categoryName?: string;
+            createdBy?: number;
+            createdByName?: string;
+            postedBy?: number | null;
+            postedByName?: string | null;
+            /** Format: date-time */
+            postedAt?: string | null;
+            /** Format: date-time */
+            createdAt?: string;
         };
         BudgetRevision: {
             id?: number;
@@ -3035,16 +3164,26 @@ export interface components {
             /** @enum {string} */
             status?: "pending" | "approved" | "rejected";
             requestedBy?: number;
+            requestedByName?: string;
             decidedBy?: number | null;
+            decidedByName?: string | null;
+            /** Format: date-time */
+            decidedAt?: string | null;
+            decisionReason?: string | null;
             /** Format: date */
             effectiveDate?: string;
-            version?: number;
+            /** Format: date-time */
+            createdAt?: string;
         };
         Forecast: {
             id?: number;
             projectId?: number;
+            /** Format: date */
             month?: string;
             amount?: number;
+            updatedBy?: number | null;
+            /** Format: date-time */
+            updatedAt?: string;
         };
         AuthUser: {
             id?: number;
@@ -3264,6 +3403,116 @@ export interface components {
         ChangeRequestDetailResponse: {
             data?: components["schemas"]["ChangeRequestDetail"];
         };
+        BudgetSummary: {
+            initialAmount?: number;
+            approvedRevisionsTotal?: number;
+            currentBudget?: number;
+            currency?: string;
+            revisions?: components["schemas"]["BudgetRevision"][];
+        };
+        BudgetSummaryResponse: {
+            data?: components["schemas"]["BudgetSummary"];
+        };
+        BudgetRevisionResponse: {
+            data?: components["schemas"]["BudgetRevision"];
+        };
+        CostCategory: {
+            id?: number;
+            code?: string;
+            name?: string;
+            isActive?: boolean;
+        };
+        CostCategoryListResponse: {
+            data?: components["schemas"]["CostCategory"][];
+        };
+        CostCategoryResponse: {
+            data?: components["schemas"]["CostCategory"];
+        };
+        CostListResponse: {
+            data?: components["schemas"]["CostTransaction"][];
+            meta?: components["schemas"]["PaginationMeta"];
+        };
+        CostDetailResponse: {
+            data?: components["schemas"]["CostTransaction"];
+        };
+        CostPostResponse: {
+            data?: components["schemas"]["CostTransaction"];
+            financials?: {
+                actualSpend?: number;
+                remainingBudget?: number;
+                utilization?: number | null;
+                currency?: string;
+            };
+        };
+        ForecastsResponse: {
+            data?: {
+                forecasts?: components["schemas"]["Forecast"][];
+                forecastToComplete?: number;
+                currency?: string;
+            };
+        };
+        ProjectFinancials: {
+            projectId?: number;
+            initialBudget?: number;
+            approvedRevisions?: number;
+            currentBudget?: number;
+            actualSpend?: number;
+            remainingBudget?: number;
+            utilization?: number | null;
+            forecastToComplete?: number;
+            eac?: number;
+            projectedVariance?: number;
+            forecastMissing?: boolean;
+            isOverrun?: boolean;
+            isNearBudget?: boolean;
+        };
+        SpendByCategoryRow: {
+            categoryId?: number;
+            categoryCode?: string;
+            categoryName?: string;
+            totalSpend?: number;
+        };
+        MonthlyTrendRow: {
+            /** Format: date */
+            month?: string;
+            actualSpend?: number | null;
+            forecast?: number | null;
+        };
+        FinanceAlert: {
+            projectId?: number;
+            projectCode?: string;
+            projectName?: string;
+            /** @enum {string} */
+            alertType?: "OVERRUN_FORECAST" | "NEAR_BUDGET" | "OVERSPENT" | "FORECAST_MISSING";
+            /** @enum {string} */
+            severity?: "critical" | "warning" | "info";
+            currentBudget?: number;
+            actualSpend?: number;
+            eac?: number;
+            utilization?: number | null;
+        };
+        FinancialSummaryResponse: {
+            data?: {
+                financials?: components["schemas"]["ProjectFinancials"];
+                spendByCategory?: components["schemas"]["SpendByCategoryRow"][];
+                monthlyTrend?: components["schemas"]["MonthlyTrendRow"][];
+                alerts?: components["schemas"]["FinanceAlert"][];
+                currency?: string;
+            };
+        };
+        FinanceAlertsResponse: {
+            data?: {
+                alerts?: components["schemas"]["FinanceAlert"][];
+                currency?: string;
+            };
+        };
+        FinanceComparisonResponse: {
+            data?: {
+                projects?: components["schemas"]["ProjectFinancials"][];
+                excluded?: number[];
+                currency?: string;
+            };
+        };
     };
     responses: never;
     parameters: {
@@ -3284,6 +3533,16 @@ export interface components {
         riskQParam: string;
         riskSortParam: "score" | "dueDate" | "status";
         riskOrderParam: "asc" | "desc";
+        /** @description One status or a comma-separated list (draft,posted). */
+        costStatusParam: string;
+        costCategoryParam: number;
+        costFromParam: string;
+        costToParam: string;
+        costEntryTypeParam: "expense" | "reversal";
+        /** @description Matches description or vendor (ILIKE). */
+        costQParam: string;
+        costSortParam: "txnDate" | "amount" | "status";
+        costOrderParam: "asc" | "desc";
     };
     requestBodies: never;
     headers: never;

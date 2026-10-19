@@ -1,4 +1,4 @@
-import { ArrowLeft, Construction, SearchX } from 'lucide-react';
+import { ArrowLeft, SearchX } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { isNotFound } from '@/api/errors';
@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChangeRequestsTab } from '@/features/change-requests/components/ChangeRequestsTab';
 import { CR_FILTER_KEYS } from '@/features/change-requests/types';
+import { FinanceTab } from '@/features/finance/components/FinanceTab';
+import { FINANCE_FILTER_KEYS } from '@/features/finance/types';
 import { MilestonesTab } from '@/features/milestones/components/MilestonesTab';
 import { RisksTab } from '@/features/risks/components/RisksTab';
 import { RISK_FILTER_KEYS } from '@/features/risks/types';
@@ -23,8 +25,7 @@ import { ProjectFormSheet } from '../components/ProjectFormSheet';
 import { ProjectHeaderCard } from '../components/ProjectHeaderCard';
 import { useProjectDetail } from '../hooks/useProjectQueries';
 
-// CLAUDE.md tab order. Tabs whose module ships later render a placeholder
-// so the page layout is final from now on.
+// CLAUDE.md tab order.
 const TABS = [
   { value: 'overview', label: 'Overview' },
   { value: 'tasks', label: 'Tasks' },
@@ -36,14 +37,15 @@ const TABS = [
   { value: 'activity', label: 'Activity' },
 ] as const;
 
-const COMING_LATER: Record<string, string> = {
-  finance: 'Project finance arrives with the finance screens.',
-};
-
 // URL keys owned by the tabs that keep their filters in the URL (several
 // share names like `status`/`page`). All are cleared on a tab switch so
 // one tab's filters never leak into another.
-const TAB_FILTER_KEYS = new Set([...TASK_FILTER_KEYS, ...RISK_FILTER_KEYS, ...CR_FILTER_KEYS]);
+const TAB_FILTER_KEYS = new Set([
+  ...TASK_FILTER_KEYS,
+  ...RISK_FILTER_KEYS,
+  ...CR_FILTER_KEYS,
+  ...FINANCE_FILTER_KEYS,
+]);
 
 export function ProjectDetailPage() {
   const { id: idParam } = useParams();
@@ -116,17 +118,15 @@ export function ProjectDetailPage() {
         <TabsContent value="change-requests" className="pt-4">
           <ChangeRequestsTab projectId={id} />
         </TabsContent>
+        <TabsContent value="finance" className="pt-4">
+          <FinanceTab project={project} canManage={canManage} />
+        </TabsContent>
         <TabsContent value="members" className="pt-4">
           <MembersTab project={project} canManage={canManage} />
         </TabsContent>
         <TabsContent value="activity" className="pt-4">
           <ActivityTab projectId={id} />
         </TabsContent>
-        {Object.entries(COMING_LATER).map(([value, message]) => (
-          <TabsContent key={value} value={value} className="pt-4">
-            <EmptyState icon={Construction} message={message} />
-          </TabsContent>
-        ))}
       </Tabs>
 
       {canManage && <ProjectFormSheet open={editOpen} onOpenChange={setEditOpen} project={project} />}

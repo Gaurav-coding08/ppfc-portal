@@ -160,6 +160,27 @@ describe('GET /api/v1/finance/alerts', () => {
     );
     expect(overrunAlerts.length).toBeGreaterThanOrEqual(1);
   });
+
+  // Regression: the scope clause's user-id placeholder ($1) used to collide
+  // with asOf, so every non-admin call failed with a 500.
+  test('non-admin caller gets 200 with only projects they can see', async () => {
+    const pm = await asProjectManager();
+    const res = await pm.agent.get('/api/v1/finance/alerts').query({ departmentId: 1 });
+    expect(res.status).toBe(200);
+
+    const { rows } = await client.query<{ id: number }>(
+      `SELECT id FROM projects WHERE owner_id = $1
+       UNION SELECT project_id FROM project_members WHERE user_id = $1`,
+      [pm.user.id],
+    );
+    const visible = new Set(rows.map((r) => r.id));
+    for (const alert of res.body.data.alerts as { projectId: number }[]) {
+      expect(visible.has(alert.projectId)).toBe(true);
+    }
+
+    const member = await asProjectMember();
+    expect((await member.agent.get('/api/v1/finance/alerts')).status).toBe(200);
+  });
 });
 
 describe('asOf parameter', () => {

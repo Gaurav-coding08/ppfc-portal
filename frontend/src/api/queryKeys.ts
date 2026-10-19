@@ -55,6 +55,22 @@ export const changeRequests = {
   detail: (id: number) => [...changeRequests.all, 'detail', id] as const,
 };
 
+// Every finance read lives under one namespace, because a single posting
+// changes several of them at once (summary, costs, budget, alerts,
+// comparison) and the rule is to invalidate them all rather than patch any
+// one number (see features/finance/hooks/useFinanceMutations.ts).
+export const finance = {
+  all: ['finance'] as const,
+  summary: (projectId: number) => [...finance.all, 'summary', projectId] as const,
+  budget: (projectId: number) => [...finance.all, 'budget', projectId] as const,
+  costs: (projectId: number, filters: Record<string, unknown>) =>
+    [...finance.all, 'costs', projectId, filters] as const,
+  forecasts: (projectId: number) => [...finance.all, 'forecasts', projectId] as const,
+  categories: (includeInactive: boolean) => [...finance.all, 'categories', includeInactive] as const,
+  alerts: (filters: Record<string, unknown>) => [...finance.all, 'alerts', filters] as const,
+  comparison: (projectIds: number[]) => [...finance.all, 'comparison', projectIds] as const,
+};
+
 // Dashboard is out of scope for M1's UI, but Part A reads
 // `GET /dashboard/kpis` once for the topbar's "Data as of" badge, since no
 // M1 endpoint otherwise exposes the reporting date (feature spec Part A.5).

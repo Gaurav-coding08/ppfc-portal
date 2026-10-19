@@ -87,3 +87,95 @@ No backend endpoints were added. Calls: `GET/POST /projects/:projectId/risks`, `
 cd frontend && npm run typecheck && npm run lint && npm test && npm run build   # 57 tests
 cd ../backend && npm test                                                     # 453 tests
 ```
+
+## Part B (done 2026-10-19)
+
+### What exists now
+
+Finance (module 05) in the SPA. The project **Finance tab** shows, in order:
+- an alerts strip and seven KPI cards, each with a definition tooltip;
+- spend-by-category (bar) and monthly actual-vs-forecast (line) charts;
+- the budget with every revision, request and admin approve/reject;
+- the costs table: draft → post, reverse, and draft edit/delete;
+- the monthly forecast grid, saved in one PUT.
+
+Clicking **Actual spend** filters the costs table to posted rows up to the as-of date, which are exactly the rows that number sums. Portfolio pages: `/finance/alerts`, `/finance/comparison` (up to 10 projects, plus the `excluded` notice) and `/finance/categories` (admin). **Feature 17 is complete.**
+
+### Files
+
+- `features/finance/types.ts` — API types, `COST_LIST_DEFAULTS`, `FINANCE_FILTER_KEYS`, `ALERT_LABELS`, `KPI_DEFINITIONS` (CLAUDE.md wording)
+- `features/finance/months.ts` — `monthsBetween`, `isEditableMonth`, `toMonth`, `formatMonth` (string month math for the grid layout)
+- `features/finance/schemas.ts` — cost / revision / category zod schemas and body builders (`toUpdateCostBody` = dirty fields only)
+- `features/finance/hooks/useFinanceQueries.ts` — `useFinancialSummary`, `useBudget`, `useProjectCosts`, `useForecasts`, `useCostCategories`, `useFinanceAlerts`, `useFinanceComparison`
+- `features/finance/hooks/useFinanceMutations.ts` — `useInvalidateFinance` + create/update/delete/post/reverse cost, request/decide revision, save forecasts, create/update category
+- `features/finance/components/` — `FinanceTab`, `FinanceSummaryCards`, `FinanceAlertsStrip`, `FinanceCharts`, `BudgetSection`, `RevisionFormSheet`, `CostsSection`, `CostFilters`, `costColumns`, `CostRowActions`, `CostFormSheet`, `ForecastGrid`
+- `features/finance/pages/` — `FinanceAlertsPage`, `FinanceComparisonPage`, `CostCategoriesPage`
+- `components/form/ReasonConfirmDialog.tsx` — confirm dialog with a required reason
+- `components/display/KpiCard.tsx` — new optional `hint` (tooltip) and `onClick`/`actionLabel` (whole card is a button)
+- `components/display/StatusBadge.tsx` — new `revision` and `alertSeverity` domains
+- `auth/can.ts` — `canDecideBudgetRevision(user, revision)` → `'eligible' | 'own' | 'none'`
+- `components/layout/nav.ts` — per-item `visible`; admin-only "Cost categories"; Comparison icon
+- `api/queryKeys.ts` — `finance` namespace
+- `test/fixtures/finance.ts`; tests `FinanceTab.test.tsx` (9), `FinancePortfolioPages.test.tsx` (3)
+- `docs/openapi.yaml` — finance response schemas + cost list params (see Decisions)
+- **Backend fix:** `backend/src/modules/finance/summary.repository.ts#getAlerts` + regression test in `finance-insights.test.ts`
+
+### Database
+
+None.
+
+### Endpoints / Pages
+
+| Route | Roles | Notes |
+|---|---|---|
+| `/projects/:id?tab=finance` | view (read-only); manage → add/edit/delete/post/reverse, request revision, save forecast; admin (not own) → decide revision | `&status&categoryId&from&to&sort=txnDate\|amount\|status&order&page` |
+| `/finance/alerts` | PM/admin nav (API is scoped for any role) | `?departmentId` |
+| `/finance/comparison` | PM/admin nav | `?projectIds=1,4` (max 10) |
+| `/finance/categories` | admin (others see ForbiddenState) | create, rename, deactivate/reactivate |
+
+No backend endpoints were added. Calls: `GET /projects/:id/financial-summary`, `GET /projects/:id/budget`, `POST /projects/:id/budget-revisions`, `POST /budget-revisions/:id/decision`, `GET/POST /projects/:id/costs`, `PATCH/DELETE /costs/:id`, `POST /costs/:id/post`, `POST /costs/:id/reverse`, `GET/PUT /projects/:id/forecasts`, `GET/POST /cost-categories`, `PATCH /cost-categories/:id`, `GET /finance/alerts`, `GET /finance/comparison`.
+
+### Reusable pieces (use these, don't rebuild)
+
+- `useInvalidateFinance()` — `finance.all` + `projects.all` + `dashboard.all`; any finance write calls it
+- `ReasonConfirmDialog({ title, description, confirmLabel, onConfirm(reason), pending, destructive })` — parent closes it on success; a failed request keeps the typed reason
+- `KpiCard hint` / `onClick` — M3 dashboard KPI cards with definitions and drill-downs
+- `FinanceSummaryCards`, `FinanceCharts` — reuse in the M3 dashboard if per-project panels are needed
+- `monthsBetween` / `isEditableMonth` — any month grid tied to the reporting date
+- `StatusBadge domain="alertSeverity"` — dashboard alert lists
+
+### Decisions & trade-offs
+
+- **Numbers are refetched, never recalculated.** `POST /costs/:id/post` returns `financials`, but they are ignored: they're computed as of the *cost's* date, not the reporting date, so showing them would briefly disagree with every other screen. The test returns `{}` for them and asserts the card shows the second summary response.
+- **One Idempotency-Key per confirmation.** The key is created when the Post (or revision-decision) dialog opens and reused for retries from that dialog. Next to it: an `inFlight` ref and the dialog's pending-disable. Checked by removing both guards: the double-click test then saw 2 POSTs and failed.
+- **Revision decision sends `version: 1`.** `budget_revisions` has no version column (feature 11: the guard is `status = 'pending'`), but the decision schema still requires `version >= 1`. OpenAPI documents this. A stale decision comes back as 422 INVALID_TRANSITION → toast + refetch.
+- **Forecast PUT also sends an Idempotency-Key** (CLAUDE.md rule) even though the route has no idempotency middleware; a repeated PUT of the same months is idempotent anyway.
+- **Forecast grid editability mirrors the backend rule** (month > reporting month, ≤ project end) only to lay out the inputs; the backend 422 still decides. Blank months are not sent (the PUT can't delete). The grid remounts on each refetch so inputs start from saved values.
+- **"Reversed" status isn't shown on the original expense.** The API has no "has been reversed" flag, and deriving one from reversal rows on the current page would be wrong across pages. Reversal rows are muted with a "Reversal" badge and a negative `signedAmount`; reversing again returns 422 with its message.
+- **Drill-down = project costs `?status=posted&to=<asOf>`**, the same set `fn_project_financials` sums (reversals included). Verified live on PRJ-004: 11 rows summing to 103,328 = actual spend.
+- **Contributors**: the Finance tab is read-only (the API allows view); the finance nav group stays hidden (feature 16 decision). Write buttons aren't rendered; a direct 403 becomes a toast with the request id.
+- **Comparison selection in the URL**, capped at 10 (backend max). Excluded ids are labelled through `useProjectLabel`.
+- **OpenAPI fixed rather than casting:**
+  - every finance path had no response schema;
+  - the cost list was missing 8 query params;
+  - `CostTransaction` lacked its joined names and posting fields;
+  - `BudgetRevision` listed a `version` that doesn't exist and lacked names, reason and timestamps;
+  - `Forecast.month` comes back as `YYYY-MM-01`, not `YYYY-MM`.
+
+  `routes:check` is still 77/77.
+- **Backend bug fixed (not a new endpoint):** `GET /finance/alerts` returned 500 for every non-admin. `scopedProjectIdsSql` hardcodes `$1` for the user id, but `getAlerts` put `asOf` at `$1`. Scope params now come first, the same rule the risks and costs repos follow. Regression test added (PM + contributor get 200, only visible projects).
+
+### Known gaps / TODO for later features
+
+- No "reversed" marker on an original posted cost (needs an API flag, e.g. `isReversed`).
+- `GET /costs` (cross-project drill) is unused; the M3 dashboard drill-downs can use it.
+- Costs table has no text search (`q` is supported by the API).
+- Category deactivation guard (drafts in use) relies on the backend 422 toast.
+- Main bundle chunk still triggers Vite's 500 KB warning (547 KB, down from 729 KB because finance pages are lazy).
+
+### How to verify quickly
+
+```bash
+cd frontend && npm run typecheck && npm run lint && npm test && npm run build   # 69 tests
+cd ../backend && npm test                                                     # 454 tests
+```

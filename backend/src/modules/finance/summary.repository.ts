@@ -197,11 +197,16 @@ export async function getAlerts(
   departmentId?: number,
   client: Queryable = pool,
 ): Promise<AlertRow[]> {
-  const deptFilter = departmentId != null
-    ? `AND p.department_id = $${scopeParams.length + 2}`
-    : '';
-  const params: unknown[] = [asOf, ...scopeParams];
-  if (departmentId != null) params.push(departmentId);
+  // `scopedProjectIdsSql` hardcodes its user-id placeholder as $1, so its
+  // params (0 or 1 entries) must come first — same rule as
+  // risks/costs repositories. asOf and departmentId are numbered after them.
+  const params: unknown[] = [...scopeParams, asOf];
+  const asOfParam = `$${params.length}`;
+  let deptFilter = '';
+  if (departmentId != null) {
+    params.push(departmentId);
+    deptFilter = `AND p.department_id = $${params.length}`;
+  }
 
   const { rows } = await client.query<{
     project_id: number;
@@ -216,7 +221,7 @@ export async function getAlerts(
   }>(
     `WITH fin AS (
        SELECT f.*, p.code AS project_code, p.name AS project_name, p.status AS project_status
-       FROM fn_project_financials($1) f
+       FROM fn_project_financials(${asOfParam}) f
        JOIN projects p ON p.id = f.project_id
        WHERE p.status NOT IN ('cancelled', 'closed')
          ${scopeSql} ${deptFilter}

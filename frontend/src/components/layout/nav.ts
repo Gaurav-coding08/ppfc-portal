@@ -1,10 +1,12 @@
 import {
   AlertTriangle,
+  BarChart3,
   Bot,
   FolderKanban,
   GitPullRequest,
   LayoutDashboard,
   ListChecks,
+  Tags,
   ScrollText,
   Shield,
   Users,
@@ -17,6 +19,9 @@ export interface NavItem {
   label: string;
   to: string;
   icon: LucideIcon;
+  // Per-item version of NavGroup.visible, for one admin-only link inside
+  // a group other roles can see.
+  visible?: (user: AuthUser | null) => boolean;
 }
 
 export interface NavGroup {
@@ -58,7 +63,9 @@ export const NAV_GROUPS: NavGroup[] = [
     visible: (user) => isAdmin(user) || isProjectManager(user),
     items: [
       { label: 'Alerts', to: '/finance/alerts', icon: AlertTriangle },
-      { label: 'Comparison', to: '/finance/comparison', icon: AlertTriangle },
+      { label: 'Comparison', to: '/finance/comparison', icon: BarChart3 },
+      // Category create/rename/deactivate is admin-only (backend requireRole).
+      { label: 'Cost categories', to: '/finance/categories', icon: Tags, visible: (user) => isAdmin(user) },
     ],
   },
   {
