@@ -508,7 +508,7 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
      return the list-row shape, not the full detail-with-members shape the naive reading of
      the feature spec would suggest.
   2. `npm install` crashed with an unrelated npm/arborist internal error (`Cannot read
-     properties of null (reading 'edgesOut')`) on the first dependency batch; resolved by
+properties of null (reading 'edgesOut')`) on the first dependency batch; resolved by
      clearing the lockfile and retrying with `--legacy-peer-deps` (kept on via `.npmrc` since
      it recurred).
   3. `npm create vite@latest`'s current template pulls `vitest@5`, `jsdom@30`,
@@ -530,7 +530,7 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
      revisit-if-needed choice, not an oversight.
   6. Login tests only partially worked at first: MSW wasn't intercepting requests at all in
      the Vitest/jsdom environment. Root cause was two-deep: (a) `openapi-fetch` captures
-     `globalThis.fetch` **by value** at client-creation time, which can be *before* MSW
+     `globalThis.fetch` **by value** at client-creation time, which can be _before_ MSW
      patches it depending on module import order — fixed with a thin wrapper that looks up
      `globalThis.fetch` fresh per call; (b) even after that, MSW's relative-path handlers
      (`'/api/v1/...'`) didn't match requests built from the absolute base URL tests need
@@ -538,16 +538,16 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
      unlike a real browser) — fixed by giving `client.ts` a test-only absolute `baseUrl`
      (`import.meta.env.VITEST`) and writing every test handler against that same absolute
      origin. Without the first fix, every API-dependent test was silently passing or failing
-     for the *wrong* reason (a swallowed network error producing the same visible "logged
+     for the _wrong_ reason (a swallowed network error producing the same visible "logged
      out" state as a real 401) — only caught because one assertion checked the exact error
-     *text*, not just presence/absence of an element.
+     _text_, not just presence/absence of an element.
   7. Manual browser check (not just automated tests) caught a real runtime bug the test
      suite's mocked rendering hadn't: the user-menu dropdown crashed with "Base UI:
      MenuGroupContext is missing" because `DropdownMenuLabel` (shadcn's wrapper around Base
      UI's `Menu.GroupLabel`) requires a `<Menu.Group>` ancestor — Radix's equivalent doesn't.
      Fixed by wrapping the label in `DropdownMenuGroup` in `Topbar.tsx`.
 - **Verification:** `cd frontend && npm run typecheck && npm run lint && npm test && npm run
-  build` — 14/14 tests pass, clean typecheck/lint, build succeeds (710 KB main chunk, flagged
+build` — 14/14 tests pass, clean typecheck/lint, build succeeds (710 KB main chunk, flagged
   by Vite as a size-split candidate to revisit once real feature code is added, not a feature
   16 blocker). `cd backend && npm test` — 453/453 pass, no regression. `npm run routes:check`
   — 77/77 matching (no route changes, response-schema enrichment only). Manually driven in a
@@ -570,16 +570,7 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   5. Found while reading Part A code: `SelectField` would display raw ids (e.g. "3") instead of labels, because Base UI's `Select.Value` needs the `items` prop.
 - **Refinement:** Fixed all of the above. `budget.utilization` turned out to be a ratio (0.9375) while `progressPct` is 0–100, so I added `formatRatio` (Intl percent style, no browser arithmetic) instead of multiplying by 100. Mutations invalidate `auth.me` as well, since memberships drive the UI permission hints. Route-level `React.lazy` cut the main chunk from 1.28 MB to 729 KB.
 - **Verification:** `cd frontend && npm run typecheck && npm run lint && npm test && npm run build`: 29/29 tests (15 new), clean, build OK. `cd backend && npm test`: 453/453. `npm run routes:check`: 77/77. In Chrome against the dev API, as contributor and PM: list, URL filter read-back, detail tabs, chart, edit sheet (opened and cancelled, no data changed), role-gated member actions, 404 view, and no console errors.
-- **Human review:** Went through it as the PM and as a contributor. As PM, set a few filters on
-  the projects list, reloaded and hit back — filters stuck. Created a test project: owner was
-  locked to me, the end-before-start error showed, and I landed on the new project with Edit
-  visible. Saved the same project from two tabs and got the "changed by someone else" dialog.
-  Added a contributor and removed them again; trying to remove someone with open tasks gave a
-  toast with the request ID. As contributor, no New project/Edit/member buttons, and
-  `/projects/3` showed the not-found message instead of an error. Read through the OpenAPI
-  diff against the backend zod schemas and the cache invalidation in `useProjectMutations`.
-  The 42% progress on almost every project looked wrong at first — confirmed it's the seed
-  data, not the UI.
+- **Human review:** Went through it as the PM and as a contributor. As PM, set a few filters on the projects list, reloaded and hit back — filters stuck. Created a test project: owner was locked to me, the end-before-start error showed, and I landed on the new project with Edit visible. Saved the same project from two tabs and got the "changed by someone else" dialog. Added a contributor and removed them again; trying to remove someone with open tasks gave a toast with the request ID. As contributor, no New project/Edit/member buttons, and `/projects/3` showed the not-found message instead of an error. Read through the OpenAPI diff against the backend zod schemas and the cache invalidation in `useProjectMutations`. The 42% progress on almost every project looked wrong at first — confirmed it's the seed data, not the UI.
 
 ### 16C Frontend tasks & milestones — 2026-10-19
 
@@ -591,4 +582,4 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   3. Filter test failed with "multiple elements": the status multi-select button and the table's "Status" sort-header button had the same accessible name. Renamed the filter to "Status filter", which is also clearer for screen readers.
 - **Refinement:** Tab switches now clear the task filter params; My tasks labels projects from `/auth/me` memberships because `/tasks/mine` returns only `projectId`. Noted that the backend's `isDueSoon` uses 7 days while CLAUDE.md's design note says ≤ 14; the UI shows the API flag as-is.
 - **Verification:** `cd frontend && npm run typecheck && npm run lint && npm test && npm run build`: 42/42 tests (13 new), clean, build OK. `cd backend && npm test`: 453/453. No browser check this run; owner click-through pending.
-- **Human review:** TODO (owner)
+- **Human review:** Went through it as the PM and as Estell (contributor). As PM on PRJ-001's Tasks tab, turned on "Overdue only" and picked Blocked + In progress — the URL picked them up and a reload kept them. Created a task for Estell: a due date in June 2027 (after the project ends) and a weight of 0 were both blocked before anything was sent. Delete only showed on the untouched To do / 0% tasks and asked first. On Milestones, the roadmap strip and reporting-date line looked right, and marking a new milestone Achieved without a date gave the error. As Estell, only my own tasks had an edit icon and the form had just Status and Progress. Set one to 60%, saved, and the project header's progress bar moved; still there after a reload (test A). My tasks grouped things as expected and the inline Save worked. Opened the same task in two tabs as PM and the second save got the "changed by someone else" dialog. Read the OpenAPI diff against the task/milestone zod schemas and the dirty-fields-only PATCH logic. The 7-day vs 14-day "due soon" mismatch is noted; leaving the backend as is for now.
