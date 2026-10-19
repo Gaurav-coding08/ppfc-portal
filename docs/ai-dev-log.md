@@ -739,3 +739,12 @@ build` — 14/14 tests pass, clean typecheck/lint, build succeeds (710 KB main c
   - YourFocus test mocks return the raw API shape (`{ data: [...], meta: {...} }`) so the hooks' internal transforms are exercised end-to-end.
   - Finance alerts mock uses `{ data: { alerts: [...] } }` to match the actual backend response shape consumed by `useFinanceAlerts`.
 - **Verification:** Frontend gate: typecheck pass, lint pass, 100/100 tests pass (11 new), build pass. Backend/E2E skipped (Docker not running; no backend changes).
+
+### 19C — Optional enhancements
+- **What changed:** Added CSV export buttons to Projects, Tasks, Risks and Costs lists, using a generic `toCsv<T>` utility with typed value accessors. Replaced the milestone timeline's flat dot layout with a Gantt-style roadmap grouped by project (diamond markers on per-project rows with a shared time axis and quarter-mark grid). Added a README "Enhancements" section listing all feature-19 improvements.
+- **Decisions:**
+  - CSV generation is purely client-side from the current filtered page already in memory — no new API call needed. Each list defines its own `CSV_COLUMNS` array with accessor functions so nested fields (e.g. `department.name`, `owner.fullName`) flatten correctly.
+  - The `ExportCsvButton` self-hides when rows are empty/undefined, so it doesn't show during loading or on empty states.
+  - The Gantt roadmap groups milestones by `projectCode` using a Map, keeping insertion order. Each project row is a CSS grid with `grid-cols-[120px_1fr]` for a fixed label column and a fluid track.
+  - No new dependencies: CSV is built with plain string concatenation and RFC 4180 escaping.
+- **Verification:** Frontend gate: typecheck pass, lint pass, 100/100 tests pass, build pass.

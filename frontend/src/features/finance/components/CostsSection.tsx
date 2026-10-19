@@ -5,6 +5,7 @@ import { ApiError } from '@/api/errors';
 import { DataTable } from '@/components/data/DataTable';
 import { EmptyState } from '@/components/data/EmptyState';
 import { ErrorState } from '@/components/data/ErrorState';
+import { ExportCsvButton } from '@/components/data/ExportCsvButton';
 import { LoadingState } from '@/components/data/LoadingState';
 import { Pagination } from '@/components/data/Pagination';
 import { ConfirmDialog } from '@/components/form/ConfirmDialog';
@@ -22,6 +23,19 @@ import {
 } from '../hooks/useFinanceMutations';
 import { COST_PAGE_SIZE, useProjectCosts } from '../hooks/useFinanceQueries';
 import type { Cost, CostListFilters } from '../types';
+
+const CSV_COLUMNS = [
+  { label: 'Date', value: (r: Cost) => r.txnDate },
+  { label: 'Category', value: (r: Cost) => r.categoryName },
+  { label: 'Description', value: (r: Cost) => r.description },
+  { label: 'Vendor', value: (r: Cost) => r.vendor },
+  { label: 'Amount', value: (r: Cost) => r.signedAmount },
+  { label: 'Status', value: (r: Cost) => r.status },
+  { label: 'Type', value: (r: Cost) => r.entryType },
+  { label: 'Created by', value: (r: Cost) => r.createdByName },
+  { label: 'Posted by', value: (r: Cost) => r.postedByName },
+  { label: 'Posted at', value: (r: Cost) => r.postedAt },
+];
 import { CostFilters } from './CostFilters';
 import { CostFormSheet } from './CostFormSheet';
 import { costColumns, costRowClassName } from './costColumns';
@@ -151,7 +165,10 @@ export const CostsSection = forwardRef<
               Posted costs can't be edited or deleted; corrections are made by reversal.
             </p>
           </div>
-          {addButton}
+          <div className="flex items-center gap-2">
+            <ExportCsvButton rows={list.data?.rows} columns={CSV_COLUMNS} filename={`project-${projectId}-costs`} />
+            {addButton}
+          </div>
         </div>
 
         <CostFilters filters={filters} setFilters={setFilters} />

@@ -264,6 +264,22 @@ ppfc-portal/
 
 Base path: `/api/v1`. All responses follow the conventions in CLAUDE.md.
 
+## Enhancements
+
+Recent UI and UX improvements beyond the core PMO features:
+
+- **Keel rebrand** — product renamed to "Keel" with an inline SVG logomark, split-layout login page, and updated favicon.
+- **Dashboard glance band** — a portfolio-at-a-glance strip (budget, actual, EAC, overruns, utilisation) above the KPI cards.
+- **Project overview redesign** — two-column layout with next milestones, top risks, financial mini-summary and recent activity.
+- **List polish** — sticky table headers, status-colour left borders on rows, 40 px row height.
+- **Milestone roadmap** — Gantt-style strip grouping milestones by project on a shared time axis.
+- **CSV export** — "Export CSV" button on Projects, Tasks, Risks and Costs lists (current filtered page).
+- **Guided tour** — first-login walkthrough (5 steps: sidebar, filters, drill-down, Your focus, notifications). Skippable, remembered in localStorage, re-openable from the user menu. Disabled in E2E (`?tour=off` or `navigator.webdriver`).
+- **"Your focus" strip** — role-based attention items below the glance band: overdue tasks (contributor), pending CRs + finance alerts (PM), failed automation + pending CRs (admin).
+- **"How to read this"** — dismissible info panel explaining the reporting date, SQL-computed numbers, filter combination and drill icons.
+- **Version-conflict handling** — PATCH bodies send the loaded `version`; a 409 `VERSION_CONFLICT` shows a reload dialog instead of silently overwriting.
+- **"What's new"** — static update list in the user dropdown menu.
+
 ## Troubleshooting
 
 ### Port 5433 already in use

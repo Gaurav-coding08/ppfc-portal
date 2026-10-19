@@ -162,30 +162,72 @@ export function ProjectHealthTable({
 }
 
 /**
- * Planned milestones due in the next `withinDays` days. Dots are placed by
- * the API's `daysToDue` (no date maths in the browser); the list below
- * repeats every milestone as text.
+ * Gantt-style milestone roadmap grouped by project. Each project gets a
+ * row with diamond markers on a shared time axis (0 to withinDays).
  */
 export function MilestoneTimeline({ rows, withinDays }: { rows: DashboardMilestone[]; withinDays: number }) {
-  const position = (days: number) => `${Math.min(Math.max(days / withinDays, 0), 1) * 100}%`;
+  const byProject = new Map<string, { code: string; projectId: number; milestones: DashboardMilestone[] }>();
+  for (const m of rows) {
+    let group = byProject.get(m.projectCode);
+    if (!group) {
+      group = { code: m.projectCode, projectId: m.projectId, milestones: [] };
+      byProject.set(m.projectCode, group);
+    }
+    group.milestones.push(m);
+  }
+  const projects = [...byProject.values()];
+
+  const pct = (days: number) => Math.min(Math.max(days / withinDays, 0), 1) * 100;
+
+  const quarterMarks = [0.25, 0.5, 0.75].map((f) => Math.round(f * withinDays));
+
   return (
-    <div className="space-y-4">
-      <div className="relative mx-2 h-6" aria-hidden>
-        <div className="absolute top-1/2 right-0 left-0 h-px bg-slate-200" />
-        {rows.map((m) => (
-          <span
-            key={m.id}
-            className="absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-600 ring-2 ring-white"
-            style={{ left: position(m.daysToDue) }}
-            title={`${m.projectCode} ${m.name} — ${formatDate(m.dueDate)}`}
-          />
-        ))}
+    <div className="space-y-1">
+      <div className="grid grid-cols-[120px_1fr] items-center gap-2 px-1 text-xs text-slate-400" aria-hidden>
+        <span />
+        <div className="relative h-5">
+          <span className="absolute left-0">Now</span>
+          {quarterMarks.map((d) => (
+            <span key={d} className="absolute -translate-x-1/2 tabular-nums" style={{ left: `${pct(d)}%` }}>
+              +{d}d
+            </span>
+          ))}
+          <span className="absolute right-0">+{withinDays}d</span>
+        </div>
       </div>
-      <div className="text-muted-foreground -mt-3 flex justify-between text-xs">
-        <span>Reporting date</span>
-        <span>+{withinDays} days</span>
-      </div>
-      <ul className="divide-y text-sm">
+
+      {projects.map((p) => (
+        <div key={p.code} className="grid grid-cols-[120px_1fr] items-center gap-2 px-1">
+          <Link
+            to={`/projects/${p.projectId}?tab=milestones`}
+            className="text-primary truncate text-sm font-medium hover:underline"
+          >
+            {p.code}
+          </Link>
+          <div className="relative h-8 rounded bg-slate-50">
+            <div className="absolute inset-y-0 right-0 left-0">
+              <div className="absolute top-1/2 right-0 left-0 h-px bg-slate-200" />
+              {quarterMarks.map((d) => (
+                <div
+                  key={d}
+                  className="absolute top-0 bottom-0 w-px bg-slate-100"
+                  style={{ left: `${pct(d)}%` }}
+                />
+              ))}
+            </div>
+            {p.milestones.map((m) => (
+              <span
+                key={m.id}
+                className="absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-sm bg-indigo-600 ring-2 ring-white"
+                style={{ left: `${pct(m.daysToDue)}%` }}
+                title={`${m.name} — ${formatDate(m.dueDate)} (in ${m.daysToDue} days)`}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <ul className="mt-3 divide-y text-sm">
         {rows.map((m) => (
           <li key={m.id} className="flex items-center justify-between gap-3 py-2">
             <span className="min-w-0">

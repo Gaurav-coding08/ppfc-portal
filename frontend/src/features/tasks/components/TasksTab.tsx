@@ -6,6 +6,7 @@ import { useAuth } from '@/auth/useAuth';
 import { DataTable } from '@/components/data/DataTable';
 import { EmptyState } from '@/components/data/EmptyState';
 import { ErrorState } from '@/components/data/ErrorState';
+import { ExportCsvButton } from '@/components/data/ExportCsvButton';
 import { LoadingState } from '@/components/data/LoadingState';
 import { Pagination } from '@/components/data/Pagination';
 import { statusBorderClass } from '@/lib/statusBorder';
@@ -17,6 +18,16 @@ import { useUrlFilters } from '@/lib/useUrlFilters';
 import { useDeleteTask } from '../hooks/useTaskMutations';
 import { TASK_PAGE_SIZE, useProjectTasks } from '../hooks/useTaskQueries';
 import { TASK_LIST_DEFAULTS, isUntouched, type TaskRow } from '../types';
+
+const CSV_COLUMNS = [
+  { label: 'Title', value: (r: TaskRow) => r.title },
+  { label: 'Assignee', value: (r: TaskRow) => r.assigneeName },
+  { label: 'Status', value: (r: TaskRow) => r.status },
+  { label: 'Priority', value: (r: TaskRow) => r.priority },
+  { label: 'Due date', value: (r: TaskRow) => r.dueDate },
+  { label: 'Weight', value: (r: TaskRow) => r.weight },
+  { label: 'Progress %', value: (r: TaskRow) => r.progress },
+];
 import { ContributorTaskSheet } from './ContributorTaskSheet';
 import { TaskFilters } from './TaskFilters';
 import { TaskFormSheet } from './TaskFormSheet';
@@ -82,7 +93,10 @@ export function TasksTab({ project, canManage }: { project: ProjectDetail; canMa
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <TaskFilters filters={filters} setFilters={setFilters} assigneeOptions={assigneeOptions} />
-        {newButton}
+        <div className="flex items-center gap-2">
+          <ExportCsvButton rows={list.data?.rows} columns={CSV_COLUMNS} filename={`${project.code}-tasks`} />
+          {newButton}
+        </div>
       </div>
 
       {list.isPending ? (

@@ -112,3 +112,34 @@
 
 - Frontend: typecheck pass, lint pass, 100/100 tests pass, build pass
 - Backend/E2E: skipped (Docker not running; no backend changes)
+
+## 19C — Optional enhancements
+
+### Changes
+
+- **CSV export** on Projects, Tasks, Risks and Costs lists:
+  - Created `lib/csv.ts` with `toCsv<T>(rows, columns)` (typed value accessors) and `downloadCsv()`.
+  - Created `ExportCsvButton` component (renders only when rows exist).
+  - Added to: `ProjectsListPage`, `TasksTab`, `RisksTab`, `CostsSection` — each defines its own `CSV_COLUMNS` with flat field accessors that handle nested objects (e.g. `r.department?.name`).
+- **Milestone roadmap Gantt view**: replaced the flat dot-on-a-line `MilestoneTimeline` with a Gantt-style layout:
+  - Groups milestones by project code.
+  - Each project row shows a horizontal track with diamond markers positioned by `daysToDue`.
+  - Shared quarter-mark grid lines.
+  - Full milestone list below for text detail.
+- **README "Enhancements" section**: added a bullet list covering all feature-19 improvements plus version-conflict handling.
+
+### Files touched
+
+- `frontend/src/lib/csv.ts` (new)
+- `frontend/src/components/data/ExportCsvButton.tsx` (new)
+- `frontend/src/features/projects/pages/ProjectsListPage.tsx` (CSV export button)
+- `frontend/src/features/tasks/components/TasksTab.tsx` (CSV export button)
+- `frontend/src/features/risks/components/RisksTab.tsx` (CSV export button)
+- `frontend/src/features/finance/components/CostsSection.tsx` (CSV export button)
+- `frontend/src/features/dashboard/components/DeliveryVisuals.tsx` (Gantt roadmap)
+- `README.md` (Enhancements section)
+
+### Gate results
+
+- Frontend: typecheck pass, lint pass, 100/100 tests pass, build pass
+- Backend/E2E: skipped (Docker not running; no backend changes)

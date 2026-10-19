@@ -5,6 +5,7 @@ import { isVersionConflict } from '@/api/errors';
 import { DataTable } from '@/components/data/DataTable';
 import { EmptyState } from '@/components/data/EmptyState';
 import { ErrorState } from '@/components/data/ErrorState';
+import { ExportCsvButton } from '@/components/data/ExportCsvButton';
 import { LoadingState } from '@/components/data/LoadingState';
 import { Pagination } from '@/components/data/Pagination';
 import { ConfirmDialog } from '@/components/form/ConfirmDialog';
@@ -16,6 +17,19 @@ import { useUrlFilters } from '@/lib/useUrlFilters';
 import { useUpdateRisk } from '../hooks/useRiskMutations';
 import { RISK_PAGE_SIZE, useProjectRisks } from '../hooks/useRiskQueries';
 import { PROJECT_RISK_DEFAULTS, type Risk } from '../types';
+
+const CSV_COLUMNS = [
+  { label: 'Type', value: (r: Risk) => r.type },
+  { label: 'Title', value: (r: Risk) => r.title },
+  { label: 'Owner', value: (r: Risk) => r.ownerName },
+  { label: 'Probability', value: (r: Risk) => r.probability },
+  { label: 'Impact', value: (r: Risk) => r.impact },
+  { label: 'Score', value: (r: Risk) => r.score },
+  { label: 'Exposure', value: (r: Risk) => r.exposure },
+  { label: 'Status', value: (r: Risk) => r.status },
+  { label: 'Due date', value: (r: Risk) => r.dueDate },
+  { label: 'Mitigation', value: (r: Risk) => r.mitigation },
+];
 import { RiskFilters } from './RiskFilters';
 import { RiskFormSheet } from './RiskFormSheet';
 import { riskColumns, riskRowClassName } from './riskColumns';
@@ -68,7 +82,10 @@ export function RisksTab({ project, canManage }: { project: ProjectDetail; canMa
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <RiskFilters filters={filters} setFilters={setFilters} />
-        {newButton}
+        <div className="flex items-center gap-2">
+          <ExportCsvButton rows={list.data?.rows} columns={CSV_COLUMNS} filename={`${project.code}-risks`} />
+          {newButton}
+        </div>
       </div>
 
       {list.isPending ? (

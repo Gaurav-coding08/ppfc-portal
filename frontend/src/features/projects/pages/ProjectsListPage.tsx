@@ -6,6 +6,7 @@ import { useAuth } from '@/auth/useAuth';
 import { DataTable } from '@/components/data/DataTable';
 import { EmptyState } from '@/components/data/EmptyState';
 import { ErrorState } from '@/components/data/ErrorState';
+import { ExportCsvButton } from '@/components/data/ExportCsvButton';
 import { LoadingState } from '@/components/data/LoadingState';
 import { Pagination } from '@/components/data/Pagination';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -16,7 +17,19 @@ import { ProjectFilters } from '../components/ProjectFilters';
 import { ProjectFormSheet } from '../components/ProjectFormSheet';
 import { projectColumns } from '../components/projectColumns';
 import { PROJECT_PAGE_SIZE, useProjectsList } from '../hooks/useProjectQueries';
-import { PROJECT_LIST_DEFAULTS } from '../types';
+import { PROJECT_LIST_DEFAULTS, type ProjectListItem } from '../types';
+
+const CSV_COLUMNS = [
+  { label: 'Code', value: (r: ProjectListItem) => r.code },
+  { label: 'Name', value: (r: ProjectListItem) => r.name },
+  { label: 'Department', value: (r: ProjectListItem) => r.department?.name },
+  { label: 'Owner', value: (r: ProjectListItem) => r.owner?.fullName },
+  { label: 'Status', value: (r: ProjectListItem) => r.status },
+  { label: 'Start date', value: (r: ProjectListItem) => r.startDate },
+  { label: 'End date', value: (r: ProjectListItem) => r.endDate },
+  { label: 'Progress %', value: (r: ProjectListItem) => r.progressPct },
+  { label: 'Delivery status', value: (r: ProjectListItem) => r.deliveryStatus },
+];
 
 // Filters, sort and page all live in the URL (CLAUDE.md "Lists"), so a
 // filtered view can be shared or bookmarked and the back button restores
@@ -41,7 +54,12 @@ export function ProjectsListPage() {
       <PageHeader
         title="Projects"
         description="Every project you own, manage or contribute to."
-        action={newButton}
+        action={
+          <div className="flex items-center gap-2">
+            <ExportCsvButton rows={list.data?.rows} columns={CSV_COLUMNS} filename="projects" />
+            {newButton}
+          </div>
+        }
       />
       <ProjectFilters filters={filters} setFilters={setFilters} />
 
