@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { TourOverlay } from '@/components/layout/GuidedTour';
+import { useTour } from '@/components/layout/useTour';
 import { useReportingDate } from '@/components/layout/useReportingDate';
 import { useUrlFilters } from '@/lib/useUrlFilters';
 import { DashboardFilterBar } from '../components/DashboardFilterBar';
@@ -7,11 +9,13 @@ import { MilestoneTimeline, OverdueByOwnerChart, ProjectHealthTable } from '../c
 import { DrillDrawer } from '../components/DrillDrawer';
 import { BudgetVsActualChart, SpendByCategoryChart } from '../components/FinanceVisuals';
 import { GlanceBand } from '../components/GlanceBand';
+import { HowToRead } from '../components/HowToRead';
 import { MonthlySpendChart } from '../components/MonthlySpendChart';
 import { KpiSections } from '../components/KpiSections';
 import { LastUpdated } from '../components/LastUpdated';
 import { RiskMatrix } from '../components/RiskMatrix';
 import { Widget } from '../components/Widget';
+import { YourFocus } from '../components/YourFocus';
 import type { DrillRequest } from '../drill';
 import {
   useBudgetVsActual,
@@ -60,15 +64,24 @@ export function DashboardPage() {
   const reportingDate = useReportingDate();
   const asOf = kpis.data?.meta.asOf ?? reportingDate;
 
+  const tour = useTour();
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Dashboard"
         description="Portfolio delivery, risk and finance. Every figure is computed live by the server."
-        action={<LastUpdated generatedAt={kpis.data?.meta.generatedAt} />}
+        action={
+          <div className="flex items-center gap-2">
+            <HowToRead />
+            <LastUpdated generatedAt={kpis.data?.meta.generatedAt} />
+          </div>
+        }
       />
 
       <GlanceBand kpis={kpis.data?.data} asOf={asOf} />
+
+      <YourFocus />
 
       <DashboardFilterBar filters={filters} setFilters={setFilters} asOf={asOf} />
 
@@ -157,6 +170,15 @@ export function DashboardPage() {
       </div>
 
       <DrillDrawer request={drill} query={query} onClose={() => setDrill(null)} />
+
+      <TourOverlay
+        active={tour.active}
+        step={tour.step}
+        total={tour.steps.length}
+        currentStep={tour.currentStep}
+        onNext={tour.next}
+        onSkip={tour.skip}
+      />
     </div>
   );
 }

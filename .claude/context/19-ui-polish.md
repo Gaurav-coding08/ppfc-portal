@@ -71,3 +71,44 @@
 
 - Frontend: typecheck pass, lint pass, 89/89 tests pass, build pass
 - Backend/E2E: skipped (Docker not running; no backend changes)
+
+## 19D — Guidance & "what's new"
+
+### Changes
+
+- **"How to read this" toggle** (`HowToRead.tsx`): dismissible info panel explaining the reporting date, SQL-computed numbers, filter combination, and drill icon. Remembers dismissal via localStorage (`keel-how-to-read-dismissed`). Collapsed state shows a small outline button in the page header action area.
+- **Role-based "Your focus" strip** (`YourFocus.tsx`): card below the glance band showing role-specific attention items:
+  - Contributor: overdue tasks + due-soon tasks (from `useMyTasks`)
+  - PM: CRs awaiting decision + finance alerts
+  - Admin: failed automation runs + pending CRs
+  - Empty state: "Nothing needs your attention." with CheckCircle2 icon
+  - `data-testid="your-focus"` for tour targeting
+- **First-login guided tour** (`useTour.ts` + `GuidedTour.tsx`):
+  - 5 steps: Navigation (sidebar), Filters, Drill down, Your focus, Notifications
+  - Auto-starts 500ms after first login; disabled when `?tour=off` or `navigator.webdriver`
+  - Persisted via localStorage (`keel-tour-completed`)
+  - TourOverlay renders backdrop + positioned card with Skip/Next/Done
+  - Listens for `keel-start-tour` custom event so Topbar can trigger it
+  - Hook split into `useTour.ts` to satisfy react-refresh/only-export-components
+- **"What's new" and "Take the tour"** in user dropdown (`Topbar.tsx`):
+  - "Take the tour" navigates to dashboard and dispatches `keel-start-tour` event
+  - "What's new" toggles a static list of recent updates
+- **Unit tests** (11 new, 100 total):
+  - `GuidedTour.test.tsx`: auto-start, step advance, Skip persists, completed blocks re-show, restart via function, restart via custom event, `?tour=off` disables, `navigator.webdriver` disables
+  - `YourFocus.test.tsx`: contributor (overdue + due-soon), PM (CRs + alerts), admin (failed runs + CRs), empty state
+
+### Files touched
+
+- `frontend/src/components/layout/useTour.ts` (new — hook + steps)
+- `frontend/src/components/layout/GuidedTour.tsx` (refactored — TourOverlay component only)
+- `frontend/src/components/layout/GuidedTour.test.tsx` (new — 7 tests)
+- `frontend/src/features/dashboard/components/HowToRead.tsx` (new)
+- `frontend/src/features/dashboard/components/YourFocus.tsx` (new)
+- `frontend/src/features/dashboard/components/YourFocus.test.tsx` (new — 4 tests)
+- `frontend/src/features/dashboard/pages/DashboardPage.tsx` (render HowToRead, YourFocus, TourOverlay)
+- `frontend/src/components/layout/Topbar.tsx` (tour + what's new menu items)
+
+### Gate results
+
+- Frontend: typecheck pass, lint pass, 100/100 tests pass, build pass
+- Backend/E2E: skipped (Docker not running; no backend changes)

@@ -1,4 +1,5 @@
-import { ChevronDown, LogOut } from 'lucide-react';
+import { ChevronDown, Compass, LogOut, Sparkles } from 'lucide-react';
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
@@ -41,6 +42,8 @@ export function Topbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const reportingDate = useReportingDate();
+
+  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
 
   async function handleLogout() {
     await logout();
@@ -103,6 +106,31 @@ export function Topbar() {
                 <p className="text-muted-foreground text-xs">{user?.role ? ROLE_LABEL[user.role] : ''}</p>
               </DropdownMenuLabel>
             </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => {
+                navigate('/');
+                setTimeout(() => window.dispatchEvent(new Event('keel-start-tour')), 300);
+              }}
+            >
+              <Compass />
+              Take the tour
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setWhatsNewOpen((o) => !o)}>
+              <Sparkles />
+              What&apos;s new
+            </DropdownMenuItem>
+            {whatsNewOpen && (
+              <div className="px-2 py-1.5 text-xs text-slate-500 space-y-1">
+                <p className="font-medium text-slate-700">Recent updates</p>
+                <ul className="list-disc pl-4 space-y-0.5">
+                  <li>Dashboard glance band &amp; focus strip</li>
+                  <li>Project overview two-column layout</li>
+                  <li>Status-colour list borders</li>
+                  <li>Guided first-login tour</li>
+                </ul>
+              </div>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut />

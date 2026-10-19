@@ -728,3 +728,14 @@ build` — 14/14 tests pass, clean typecheck/lint, build succeeds (710 KB main c
   - Status border is a central utility (`lib/statusBorder.ts`) mapping every domain's statuses to Tailwind `border-l-4` classes, applied via the existing `getRowClassName` DataTable prop.
   - Dashboard tests now use `getAllByText` since the actual-spend value appears in both the glance band and KPI cards.
 - **Verification:** Frontend gate: typecheck pass, lint pass, 89/89 tests pass, build pass.
+
+### 19D — Guidance & "what's new"
+- **What changed:** Added three guidance features to the dashboard: a dismissible "How to read this" info panel, a role-based "Your focus" strip showing action items (overdue tasks for contributors, pending CRs for PMs, failed automation for admins), and a 5-step guided tour that auto-starts on first login. Added "Take the tour" and "What's new" items to the user dropdown in the topbar. Wrote 11 new unit tests covering tour behaviour and YourFocus rendering per role.
+- **Decisions:**
+  - Tour hook (`useTour.ts`) split from `GuidedTour.tsx` to satisfy the `react-refresh/only-export-components` lint rule. The hook exports the state; the component exports the overlay.
+  - Tour restart from the Topbar uses a custom DOM event (`keel-start-tour`) rather than context or prop drilling — keeps the Topbar decoupled from dashboard state.
+  - `requestAnimationFrame` wraps the position calculation in TourOverlay to avoid the `react-hooks/set-state-in-effect` lint error (async setState is allowed, synchronous is not).
+  - "What's new" is a static list inside the dropdown — no API call. Content describes the recent 19A/19B/19D features.
+  - YourFocus test mocks return the raw API shape (`{ data: [...], meta: {...} }`) so the hooks' internal transforms are exercised end-to-end.
+  - Finance alerts mock uses `{ data: { alerts: [...] } }` to match the actual backend response shape consumed by `useFinanceAlerts`.
+- **Verification:** Frontend gate: typecheck pass, lint pass, 100/100 tests pass (11 new), build pass. Backend/E2E skipped (Docker not running; no backend changes).
