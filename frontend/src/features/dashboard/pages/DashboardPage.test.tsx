@@ -114,7 +114,9 @@ describe('DashboardPage', () => {
       'Department: Digital Platforms',
     );
     expect(within(drawer).getByTestId('drill-filter-context')).toHaveTextContent('Category: all categories');
-    expect(within(drawer).getByText(/67 records/)).toBeInTheDocument();
+    // Header line starts with the count; the footer reads "Showing 1–20 of 67 records".
+    expect(within(drawer).getByText(/^67 records/)).toBeInTheDocument();
+    expect(within(drawer).getByText('Showing 1–20 of 67 records')).toBeInTheDocument();
     expect(within(drawer).getByText(money(580390))).toBeInTheDocument();
     expect(within(drawer).getByRole('link', { name: 'PRJ-005' })).toHaveAttribute(
       'href',

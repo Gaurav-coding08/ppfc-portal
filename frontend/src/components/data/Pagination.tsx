@@ -18,7 +18,11 @@ export function Pagination({
 
   return (
     <div className="flex items-center justify-between gap-4 text-sm">
-      <p className="text-muted-foreground">{total === 0 ? 'No results' : `${from}–${to} of ${total}`}</p>
+      <p className="text-muted-foreground">
+        {total === 0
+          ? 'No results'
+          : `Showing ${from}–${to} of ${total} ${total === 1 ? 'record' : 'records'}`}
+      </p>
       <div className="flex items-center gap-2">
         <Button
           variant="outline"
