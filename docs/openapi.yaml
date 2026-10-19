@@ -451,13 +451,312 @@ components:
     # the "Data as of" badge (feature spec Part A.5: "if none is exposed,
     # read it from an existing endpoint's asOf"). The rest of the dashboard
     # response shapes are left as-is for M3 to fill in.
+    # Enriched in feature 18 Part A from real responses against the seeded
+    # dev DB. `ignoredFilters` lists filters the endpoint accepted but whose
+    # SQL does not use (categoryId on everything except monthly-spend,
+    # spend-by-category and drill/costs) — the UI labels those widgets
+    # "all categories".
     DashboardMeta:
       type: object
+      required: [asOf, appliedFilters, ignoredFilters, generatedAt]
       properties:
         asOf: { type: string, format: date }
-        appliedFilters: { type: array, items: {} }
-        ignoredFilters: { type: array, items: {} }
+        appliedFilters: { type: array, items: { type: string } }
+        ignoredFilters: { type: array, items: { type: string } }
         generatedAt: { type: string, format: date-time }
+
+    DashboardPagedMeta:
+      allOf:
+        - { $ref: '#/components/schemas/DashboardMeta' }
+        - type: object
+          required: [page, pageSize, total]
+          properties:
+            page: { type: integer }
+            pageSize: { type: integer }
+            total: { type: integer }
+
+    DashboardKpi:
+      type: object
+      required: [key, value, unit, drill]
+      properties:
+        key:
+          type: string
+          enum:
+            - totalProjects
+            - activeProjects
+            - portfolioProgressPct
+            - taskCompletionPct
+            - overdueIncompleteTasks
+            - milestonesDue14d
+            - openHighExposureRisks
+            - blockedTasks
+            - pendingChangeRequests
+            - approvedBudget
+            - actualSpend
+            - remainingBudget
+            - utilizationPct
+            - forecastEac
+            - projectedOverrunCount
+            - projectedOverrunAmount
+        # null only for utilizationPct when the approved budget is 0.
+        value: { type: number, nullable: true }
+        unit: { type: string, enum: [count, pct, AED] }
+        drill:
+          type: object
+          required: [endpoint]
+          properties:
+            endpoint: { type: string }
+            params:
+              type: object
+              additionalProperties: { type: string }
+
+    DashboardKpisResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [kpis]
+          properties:
+            kpis: { type: array, items: { $ref: '#/components/schemas/DashboardKpi' } }
+        meta: { $ref: '#/components/schemas/DashboardMeta' }
+
+    DashboardProjectHealthResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [projects]
+          properties:
+            projects:
+              type: array
+              items:
+                type: object
+                required: [projectId, code, name, status, progressPct, deliveryStatus, utilization, currentBudget, eac, openHighRisks, overdueTasks]
+                properties:
+                  projectId: { type: integer }
+                  code: { type: string }
+                  name: { type: string }
+                  status: { type: string, enum: [planning, active, on_hold, completed, cancelled] }
+                  progressPct: { type: number }
+                  deliveryStatus: { type: string }
+                  # Ratio (actual / budget), null when the budget is 0.
+                  utilization: { type: number, nullable: true }
+                  currentBudget: { type: number, nullable: true }
+                  eac: { type: number, nullable: true }
+                  openHighRisks: { type: integer }
+                  overdueTasks: { type: integer }
+        meta: { $ref: '#/components/schemas/DashboardMeta' }
+
+    DashboardBudgetVsActualResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [projects]
+          properties:
+            projects:
+              type: array
+              items:
+                type: object
+                required: [projectId, code, name, currentBudget, actualSpend, eac, isOverrun]
+                properties:
+                  projectId: { type: integer }
+                  code: { type: string }
+                  name: { type: string }
+                  currentBudget: { type: number, nullable: true }
+                  actualSpend: { type: number, nullable: true }
+                  eac: { type: number, nullable: true }
+                  # fn_project_financials.is_overrun (EAC > current budget).
+                  isOverrun: { type: boolean }
+        meta: { $ref: '#/components/schemas/DashboardMeta' }
+
+    DashboardMonthlySpendResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [months]
+          properties:
+            months:
+              type: array
+              items:
+                type: object
+                required: [month, actualSpend, forecast, cumulativeActual]
+                properties:
+                  month: { type: string, format: date, description: 'YYYY-MM-01' }
+                  actualSpend: { type: number, nullable: true }
+                  forecast: { type: number, nullable: true }
+                  cumulativeActual: { type: number, nullable: true }
+        meta: { $ref: '#/components/schemas/DashboardMeta' }
+
+    DashboardSpendByCategoryResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [categories]
+          properties:
+            categories:
+              type: array
+              items:
+                type: object
+                required: [categoryId, categoryCode, categoryName, totalSpend]
+                properties:
+                  categoryId: { type: integer }
+                  categoryCode: { type: string }
+                  categoryName: { type: string }
+                  totalSpend: { type: number }
+        meta: { $ref: '#/components/schemas/DashboardMeta' }
+
+    DashboardOverdueByOwnerResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [owners]
+          properties:
+            owners:
+              type: array
+              items:
+                type: object
+                required: [assigneeId, assigneeName, count]
+                properties:
+                  assigneeId: { type: integer, nullable: true }
+                  assigneeName: { type: string, nullable: true }
+                  count: { type: integer }
+        meta: { $ref: '#/components/schemas/DashboardMeta' }
+
+    DashboardRiskMatrixResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [cells, totalOpenRisks]
+          properties:
+            # Only non-empty cells are returned.
+            cells:
+              type: array
+              items:
+                type: object
+                required: [probability, impact, count, band]
+                properties:
+                  probability: { type: integer, minimum: 1, maximum: 5 }
+                  impact: { type: integer, minimum: 1, maximum: 5 }
+                  count: { type: integer }
+                  band: { type: string, enum: [low, medium, high] }
+            totalOpenRisks: { type: integer }
+        meta: { $ref: '#/components/schemas/DashboardMeta' }
+
+    DashboardMilestonesResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [milestones]
+          properties:
+            milestones:
+              type: array
+              items:
+                type: object
+                required: [id, projectId, projectCode, name, dueDate, status, isOverdue, daysToDue]
+                properties:
+                  id: { type: integer }
+                  projectId: { type: integer }
+                  projectCode: { type: string }
+                  name: { type: string }
+                  dueDate: { type: string, format: date }
+                  status: { type: string }
+                  isOverdue: { type: boolean }
+                  daysToDue: { type: integer }
+        meta: { $ref: '#/components/schemas/DashboardMeta' }
+
+    DashboardDrillCostsResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            required: [id, projectId, projectCode, categoryName, txnDate, amount, entryType, description]
+            properties:
+              id: { type: integer }
+              projectId: { type: integer }
+              projectCode: { type: string }
+              categoryName: { type: string }
+              txnDate: { type: string, format: date }
+              amount: { type: number, nullable: true }
+              entryType: { type: string, enum: [expense, reversal] }
+              description: { type: string }
+        meta: { $ref: '#/components/schemas/DashboardPagedMeta' }
+
+    DashboardDrillTasksResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            required: [id, projectId, projectCode, title, assigneeName, status, dueDate, progress]
+            properties:
+              id: { type: integer }
+              projectId: { type: integer }
+              projectCode: { type: string }
+              title: { type: string }
+              assigneeName: { type: string, nullable: true }
+              status: { type: string, enum: [todo, in_progress, blocked, done] }
+              dueDate: { type: string, format: date, nullable: true }
+              progress: { type: number }
+        meta: { $ref: '#/components/schemas/DashboardPagedMeta' }
+
+    DashboardDrillRisksResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            required: [id, projectId, projectCode, title, probability, impact, score, band, status]
+            properties:
+              id: { type: integer }
+              projectId: { type: integer }
+              projectCode: { type: string }
+              title: { type: string }
+              probability: { type: integer }
+              impact: { type: integer }
+              score: { type: integer }
+              band: { type: string, enum: [low, medium, high] }
+              status: { type: string }
+        meta: { $ref: '#/components/schemas/DashboardPagedMeta' }
+
+    DashboardDrillChangeRequestsResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            required: [id, code, projectId, projectCode, title, requestedByName, submittedAt]
+            properties:
+              id: { type: integer }
+              code: { type: string }
+              projectId: { type: integer }
+              projectCode: { type: string }
+              title: { type: string }
+              requestedByName: { type: string, nullable: true }
+              submittedAt: { type: string, format: date-time }
+        meta: { $ref: '#/components/schemas/DashboardPagedMeta' }
 
     # Enriched in feature 16 Part B: the projects list's owner filter reads
     # `managers` from here, the one option list every role can call.
@@ -720,6 +1019,15 @@ components:
             currency: { type: string }
 
   parameters:
+    # Shared dashboard filter contract (backend dashboard.filters.ts). Id
+    # filters accept a comma list (e.g. "1,3").
+    dashDepartmentId: { name: departmentId, in: query, schema: { type: string }, description: 'Comma-separated department ids' }
+    dashProjectId: { name: projectId, in: query, schema: { type: string }, description: 'Comma-separated project ids' }
+    dashManagerId: { name: managerId, in: query, schema: { type: string }, description: 'Comma-separated owner (manager) ids' }
+    dashStatus: { name: status, in: query, schema: { type: string }, description: 'Comma-separated project statuses' }
+    dashFrom: { name: from, in: query, schema: { type: string, format: date } }
+    dashTo: { name: to, in: query, schema: { type: string, format: date } }
+    dashCategoryId: { name: categoryId, in: query, schema: { type: string }, description: 'Comma-separated cost category ids; honoured only by monthly-spend, spend-by-category and drill/costs' }
     pageParam:
       name: page
       in: query
@@ -1970,100 +2278,247 @@ paths:
       summary: 16 executive KPIs
       parameters:
         - { $ref: '#/components/parameters/asOfParam' }
-        - { name: departmentId, in: query, schema: { type: integer } }
-        - { name: projectId, in: query, schema: { type: integer } }
-        - { name: managerId, in: query, schema: { type: integer } }
-        - { name: status, in: query, schema: { type: string } }
-        - { name: categoryId, in: query, schema: { type: integer } }
+        - { $ref: '#/components/parameters/dashDepartmentId' }
+        - { $ref: '#/components/parameters/dashProjectId' }
+        - { $ref: '#/components/parameters/dashManagerId' }
+        - { $ref: '#/components/parameters/dashStatus' }
+        - { $ref: '#/components/parameters/dashFrom' }
+        - { $ref: '#/components/parameters/dashTo' }
+        - { $ref: '#/components/parameters/dashCategoryId' }
       responses:
         '200':
           description: OK
           content:
             application/json:
-              schema:
-                type: object
-                properties:
-                  data: {}
-                  meta: { $ref: '#/components/schemas/DashboardMeta' }
+              schema: { $ref: '#/components/schemas/DashboardKpisResponse' }
 
   /dashboard/project-health:
     get:
       summary: Per-project health
+      parameters:
+        - { $ref: '#/components/parameters/asOfParam' }
+        - { $ref: '#/components/parameters/dashDepartmentId' }
+        - { $ref: '#/components/parameters/dashProjectId' }
+        - { $ref: '#/components/parameters/dashManagerId' }
+        - { $ref: '#/components/parameters/dashStatus' }
+        - { $ref: '#/components/parameters/dashFrom' }
+        - { $ref: '#/components/parameters/dashTo' }
+        - { $ref: '#/components/parameters/dashCategoryId' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardProjectHealthResponse' }
 
   /dashboard/budget-vs-actual-eac:
     get:
       summary: Budget vs actual vs EAC
+      parameters:
+        - { $ref: '#/components/parameters/asOfParam' }
+        - { $ref: '#/components/parameters/dashDepartmentId' }
+        - { $ref: '#/components/parameters/dashProjectId' }
+        - { $ref: '#/components/parameters/dashManagerId' }
+        - { $ref: '#/components/parameters/dashStatus' }
+        - { $ref: '#/components/parameters/dashFrom' }
+        - { $ref: '#/components/parameters/dashTo' }
+        - { $ref: '#/components/parameters/dashCategoryId' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardBudgetVsActualResponse' }
 
   /dashboard/monthly-spend:
     get:
       summary: Monthly spend trend
+      parameters:
+        - { $ref: '#/components/parameters/asOfParam' }
+        - { $ref: '#/components/parameters/dashDepartmentId' }
+        - { $ref: '#/components/parameters/dashProjectId' }
+        - { $ref: '#/components/parameters/dashManagerId' }
+        - { $ref: '#/components/parameters/dashStatus' }
+        - { $ref: '#/components/parameters/dashFrom' }
+        - { $ref: '#/components/parameters/dashTo' }
+        - { $ref: '#/components/parameters/dashCategoryId' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardMonthlySpendResponse' }
 
   /dashboard/spend-by-category:
     get:
       summary: Spend by category
+      parameters:
+        - { $ref: '#/components/parameters/asOfParam' }
+        - { $ref: '#/components/parameters/dashDepartmentId' }
+        - { $ref: '#/components/parameters/dashProjectId' }
+        - { $ref: '#/components/parameters/dashManagerId' }
+        - { $ref: '#/components/parameters/dashStatus' }
+        - { $ref: '#/components/parameters/dashFrom' }
+        - { $ref: '#/components/parameters/dashTo' }
+        - { $ref: '#/components/parameters/dashCategoryId' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardSpendByCategoryResponse' }
 
   /dashboard/overdue-by-owner:
     get:
       summary: Overdue tasks by owner
+      parameters:
+        - { $ref: '#/components/parameters/asOfParam' }
+        - { $ref: '#/components/parameters/dashDepartmentId' }
+        - { $ref: '#/components/parameters/dashProjectId' }
+        - { $ref: '#/components/parameters/dashManagerId' }
+        - { $ref: '#/components/parameters/dashStatus' }
+        - { $ref: '#/components/parameters/dashFrom' }
+        - { $ref: '#/components/parameters/dashTo' }
+        - { $ref: '#/components/parameters/dashCategoryId' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardOverdueByOwnerResponse' }
 
   /dashboard/risk-matrix:
     get:
       summary: 5x5 risk matrix
+      parameters:
+        - { $ref: '#/components/parameters/asOfParam' }
+        - { $ref: '#/components/parameters/dashDepartmentId' }
+        - { $ref: '#/components/parameters/dashProjectId' }
+        - { $ref: '#/components/parameters/dashManagerId' }
+        - { $ref: '#/components/parameters/dashStatus' }
+        - { $ref: '#/components/parameters/dashFrom' }
+        - { $ref: '#/components/parameters/dashTo' }
+        - { $ref: '#/components/parameters/dashCategoryId' }
+        - { name: riskTimeframe, in: query, schema: { type: string, enum: ['true', 'false'] } }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardRiskMatrixResponse' }
 
   /dashboard/milestones:
     get:
       summary: Upcoming milestones
+      parameters:
+        - { $ref: '#/components/parameters/asOfParam' }
+        - { $ref: '#/components/parameters/dashDepartmentId' }
+        - { $ref: '#/components/parameters/dashProjectId' }
+        - { $ref: '#/components/parameters/dashManagerId' }
+        - { $ref: '#/components/parameters/dashStatus' }
+        - { $ref: '#/components/parameters/dashFrom' }
+        - { $ref: '#/components/parameters/dashTo' }
+        - { $ref: '#/components/parameters/dashCategoryId' }
+        - { name: withinDays, in: query, schema: { type: integer, minimum: 1 } }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardMilestonesResponse' }
 
   /dashboard/drill/costs:
     get:
-      summary: Drill-down costs
+      summary: Drill-down posted costs (txn_date <= asOf)
       parameters:
+        - { $ref: '#/components/parameters/asOfParam' }
+        - { $ref: '#/components/parameters/dashDepartmentId' }
+        - { $ref: '#/components/parameters/dashProjectId' }
+        - { $ref: '#/components/parameters/dashManagerId' }
+        - { $ref: '#/components/parameters/dashStatus' }
+        - { $ref: '#/components/parameters/dashFrom' }
+        - { $ref: '#/components/parameters/dashTo' }
+        - { $ref: '#/components/parameters/dashCategoryId' }
+        - { name: drillProjectId, in: query, schema: { type: integer } }
+        - { name: drillCategoryId, in: query, schema: { type: integer } }
+        - { name: month, in: query, schema: { type: string, pattern: '^\\d{4}-\\d{2}$' } }
         - { $ref: '#/components/parameters/pageParam' }
         - { $ref: '#/components/parameters/pageSizeParam' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardDrillCostsResponse' }
 
   /dashboard/drill/tasks:
     get:
       summary: Drill-down tasks
       parameters:
+        - { $ref: '#/components/parameters/asOfParam' }
+        - { $ref: '#/components/parameters/dashDepartmentId' }
+        - { $ref: '#/components/parameters/dashProjectId' }
+        - { $ref: '#/components/parameters/dashManagerId' }
+        - { $ref: '#/components/parameters/dashStatus' }
+        - { $ref: '#/components/parameters/dashFrom' }
+        - { $ref: '#/components/parameters/dashTo' }
+        - { $ref: '#/components/parameters/dashCategoryId' }
         - { name: kind, in: query, schema: { type: string, enum: [overdue, blocked, all] } }
+        - { name: ownerId, in: query, schema: { type: integer } }
+        - { name: drillProjectId, in: query, schema: { type: integer } }
         - { $ref: '#/components/parameters/pageParam' }
         - { $ref: '#/components/parameters/pageSizeParam' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardDrillTasksResponse' }
 
   /dashboard/drill/risks:
     get:
-      summary: Drill-down risks
+      summary: Drill-down open risks
       parameters:
+        - { $ref: '#/components/parameters/asOfParam' }
+        - { $ref: '#/components/parameters/dashDepartmentId' }
+        - { $ref: '#/components/parameters/dashProjectId' }
+        - { $ref: '#/components/parameters/dashManagerId' }
+        - { $ref: '#/components/parameters/dashStatus' }
+        - { $ref: '#/components/parameters/dashFrom' }
+        - { $ref: '#/components/parameters/dashTo' }
+        - { $ref: '#/components/parameters/dashCategoryId' }
+        - { name: kind, in: query, schema: { type: string, enum: [high-exposure, cell, all] } }
+        - { name: probability, in: query, schema: { type: integer, minimum: 1, maximum: 5 } }
+        - { name: impact, in: query, schema: { type: integer, minimum: 1, maximum: 5 } }
         - { $ref: '#/components/parameters/pageParam' }
         - { $ref: '#/components/parameters/pageSizeParam' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardDrillRisksResponse' }
 
   /dashboard/drill/change-requests:
     get:
       summary: Drill-down pending CRs
       parameters:
+        - { $ref: '#/components/parameters/asOfParam' }
+        - { $ref: '#/components/parameters/dashDepartmentId' }
+        - { $ref: '#/components/parameters/dashProjectId' }
+        - { $ref: '#/components/parameters/dashManagerId' }
+        - { $ref: '#/components/parameters/dashStatus' }
+        - { $ref: '#/components/parameters/dashFrom' }
+        - { $ref: '#/components/parameters/dashTo' }
+        - { $ref: '#/components/parameters/dashCategoryId' }
         - { $ref: '#/components/parameters/pageParam' }
         - { $ref: '#/components/parameters/pageSizeParam' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardDrillChangeRequestsResponse' }
 
   /dashboard/filters:
     get:

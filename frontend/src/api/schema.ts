@@ -2553,11 +2553,18 @@ export interface paths {
                 query?: {
                     /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */
                     asOf?: components["parameters"]["asOfParam"];
-                    departmentId?: number;
-                    projectId?: number;
-                    managerId?: number;
-                    status?: string;
-                    categoryId?: number;
+                    /** @description Comma-separated department ids */
+                    departmentId?: components["parameters"]["dashDepartmentId"];
+                    /** @description Comma-separated project ids */
+                    projectId?: components["parameters"]["dashProjectId"];
+                    /** @description Comma-separated owner (manager) ids */
+                    managerId?: components["parameters"]["dashManagerId"];
+                    /** @description Comma-separated project statuses */
+                    status?: components["parameters"]["dashStatus"];
+                    from?: components["parameters"]["dashFrom"];
+                    to?: components["parameters"]["dashTo"];
+                    /** @description Comma-separated cost category ids; honoured only by monthly-spend, spend-by-category and drill/costs */
+                    categoryId?: components["parameters"]["dashCategoryId"];
                 };
                 header?: never;
                 path?: never;
@@ -2571,10 +2578,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            data?: unknown;
-                            meta?: components["schemas"]["DashboardMeta"];
-                        };
+                        "application/json": components["schemas"]["DashboardKpisResponse"];
                     };
                 };
             };
@@ -2597,7 +2601,22 @@ export interface paths {
         /** Per-project health */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */
+                    asOf?: components["parameters"]["asOfParam"];
+                    /** @description Comma-separated department ids */
+                    departmentId?: components["parameters"]["dashDepartmentId"];
+                    /** @description Comma-separated project ids */
+                    projectId?: components["parameters"]["dashProjectId"];
+                    /** @description Comma-separated owner (manager) ids */
+                    managerId?: components["parameters"]["dashManagerId"];
+                    /** @description Comma-separated project statuses */
+                    status?: components["parameters"]["dashStatus"];
+                    from?: components["parameters"]["dashFrom"];
+                    to?: components["parameters"]["dashTo"];
+                    /** @description Comma-separated cost category ids; honoured only by monthly-spend, spend-by-category and drill/costs */
+                    categoryId?: components["parameters"]["dashCategoryId"];
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -2609,7 +2628,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DashboardProjectHealthResponse"];
+                    };
                 };
             };
         };
@@ -2631,7 +2652,22 @@ export interface paths {
         /** Budget vs actual vs EAC */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */
+                    asOf?: components["parameters"]["asOfParam"];
+                    /** @description Comma-separated department ids */
+                    departmentId?: components["parameters"]["dashDepartmentId"];
+                    /** @description Comma-separated project ids */
+                    projectId?: components["parameters"]["dashProjectId"];
+                    /** @description Comma-separated owner (manager) ids */
+                    managerId?: components["parameters"]["dashManagerId"];
+                    /** @description Comma-separated project statuses */
+                    status?: components["parameters"]["dashStatus"];
+                    from?: components["parameters"]["dashFrom"];
+                    to?: components["parameters"]["dashTo"];
+                    /** @description Comma-separated cost category ids; honoured only by monthly-spend, spend-by-category and drill/costs */
+                    categoryId?: components["parameters"]["dashCategoryId"];
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -2643,7 +2679,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DashboardBudgetVsActualResponse"];
+                    };
                 };
             };
         };
@@ -2665,7 +2703,22 @@ export interface paths {
         /** Monthly spend trend */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */
+                    asOf?: components["parameters"]["asOfParam"];
+                    /** @description Comma-separated department ids */
+                    departmentId?: components["parameters"]["dashDepartmentId"];
+                    /** @description Comma-separated project ids */
+                    projectId?: components["parameters"]["dashProjectId"];
+                    /** @description Comma-separated owner (manager) ids */
+                    managerId?: components["parameters"]["dashManagerId"];
+                    /** @description Comma-separated project statuses */
+                    status?: components["parameters"]["dashStatus"];
+                    from?: components["parameters"]["dashFrom"];
+                    to?: components["parameters"]["dashTo"];
+                    /** @description Comma-separated cost category ids; honoured only by monthly-spend, spend-by-category and drill/costs */
+                    categoryId?: components["parameters"]["dashCategoryId"];
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -2677,7 +2730,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DashboardMonthlySpendResponse"];
+                    };
                 };
             };
         };
@@ -2699,7 +2754,22 @@ export interface paths {
         /** Spend by category */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */
+                    asOf?: components["parameters"]["asOfParam"];
+                    /** @description Comma-separated department ids */
+                    departmentId?: components["parameters"]["dashDepartmentId"];
+                    /** @description Comma-separated project ids */
+                    projectId?: components["parameters"]["dashProjectId"];
+                    /** @description Comma-separated owner (manager) ids */
+                    managerId?: components["parameters"]["dashManagerId"];
+                    /** @description Comma-separated project statuses */
+                    status?: components["parameters"]["dashStatus"];
+                    from?: components["parameters"]["dashFrom"];
+                    to?: components["parameters"]["dashTo"];
+                    /** @description Comma-separated cost category ids; honoured only by monthly-spend, spend-by-category and drill/costs */
+                    categoryId?: components["parameters"]["dashCategoryId"];
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -2711,7 +2781,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DashboardSpendByCategoryResponse"];
+                    };
                 };
             };
         };
@@ -2733,7 +2805,22 @@ export interface paths {
         /** Overdue tasks by owner */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */
+                    asOf?: components["parameters"]["asOfParam"];
+                    /** @description Comma-separated department ids */
+                    departmentId?: components["parameters"]["dashDepartmentId"];
+                    /** @description Comma-separated project ids */
+                    projectId?: components["parameters"]["dashProjectId"];
+                    /** @description Comma-separated owner (manager) ids */
+                    managerId?: components["parameters"]["dashManagerId"];
+                    /** @description Comma-separated project statuses */
+                    status?: components["parameters"]["dashStatus"];
+                    from?: components["parameters"]["dashFrom"];
+                    to?: components["parameters"]["dashTo"];
+                    /** @description Comma-separated cost category ids; honoured only by monthly-spend, spend-by-category and drill/costs */
+                    categoryId?: components["parameters"]["dashCategoryId"];
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -2745,7 +2832,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DashboardOverdueByOwnerResponse"];
+                    };
                 };
             };
         };
@@ -2767,7 +2856,23 @@ export interface paths {
         /** 5x5 risk matrix */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */
+                    asOf?: components["parameters"]["asOfParam"];
+                    /** @description Comma-separated department ids */
+                    departmentId?: components["parameters"]["dashDepartmentId"];
+                    /** @description Comma-separated project ids */
+                    projectId?: components["parameters"]["dashProjectId"];
+                    /** @description Comma-separated owner (manager) ids */
+                    managerId?: components["parameters"]["dashManagerId"];
+                    /** @description Comma-separated project statuses */
+                    status?: components["parameters"]["dashStatus"];
+                    from?: components["parameters"]["dashFrom"];
+                    to?: components["parameters"]["dashTo"];
+                    /** @description Comma-separated cost category ids; honoured only by monthly-spend, spend-by-category and drill/costs */
+                    categoryId?: components["parameters"]["dashCategoryId"];
+                    riskTimeframe?: "true" | "false";
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -2779,7 +2884,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DashboardRiskMatrixResponse"];
+                    };
                 };
             };
         };
@@ -2801,7 +2908,23 @@ export interface paths {
         /** Upcoming milestones */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */
+                    asOf?: components["parameters"]["asOfParam"];
+                    /** @description Comma-separated department ids */
+                    departmentId?: components["parameters"]["dashDepartmentId"];
+                    /** @description Comma-separated project ids */
+                    projectId?: components["parameters"]["dashProjectId"];
+                    /** @description Comma-separated owner (manager) ids */
+                    managerId?: components["parameters"]["dashManagerId"];
+                    /** @description Comma-separated project statuses */
+                    status?: components["parameters"]["dashStatus"];
+                    from?: components["parameters"]["dashFrom"];
+                    to?: components["parameters"]["dashTo"];
+                    /** @description Comma-separated cost category ids; honoured only by monthly-spend, spend-by-category and drill/costs */
+                    categoryId?: components["parameters"]["dashCategoryId"];
+                    withinDays?: number;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -2813,7 +2936,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DashboardMilestonesResponse"];
+                    };
                 };
             };
         };
@@ -2832,10 +2957,27 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Drill-down costs */
+        /** Drill-down posted costs (txn_date <= asOf) */
         get: {
             parameters: {
                 query?: {
+                    /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */
+                    asOf?: components["parameters"]["asOfParam"];
+                    /** @description Comma-separated department ids */
+                    departmentId?: components["parameters"]["dashDepartmentId"];
+                    /** @description Comma-separated project ids */
+                    projectId?: components["parameters"]["dashProjectId"];
+                    /** @description Comma-separated owner (manager) ids */
+                    managerId?: components["parameters"]["dashManagerId"];
+                    /** @description Comma-separated project statuses */
+                    status?: components["parameters"]["dashStatus"];
+                    from?: components["parameters"]["dashFrom"];
+                    to?: components["parameters"]["dashTo"];
+                    /** @description Comma-separated cost category ids; honoured only by monthly-spend, spend-by-category and drill/costs */
+                    categoryId?: components["parameters"]["dashCategoryId"];
+                    drillProjectId?: number;
+                    drillCategoryId?: number;
+                    month?: string;
                     page?: components["parameters"]["pageParam"];
                     pageSize?: components["parameters"]["pageSizeParam"];
                 };
@@ -2850,7 +2992,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DashboardDrillCostsResponse"];
+                    };
                 };
             };
         };
@@ -2873,7 +3017,23 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
+                    /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */
+                    asOf?: components["parameters"]["asOfParam"];
+                    /** @description Comma-separated department ids */
+                    departmentId?: components["parameters"]["dashDepartmentId"];
+                    /** @description Comma-separated project ids */
+                    projectId?: components["parameters"]["dashProjectId"];
+                    /** @description Comma-separated owner (manager) ids */
+                    managerId?: components["parameters"]["dashManagerId"];
+                    /** @description Comma-separated project statuses */
+                    status?: components["parameters"]["dashStatus"];
+                    from?: components["parameters"]["dashFrom"];
+                    to?: components["parameters"]["dashTo"];
+                    /** @description Comma-separated cost category ids; honoured only by monthly-spend, spend-by-category and drill/costs */
+                    categoryId?: components["parameters"]["dashCategoryId"];
                     kind?: "overdue" | "blocked" | "all";
+                    ownerId?: number;
+                    drillProjectId?: number;
                     page?: components["parameters"]["pageParam"];
                     pageSize?: components["parameters"]["pageSizeParam"];
                 };
@@ -2888,7 +3048,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DashboardDrillTasksResponse"];
+                    };
                 };
             };
         };
@@ -2907,10 +3069,27 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Drill-down risks */
+        /** Drill-down open risks */
         get: {
             parameters: {
                 query?: {
+                    /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */
+                    asOf?: components["parameters"]["asOfParam"];
+                    /** @description Comma-separated department ids */
+                    departmentId?: components["parameters"]["dashDepartmentId"];
+                    /** @description Comma-separated project ids */
+                    projectId?: components["parameters"]["dashProjectId"];
+                    /** @description Comma-separated owner (manager) ids */
+                    managerId?: components["parameters"]["dashManagerId"];
+                    /** @description Comma-separated project statuses */
+                    status?: components["parameters"]["dashStatus"];
+                    from?: components["parameters"]["dashFrom"];
+                    to?: components["parameters"]["dashTo"];
+                    /** @description Comma-separated cost category ids; honoured only by monthly-spend, spend-by-category and drill/costs */
+                    categoryId?: components["parameters"]["dashCategoryId"];
+                    kind?: "high-exposure" | "cell" | "all";
+                    probability?: number;
+                    impact?: number;
                     page?: components["parameters"]["pageParam"];
                     pageSize?: components["parameters"]["pageSizeParam"];
                 };
@@ -2925,7 +3104,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DashboardDrillRisksResponse"];
+                    };
                 };
             };
         };
@@ -2948,6 +3129,20 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
+                    /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */
+                    asOf?: components["parameters"]["asOfParam"];
+                    /** @description Comma-separated department ids */
+                    departmentId?: components["parameters"]["dashDepartmentId"];
+                    /** @description Comma-separated project ids */
+                    projectId?: components["parameters"]["dashProjectId"];
+                    /** @description Comma-separated owner (manager) ids */
+                    managerId?: components["parameters"]["dashManagerId"];
+                    /** @description Comma-separated project statuses */
+                    status?: components["parameters"]["dashStatus"];
+                    from?: components["parameters"]["dashFrom"];
+                    to?: components["parameters"]["dashTo"];
+                    /** @description Comma-separated cost category ids; honoured only by monthly-spend, spend-by-category and drill/costs */
+                    categoryId?: components["parameters"]["dashCategoryId"];
                     page?: components["parameters"]["pageParam"];
                     pageSize?: components["parameters"]["pageSizeParam"];
                 };
@@ -2962,7 +3157,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DashboardDrillChangeRequestsResponse"];
+                    };
                 };
             };
         };
@@ -3346,11 +3543,191 @@ export interface components {
         };
         DashboardMeta: {
             /** Format: date */
-            asOf?: string;
-            appliedFilters?: unknown[];
-            ignoredFilters?: unknown[];
+            asOf: string;
+            appliedFilters: string[];
+            ignoredFilters: string[];
             /** Format: date-time */
-            generatedAt?: string;
+            generatedAt: string;
+        };
+        DashboardPagedMeta: components["schemas"]["DashboardMeta"] & {
+            page: number;
+            pageSize: number;
+            total: number;
+        };
+        DashboardKpi: {
+            /** @enum {string} */
+            key: "totalProjects" | "activeProjects" | "portfolioProgressPct" | "taskCompletionPct" | "overdueIncompleteTasks" | "milestonesDue14d" | "openHighExposureRisks" | "blockedTasks" | "pendingChangeRequests" | "approvedBudget" | "actualSpend" | "remainingBudget" | "utilizationPct" | "forecastEac" | "projectedOverrunCount" | "projectedOverrunAmount";
+            value: number | null;
+            /** @enum {string} */
+            unit: "count" | "pct" | "AED";
+            drill: {
+                endpoint: string;
+                params?: {
+                    [key: string]: string;
+                };
+            };
+        };
+        DashboardKpisResponse: {
+            data: {
+                kpis: components["schemas"]["DashboardKpi"][];
+            };
+            meta: components["schemas"]["DashboardMeta"];
+        };
+        DashboardProjectHealthResponse: {
+            data: {
+                projects: {
+                    projectId: number;
+                    code: string;
+                    name: string;
+                    /** @enum {string} */
+                    status: "planning" | "active" | "on_hold" | "completed" | "cancelled";
+                    progressPct: number;
+                    deliveryStatus: string;
+                    utilization: number | null;
+                    currentBudget: number | null;
+                    eac: number | null;
+                    openHighRisks: number;
+                    overdueTasks: number;
+                }[];
+            };
+            meta: components["schemas"]["DashboardMeta"];
+        };
+        DashboardBudgetVsActualResponse: {
+            data: {
+                projects: {
+                    projectId: number;
+                    code: string;
+                    name: string;
+                    currentBudget: number | null;
+                    actualSpend: number | null;
+                    eac: number | null;
+                    isOverrun: boolean;
+                }[];
+            };
+            meta: components["schemas"]["DashboardMeta"];
+        };
+        DashboardMonthlySpendResponse: {
+            data: {
+                months: {
+                    /**
+                     * Format: date
+                     * @description YYYY-MM-01
+                     */
+                    month: string;
+                    actualSpend: number | null;
+                    forecast: number | null;
+                    cumulativeActual: number | null;
+                }[];
+            };
+            meta: components["schemas"]["DashboardMeta"];
+        };
+        DashboardSpendByCategoryResponse: {
+            data: {
+                categories: {
+                    categoryId: number;
+                    categoryCode: string;
+                    categoryName: string;
+                    totalSpend: number;
+                }[];
+            };
+            meta: components["schemas"]["DashboardMeta"];
+        };
+        DashboardOverdueByOwnerResponse: {
+            data: {
+                owners: {
+                    assigneeId: number | null;
+                    assigneeName: string | null;
+                    count: number;
+                }[];
+            };
+            meta: components["schemas"]["DashboardMeta"];
+        };
+        DashboardRiskMatrixResponse: {
+            data: {
+                cells: {
+                    probability: number;
+                    impact: number;
+                    count: number;
+                    /** @enum {string} */
+                    band: "low" | "medium" | "high";
+                }[];
+                totalOpenRisks: number;
+            };
+            meta: components["schemas"]["DashboardMeta"];
+        };
+        DashboardMilestonesResponse: {
+            data: {
+                milestones: {
+                    id: number;
+                    projectId: number;
+                    projectCode: string;
+                    name: string;
+                    /** Format: date */
+                    dueDate: string;
+                    status: string;
+                    isOverdue: boolean;
+                    daysToDue: number;
+                }[];
+            };
+            meta: components["schemas"]["DashboardMeta"];
+        };
+        DashboardDrillCostsResponse: {
+            data: {
+                id: number;
+                projectId: number;
+                projectCode: string;
+                categoryName: string;
+                /** Format: date */
+                txnDate: string;
+                amount: number | null;
+                /** @enum {string} */
+                entryType: "expense" | "reversal";
+                description: string;
+            }[];
+            meta: components["schemas"]["DashboardPagedMeta"];
+        };
+        DashboardDrillTasksResponse: {
+            data: {
+                id: number;
+                projectId: number;
+                projectCode: string;
+                title: string;
+                assigneeName: string | null;
+                /** @enum {string} */
+                status: "todo" | "in_progress" | "blocked" | "done";
+                /** Format: date */
+                dueDate: string | null;
+                progress: number;
+            }[];
+            meta: components["schemas"]["DashboardPagedMeta"];
+        };
+        DashboardDrillRisksResponse: {
+            data: {
+                id: number;
+                projectId: number;
+                projectCode: string;
+                title: string;
+                probability: number;
+                impact: number;
+                score: number;
+                /** @enum {string} */
+                band: "low" | "medium" | "high";
+                status: string;
+            }[];
+            meta: components["schemas"]["DashboardPagedMeta"];
+        };
+        DashboardDrillChangeRequestsResponse: {
+            data: {
+                id: number;
+                code: string;
+                projectId: number;
+                projectCode: string;
+                title: string;
+                requestedByName: string | null;
+                /** Format: date-time */
+                submittedAt: string;
+            }[];
+            meta: components["schemas"]["DashboardPagedMeta"];
         };
         FilterOption: {
             id?: number;
@@ -3516,6 +3893,18 @@ export interface components {
     };
     responses: never;
     parameters: {
+        /** @description Comma-separated department ids */
+        dashDepartmentId: string;
+        /** @description Comma-separated project ids */
+        dashProjectId: string;
+        /** @description Comma-separated owner (manager) ids */
+        dashManagerId: string;
+        /** @description Comma-separated project statuses */
+        dashStatus: string;
+        dashFrom: string;
+        dashTo: string;
+        /** @description Comma-separated cost category ids; honoured only by monthly-spend, spend-by-category and drill/costs */
+        dashCategoryId: string;
         pageParam: number;
         pageSizeParam: number;
         /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */

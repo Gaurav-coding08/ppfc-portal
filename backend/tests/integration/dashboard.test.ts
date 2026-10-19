@@ -277,6 +277,42 @@ describe('categoryId filter handling', () => {
     expect(delRes.status).toBe(200);
     expect(delRes.body.meta.ignoredFilters).toContain('categoryId');
   });
+
+  // KPIs and budget-vs-actual read fn_project_financials(), which has no
+  // category dimension. Their meta must say categoryId was ignored, and the
+  // numbers must indeed not change — otherwise the UI would label an
+  // all-category figure as category-filtered.
+  test('KPIs and budget-vs-actual report categoryId as ignored and do not change', async () => {
+    const admin = await asAdmin();
+    const categoryId = await findActiveCategoryId();
+
+    for (const path of ['/api/v1/dashboard/kpis', '/api/v1/dashboard/budget-vs-actual-eac']) {
+      const plain = await admin.agent.get(path);
+      const filtered = await admin.agent.get(path).query({ categoryId: `${categoryId}` });
+      expect(filtered.status).toBe(200);
+      expect(filtered.body.meta.ignoredFilters).toContain('categoryId');
+      expect(filtered.body.meta.appliedFilters).not.toContain('categoryId');
+      expect(filtered.body.data).toEqual(plain.body.data);
+    }
+  });
+});
+
+describe('GET /api/v1/dashboard/budget-vs-actual-eac', () => {
+  test('isOverrun flags exactly the projects counted by projectedOverrunCount', async () => {
+    const admin = await asAdmin();
+    const [bva, kpis] = await Promise.all([
+      admin.agent.get('/api/v1/dashboard/budget-vs-actual-eac'),
+      admin.agent.get('/api/v1/dashboard/kpis'),
+    ]);
+    expect(bva.status).toBe(200);
+    const rows = bva.body.data.projects as { name: string; isOverrun: boolean }[];
+    expect(rows.every((r) => typeof r.isOverrun === 'boolean' && typeof r.name === 'string')).toBe(true);
+
+    const overrunKpi = (kpis.body.data.kpis as { key: string; value: number }[]).find(
+      (k) => k.key === 'projectedOverrunCount',
+    )!;
+    expect(rows.filter((r) => r.isOverrun).length).toBe(overrunKpi.value);
+  });
 });
 
 describe('Contributor scoping', () => {

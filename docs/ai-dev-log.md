@@ -628,3 +628,31 @@ build` — 14/14 tests pass, clean typecheck/lint, build succeeds (710 KB main c
   - Live read-only curls of every query shape the UI sends returned 200.
   - No browser check this run; owner click-through pending.
 - **Human review:** Went through it as the PM, as Garnet (admin) and as Estell. As PM on PRJ-001's Finance tab, I added a draft cost dated in September and posted it. The confirm dialog warned that it can't be edited afterwards, and actual spend, remaining and utilization all moved once it went through. Clicking the Actual spend card jumped down to the costs table filtered to posted costs up to 30 Sep, and my new cost was in the list (test B). Reversed it with a reason and the number went back down; the reversal row shows greyed out with a minus amount. Leaving the reason empty was blocked. I requested a budget revision, which stayed pending and was marked "not included in approved budget". As Garnet I approved it and the current budget went up. The Approve button was greyed out on a revision Garnet had raised himself. In the forecast grid, everything up to September was locked; I edited October, saved, and EAC changed after the refetch. As Estell the tab was read-only, with no Add, Post or Reverse, and curl with her cookie on the post endpoint gave a 403 (test D). Alerts showed PRJ-004 as overspent, and the comparison with PRJ-002 in the list said it couldn't be shown. I read the alerts SQL fix and its test before accepting a backend change in a frontend feature. Not showing "reversed" on the original cost is fine until the API has a flag for it.
+
+### 18A Executive dashboard — 2026-10-19
+
+- **Goal:** `/dashboard` (module 06), all from the feature 13 endpoints with no client-side maths:
+  - six URL filters, three KPI sections with definitions;
+  - ≥ 5 recharts/CSS visuals, each failing independently;
+  - drill-down drawers showing "N records · total X";
+  - a "Last updated · Refresh" control (feature 18 Part A).
+- **Prompt/approach:** /run-feature 18 (Part A) with the feature spec, CLAUDE.md, the 13/16/17 context files, `docs/kpi-definitions.md`, the backend dashboard filters/schemas/service, and the OpenAPI file. Captured live responses for all 13 dashboard endpoints (admin) before writing schemas.
+- **First output issue:**
+  1. **Backend metadata bug.** Comparing live KPIs with and without `?categoryId=1` gave identical financial values. Yet `meta.appliedFilters` listed `categoryId`, for both `/kpis` and `/budget-vs-actual-eac`. Both read `fn_project_financials`, which has no category dimension. Showing "Filtered by category" on those cards would have been false, and the Actual spend drill (which does filter by category) wouldn't reconcile with the card. Fixed the meta (now `ignoredFilters`) with a regression test that also asserts the data is unchanged. No route added.
+  2. **Missing overrun flag.** `budget-vs-actual-eac` had no overrun flag, so highlighting overrun bars would have meant comparing EAC with budget in the browser. Added `isOverrun` (and `name`) from the same SQL function, with a test that the flagged rows equal `projectedOverrunCount`.
+  3. **OpenAPI drift.** 12 of the 13 dashboard paths had no response schema or filter params. Added them from the live responses. My first risk-drill schema guessed `exposure`/`ownerName`/`type`, but the live response has `band` and none of those; corrected before generating types. `routes:check` still 77/77.
+  4. **Cache-key collision.** `useReportingDate` (feature 16) stored `dashboard.kpis({})` as a bare `asOf` string, while the unfiltered dashboard needs `{data, meta}` under the same key. Whichever query ran first would have corrupted the other's data. Both now share `kpisQueryOptions` and the badge uses `select`.
+  5. **Test failures.**
+     - Four tests failed with "Unable to find AED 580,390.00" while the card visibly showed it: the same Intl no-break-space matcher issue as 17B. I used the normalising `money()` helper from those tests.
+     - One assertion read the topbar's unfiltered KPI call instead of the filtered one. The helper now picks the latest filtered call.
+- **Refinement:**
+  - Drills inherit the source widget's category context. The Actual spend card and budget chart drop `categoryId`; spend-by-category bars keep it.
+  - "Total X" is the clicked figure as returned by the API; drill endpoints return no sum and the browser doesn't add money.
+  - Moved recharts styling into `components/display/chartTheme.ts`, shared with the finance tab charts.
+  - Split `MonthlySpendChart` out to keep files under ~250 lines.
+- **Verification:**
+  - `cd frontend && npm run typecheck && npm run lint && npm test && npm run build`: 75/75 tests (6 new), clean, build OK (dashboard chunk 31 KB).
+  - `cd backend && npm run typecheck && npm run lint && npm test`: 456/456 (2 new).
+  - Live curl after the fix: `/kpis?categoryId=1` → `ignoredFilters: ["categoryId"]`; `budget-vs-actual-eac` rows carry `isOverrun`.
+  - No browser check this run; owner click-through pending.
+- **Human review:** TODO (owner)

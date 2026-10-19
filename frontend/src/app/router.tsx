@@ -10,6 +10,9 @@ import { NotFoundPage } from './NotFoundPage';
 // login screen and shell don't pay for every module's code — recharts in
 // particular. The shell's <Suspense> shows a skeleton while a chunk loads.
 // The `.then` maps the named export to the default export `lazy` expects.
+const DashboardPage = lazy(() =>
+  import('@/features/dashboard/pages/DashboardPage').then((m) => ({ default: m.DashboardPage })),
+);
 const ProjectsListPage = lazy(() =>
   import('@/features/projects/pages/ProjectsListPage').then((m) => ({ default: m.ProjectsListPage })),
 );
@@ -60,7 +63,7 @@ export function AppRoutes() {
       <Route element={<RequireAuth />}>
         <Route element={<AppShell />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<PlaceholderPage title="Dashboard" />} />
+          <Route path="dashboard" element={<DashboardPage />} />
           <Route path="projects" element={<ProjectsListPage />} />
           <Route path="projects/:id" element={<ProjectDetailPage />} />
           <Route path="my-tasks" element={<MyTasksPage />} />

@@ -38,6 +38,7 @@ export function useProjectFilterOptions() {
         departments: toOptions(data!.data?.departments),
         owners: toOptions(data!.data?.managers),
         projects: toOptions(data!.data?.projects),
+        categories: toOptions(data!.data?.categories),
       };
     },
   });

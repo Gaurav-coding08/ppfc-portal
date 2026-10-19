@@ -71,12 +71,18 @@ export const finance = {
   comparison: (projectIds: number[]) => [...finance.all, 'comparison', projectIds] as const,
 };
 
-// Dashboard is out of scope for M1's UI, but Part A reads
-// `GET /dashboard/kpis` once for the topbar's "Data as of" badge, since no
-// M1 endpoint otherwise exposes the reporting date (feature spec Part A.5).
+// Every dashboard read lives under `dashboard.all`. Each M1/M2 mutation hook
+// already invalidates `dashboard.all`, so a task update or cost posting
+// anywhere makes every KPI, chart and drill refetch (CLAUDE.md: invalidate,
+// never patch). The topbar's "Data as of" badge also reads `kpis({})`.
 export const dashboard = {
   all: ['dashboard'] as const,
   kpis: (filters: Record<string, unknown>) => [...dashboard.all, 'kpis', filters] as const,
+  // One key per visual endpoint (e.g. 'monthly-spend'), keyed by filters.
+  widget: (name: string, filters: Record<string, unknown>) =>
+    [...dashboard.all, 'widget', name, filters] as const,
+  drill: (kind: string, params: Record<string, unknown>) =>
+    [...dashboard.all, 'drill', kind, params] as const,
   // Option lists (departments, managers, …) scoped to the caller. The
   // projects list's owner filter reads `managers` from here (Part B).
   filters: () => [...dashboard.all, 'filters'] as const,

@@ -1,22 +1,17 @@
 import { useQuery } from '@tanstack/react-query';
-import { api } from '@/api/client';
-import { toApiError } from '@/api/errors';
-import * as queryKeys from '@/api/queryKeys';
+import { kpisQueryOptions } from '@/features/dashboard/hooks/useDashboardQueries';
 
-// No M1 endpoint exposes the reporting date on its own, so the topbar's
+// No endpoint exposes the reporting date on its own, so the topbar's
 // "Data as of" badge reads it off `GET /dashboard/kpis`'s `meta.asOf` —
-// an endpoint that already exists and is reachable by every role (feature
-// spec Part A.5: "if none is exposed, read it from an existing endpoint's
-// asOf; do not hardcode"). This does not build any dashboard UI.
+// an endpoint every role can reach (feature 16 spec Part A.5: "if none is
+// exposed, read it from an existing endpoint's asOf; do not hardcode").
+// It shares the unfiltered dashboard's KPI query (same key, same cached
+// shape) and only selects `asOf`, so the dashboard page doesn't fetch the
+// KPIs twice.
 export function useReportingDate(): string | undefined {
   const { data } = useQuery({
-    queryKey: queryKeys.dashboard.kpis({}),
-    queryFn: async () => {
-      const { data, error, response } = await api.GET('/dashboard/kpis', { params: { query: {} } });
-      if (error) throw toApiError(error, response);
-      return data!.meta!.asOf;
-    },
-    staleTime: Infinity,
+    ...kpisQueryOptions({}),
+    select: (result) => result.meta.asOf,
   });
   return data;
 }

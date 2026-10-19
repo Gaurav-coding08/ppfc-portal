@@ -235,9 +235,11 @@ export async function getProjectHealth(
 export interface BudgetVsActualRow {
   projectId: number;
   code: string;
+  name: string;
   currentBudget: number | null;
   actualSpend: number | null;
   eac: number | null;
+  isOverrun: boolean;
 }
 
 export async function getBudgetVsActual(
@@ -246,12 +248,15 @@ export async function getBudgetVsActual(
 ): Promise<BudgetVsActualRow[]> {
   const p = [...cte.params, cte.asOf];
   const { rows } = await client.query<{
-    project_id: number; code: string;
-    current_budget: string; actual_spend: string; eac: string;
+    project_id: number; code: string; name: string;
+    current_budget: string; actual_spend: string; eac: string; is_overrun: boolean;
   }>(
+    // is_overrun comes from the same function as the KPI's overrun count, so
+    // the chart's highlighted bars always match projectedOverrunCount.
     `WITH ${cte.sql}
-     SELECT p.id AS project_id, p.code,
-       f.current_budget::text, f.actual_spend::text, f.eac::text
+     SELECT p.id AS project_id, p.code, p.name,
+       f.current_budget::text, f.actual_spend::text, f.eac::text,
+       COALESCE(f.is_overrun, FALSE) AS is_overrun
      FROM projects p
      JOIN filtered_projects fp ON fp.id = p.id
      LEFT JOIN fn_project_financials($${p.length}) f ON f.project_id = p.id
@@ -261,8 +266,10 @@ export async function getBudgetVsActual(
   return rows.map((r) => ({
     projectId: r.project_id,
     code: r.code,
+    name: r.name,
     currentBudget: toMoney(r.current_budget),
     actualSpend: toMoney(r.actual_spend),
     eac: toMoney(r.eac),
+    isOverrun: r.is_overrun,
   }));
 }

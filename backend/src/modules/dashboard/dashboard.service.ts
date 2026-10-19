@@ -27,8 +27,13 @@ interface DashboardResponse<T> {
   meta: Meta;
 }
 
-function buildMeta(asOf: string, filters: DashboardFilters, isFinance: boolean): Meta {
-  const { applied, ignored } = classifyFilters(filters, isFinance);
+// `honoursCategory`: true only when the endpoint's SQL actually filters by
+// cost category (monthly-spend, spend-by-category, drill/costs). KPIs and
+// budget-vs-actual read fn_project_financials(), which has no category
+// dimension, so they must report categoryId as ignored rather than claim a
+// filter the numbers don't reflect.
+function buildMeta(asOf: string, filters: DashboardFilters, honoursCategory: boolean): Meta {
+  const { applied, ignored } = classifyFilters(filters, honoursCategory);
   return { asOf, appliedFilters: applied, ignoredFilters: ignored, generatedAt: new Date().toISOString() };
 }
 
@@ -46,7 +51,7 @@ export async function getKpis(
 ): Promise<DashboardResponse<{ kpis: repo.KpiRow[] }>> {
   const cte = buildFilteredProjectsCte(caller, filters);
   const kpis = await withDashboardTx((c) => repo.getKpis(cte, filters, c));
-  return { data: { kpis }, meta: buildMeta(cte.asOf, filters, true) };
+  return { data: { kpis }, meta: buildMeta(cte.asOf, filters, false) };
 }
 
 export async function getProjectHealth(
@@ -64,7 +69,7 @@ export async function getBudgetVsActual(
 ): Promise<DashboardResponse<{ projects: repo.BudgetVsActualRow[] }>> {
   const cte = buildFilteredProjectsCte(caller, filters);
   const projects = await withDashboardTx((c) => repo.getBudgetVsActual(cte, c));
-  return { data: { projects }, meta: buildMeta(cte.asOf, filters, true) };
+  return { data: { projects }, meta: buildMeta(cte.asOf, filters, false) };
 }
 
 export async function getMonthlySpend(

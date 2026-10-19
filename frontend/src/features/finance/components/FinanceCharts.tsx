@@ -12,23 +12,14 @@ import {
   YAxis,
 } from 'recharts';
 import { EmptyState } from '@/components/data/EmptyState';
+import { AXIS_TICK, GRID, compactAed } from '@/components/display/chartTheme';
 import { Card } from '@/components/ui/card';
 import { formatDate, formatMoney } from '@/lib/format';
 import type { MonthlyTrendRow, SpendByCategoryRow } from '../types';
 
 // CLAUDE.md fixed chart palette: Actual indigo-600, Forecast teal-500
-// (dashed). Grid and axes stay muted so the data carries the reading.
-// Every plotted value is a number the API returned; the charts only draw.
-const AXIS_TICK = { fontSize: 12, fill: 'var(--color-slate-500)' };
-const GRID = 'var(--color-slate-200)';
-
-// Compact axis labels ("AED 25K"); the tooltip shows the full amount.
-const compactAed = new Intl.NumberFormat('en-AE', {
-  style: 'currency',
-  currency: 'AED',
-  notation: 'compact',
-  maximumFractionDigits: 1,
-});
+// (dashed). Every plotted value is a number the API returned; the charts
+// only draw.
 
 export function FinanceCharts({
   spendByCategory,

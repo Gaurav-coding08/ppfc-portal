@@ -40,11 +40,13 @@ export interface FilterContext {
   ignoredFilters: string[];
 }
 
-// Returns the applied/ignored filter lists. Finance endpoints honour categoryId;
-// delivery endpoints report it as ignored.
+// Returns the applied/ignored filter lists. Only endpoints whose SQL filters
+// cost rows by category honour categoryId; every other endpoint (delivery,
+// and the fn_project_financials-based KPIs/budget-vs-actual) reports it as
+// ignored.
 export function classifyFilters(
   filters: DashboardFilters,
-  isFinanceEndpoint: boolean,
+  honoursCategory: boolean,
 ): { applied: string[]; ignored: string[] } {
   const applied: string[] = [];
   const ignored: string[] = [];
@@ -58,7 +60,7 @@ export function classifyFilters(
   if (filters.asOf) applied.push('asOf');
 
   if (filters.categoryId) {
-    if (isFinanceEndpoint) applied.push('categoryId');
+    if (honoursCategory) applied.push('categoryId');
     else ignored.push('categoryId');
   }
 

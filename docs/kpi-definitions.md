@@ -6,6 +6,8 @@ All KPIs are recomputed on every request from source tables — no caching or ma
 
 Default reporting date: `2026-09-30` (from `app_settings.reporting_date`; overridden by `?asOf=`).
 
+**Category filter:** `categoryId` does not change any KPI. The financial KPIs read `fn_project_financials(asOf)`, which totals each project across all categories, so `/kpis` reports `categoryId` in `meta.ignoredFilters` (as does `/budget-vs-actual-eac`). Only `monthly-spend`, `spend-by-category` and `drill/costs` honour it. To reconcile `actualSpend` with `drill/costs`, call the drill **without** `categoryId` — the dashboard's drill drawer does this automatically.
+
 ---
 
 ## 1. totalProjects
