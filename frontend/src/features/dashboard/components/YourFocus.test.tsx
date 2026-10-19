@@ -30,9 +30,9 @@ describe('YourFocus', () => {
       http.get(`${API}/tasks/mine`, () =>
         HttpResponse.json({
           data: [
-            { id: 1, title: 'Task A', status: 'in_progress', isOverdue: true, daysToDue: -3 },
-            { id: 2, title: 'Task B', status: 'in_progress', isOverdue: false, daysToDue: 7 },
-            { id: 3, title: 'Task C', status: 'done', isOverdue: true, daysToDue: -1 },
+            { id: 1, title: 'Task A', status: 'in_progress', isOverdue: true, isDueSoon: false },
+            { id: 2, title: 'Task B', status: 'in_progress', isOverdue: false, isDueSoon: true },
+            { id: 3, title: 'Task C', status: 'done', isOverdue: true, isDueSoon: false },
           ],
           meta: { page: 1, pageSize: 20, total: 3 },
         }),

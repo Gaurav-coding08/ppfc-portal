@@ -10,7 +10,7 @@ import { useFinanceAlerts } from '@/features/finance/hooks/useFinanceQueries';
 import { useAutomationRuns } from '@/features/automation/hooks/useAutomation';
 import type { components } from '@/api/schema';
 
-type Task = components['schemas']['TaskListItem'];
+type Task = components['schemas']['TaskRow'];
 
 function FocusItem({
   icon,
@@ -45,7 +45,7 @@ function ContributorFocus() {
     (t: Task) => t.status !== 'done' && t.isOverdue,
   ).length;
   const dueSoon = rows.filter(
-    (t: Task) => t.status !== 'done' && !t.isOverdue && t.daysToDue != null && t.daysToDue >= 0 && t.daysToDue <= 14,
+    (t: Task) => t.status !== 'done' && !t.isOverdue && t.isDueSoon,
   ).length;
 
   if (overdue === 0 && dueSoon === 0) return <EmptyFocus />;
@@ -106,7 +106,7 @@ function PmFocus() {
 }
 
 function AdminFocus() {
-  const runs = useAutomationRuns({ page: '1', status: '' }, true);
+  const runs = useAutomationRuns({ tab: 'runs', page: '1', status: '' }, true);
   const crs = useChangeRequests({ status: 'submitted', page: '1' });
 
   if (runs.isPending || crs.isPending) return <Skeleton className="h-10 w-60" />;
