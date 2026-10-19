@@ -570,4 +570,13 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   5. Found while reading Part A code: `SelectField` would display raw ids (e.g. "3") instead of labels, because Base UI's `Select.Value` needs the `items` prop.
 - **Refinement:** Fixed all of the above. `budget.utilization` turned out to be a ratio (0.9375) while `progressPct` is 0–100, so I added `formatRatio` (Intl percent style, no browser arithmetic) instead of multiplying by 100. Mutations invalidate `auth.me` as well, since memberships drive the UI permission hints. Route-level `React.lazy` cut the main chunk from 1.28 MB to 729 KB.
 - **Verification:** `cd frontend && npm run typecheck && npm run lint && npm test && npm run build`: 29/29 tests (15 new), clean, build OK. `cd backend && npm test`: 453/453. `npm run routes:check`: 77/77. In Chrome against the dev API, as contributor and PM: list, URL filter read-back, detail tabs, chart, edit sheet (opened and cancelled, no data changed), role-gated member actions, 404 view, and no console errors.
-- **Human review:** TODO (owner)
+- **Human review:** Went through it as the PM and as a contributor. As PM, set a few filters on
+  the projects list, reloaded and hit back — filters stuck. Created a test project: owner was
+  locked to me, the end-before-start error showed, and I landed on the new project with Edit
+  visible. Saved the same project from two tabs and got the "changed by someone else" dialog.
+  Added a contributor and removed them again; trying to remove someone with open tasks gave a
+  toast with the request ID. As contributor, no New project/Edit/member buttons, and
+  `/projects/3` showed the not-found message instead of an error. Read through the OpenAPI
+  diff against the backend zod schemas and the cache invalidation in `useProjectMutations`.
+  The 42% progress on almost every project looked wrong at first — confirmed it's the seed
+  data, not the UI.
