@@ -1,0 +1,194 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design tokens from CLAUDE.md's "Design system — clean, calm, executive"
+ * section: slate neutrals, indigo-600 primary accent, semantic colours.
+ * These are shadcn's standard token names, so every shadcn component picks
+ * them up automatically (bg-background, text-foreground, etc.) — `shadcn
+ * init` scaffolded this file with its own neutral/Geist defaults, which are
+ * overridden below rather than hand-rolling the file from scratch, per
+ * CLAUDE.md's "follow its docs for the Tailwind version it sets up".
+ */
+:root {
+  --radius: 0.75rem;
+
+  --background: oklch(0.984 0.003 247.86); /* slate-50 */
+  --foreground: oklch(0.208 0.042 265.75); /* slate-900 */
+
+  --card: oklch(1 0 0); /* white */
+  --card-foreground: oklch(0.208 0.042 265.75);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.208 0.042 265.75);
+
+  --primary: oklch(0.511 0.238 276.97); /* indigo-600 */
+  --primary-foreground: oklch(0.984 0.003 247.86);
+
+  --secondary: oklch(0.968 0.007 247.9); /* slate-100 */
+  --secondary-foreground: oklch(0.279 0.041 260.03);
+
+  --muted: oklch(0.968 0.007 247.9);
+  --muted-foreground: oklch(0.554 0.046 257.42); /* slate-500 */
+
+  --accent: oklch(0.968 0.007 247.9);
+  --accent-foreground: oklch(0.279 0.041 260.03);
+
+  --destructive: oklch(0.577 0.245 27.33); /* rose-600 */
+  --destructive-foreground: oklch(0.984 0.003 247.86);
+
+  --success: oklch(0.596 0.145 163.23); /* emerald-600 */
+  --success-foreground: oklch(0.984 0.003 247.86);
+
+  --warning: oklch(0.769 0.188 70.08); /* amber-500 */
+  --warning-foreground: oklch(0.279 0.041 260.03);
+
+  --info: oklch(0.588 0.158 241.97); /* sky-600 */
+  --info-foreground: oklch(0.984 0.003 247.86);
+
+  --border: oklch(0.928 0.006 264.53); /* slate-200 */
+  --input: oklch(0.928 0.006 264.53);
+  --ring: oklch(0.511 0.238 276.97); /* indigo-600 focus ring */
+
+  /* Chart series — fixed order per CLAUDE.md: indigo, teal, amber, sky, violet, slate */
+  --chart-1: oklch(0.511 0.238 276.97); /* indigo-600 */
+  --chart-2: oklch(0.6 0.118 184.7); /* teal-500 */
+  --chart-3: oklch(0.769 0.188 70.08); /* amber-500 */
+  --chart-4: oklch(0.588 0.158 241.97); /* sky-600 */
+  --chart-5: oklch(0.541 0.236 293.01); /* violet-600 */
+
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.208 0.042 265.75);
+  --sidebar-primary: oklch(0.511 0.238 276.97);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.86);
+  --sidebar-accent: oklch(0.968 0.007 247.9);
+  --sidebar-accent-foreground: oklch(0.279 0.041 260.03);
+  --sidebar-border: oklch(0.928 0.006 264.53);
+  --sidebar-ring: oklch(0.511 0.238 276.97);
+}
+
+/*
+ * Only a `.dark` class override, not a prefers-color-scheme query — the
+ * design system doesn't call for an auto dark mode in this phase, but
+ * shadcn components reference these vars either way.
+ */
+.dark {
+  --background: oklch(0.208 0.042 265.75);
+  --foreground: oklch(0.984 0.003 247.86);
+
+  --card: oklch(0.279 0.041 260.03);
+  --card-foreground: oklch(0.984 0.003 247.86);
+
+  --popover: oklch(0.279 0.041 260.03);
+  --popover-foreground: oklch(0.984 0.003 247.86);
+
+  --primary: oklch(0.606 0.191 276.5);
+  --primary-foreground: oklch(0.984 0.003 247.86);
+
+  --secondary: oklch(0.372 0.044 257.29);
+  --secondary-foreground: oklch(0.984 0.003 247.86);
+
+  --muted: oklch(0.372 0.044 257.29);
+  --muted-foreground: oklch(0.711 0.035 256.79);
+
+  --accent: oklch(0.372 0.044 257.29);
+  --accent-foreground: oklch(0.984 0.003 247.86);
+
+  --destructive: oklch(0.637 0.237 25.33);
+  --destructive-foreground: oklch(0.984 0.003 247.86);
+
+  --success: oklch(0.696 0.145 162.48);
+  --success-foreground: oklch(0.208 0.042 265.75);
+
+  --warning: oklch(0.828 0.189 84.43);
+  --warning-foreground: oklch(0.208 0.042 265.75);
+
+  --info: oklch(0.685 0.141 234.28);
+  --info-foreground: oklch(0.208 0.042 265.75);
+
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 18%);
+  --ring: oklch(0.606 0.191 276.5);
+
+  --chart-1: oklch(0.606 0.191 276.5);
+  --chart-2: oklch(0.65 0.118 184.7);
+  --chart-3: oklch(0.828 0.189 84.43);
+  --chart-4: oklch(0.685 0.141 234.28);
+  --chart-5: oklch(0.63 0.21 293.01);
+
+  --sidebar: oklch(0.279 0.041 260.03);
+  --sidebar-foreground: oklch(0.984 0.003 247.86);
+  --sidebar-primary: oklch(0.606 0.191 276.5);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.86);
+  --sidebar-accent: oklch(0.372 0.044 257.29);
+  --sidebar-accent-foreground: oklch(0.984 0.003 247.86);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.606 0.191 276.5);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  /* CLAUDE.md: "All numbers tabular-nums" */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}

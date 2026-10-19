@@ -1,0 +1,57 @@
+// UI-only permission hints — hide or disable actions the user probably
+// can't take, so the screen doesn't invite a guaranteed 403. The backend is
+// the real authority (CLAUDE.md "Role-aware UI is convenience only"); every
+// mutation still handles a 403 from the server gracefully regardless of
+// what this file says.
+import type { AuthUser, Membership } from './types';
+
+export function isAdmin(user: AuthUser | null): boolean {
+  return user?.role === 'admin';
+}
+
+export function isProjectManager(user: AuthUser | null): boolean {
+  return user?.role === 'project_manager';
+}
+
+export function isContributor(user: AuthUser | null): boolean {
+  return user?.role === 'contributor';
+}
+
+/** CLAUDE.md canManage: admin, or PM who owns/manages this specific project. */
+export function canManageProject(
+  user: AuthUser | null,
+  memberships: Membership[],
+  projectId: number,
+): boolean {
+  if (!user) return false;
+  if (isAdmin(user)) return true;
+  if (!isProjectManager(user)) return false;
+  return memberships.some((m) => m.projectId === projectId && m.memberRole === 'manager');
+}
+
+/** CLAUDE.md canView: admin, or any recorded membership on the project. */
+export function canViewProject(user: AuthUser | null, memberships: Membership[], projectId: number): boolean {
+  if (!user) return false;
+  if (isAdmin(user)) return true;
+  return memberships.some((m) => m.projectId === projectId);
+}
+
+export function canCreateProject(user: AuthUser | null): boolean {
+  return isAdmin(user) || isProjectManager(user);
+}
+
+export function canViewAdminNav(user: AuthUser | null): boolean {
+  return isAdmin(user);
+}
+
+/** A contributor may edit only their own assigned task's progress/status. */
+export function canEditOwnTaskOnly(
+  user: AuthUser | null,
+  memberships: Membership[],
+  projectId: number,
+  assigneeId: number | null,
+): boolean {
+  if (!user) return false;
+  if (canManageProject(user, memberships, projectId)) return false;
+  return assigneeId === user.id;
+}

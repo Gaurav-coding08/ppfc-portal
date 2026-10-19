@@ -17,6 +17,6 @@
 | 13  | 13-dashboard-analytics                 | done    | 2026-10-18 | 19    |
 | 14  | 14-backend-hardening                   | done    | 2026-10-18 | 120   |
 | 15  | 15-automation-overdue-escalation       | done    | 2026-10-18 | 453   |
-| 16  | 16-frontend-m1-foundation-delivery     | pending |            |       |
+| 16  | 16-frontend-m1-foundation-delivery     | in_progress (A done) | 2026-10-19 | 14    |
 | 17  | 17-frontend-m2-governance-finance      | pending |            |       |
 | 18  | 18-frontend-m3-dashboard-admin-quality | pending |            |       |

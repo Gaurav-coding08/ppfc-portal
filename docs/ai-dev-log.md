@@ -487,3 +487,73 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   `db: "up"`; worker log confirmed a `trigger: "schedule"` run firing on its cron tick
   (temporarily set to `* * * * *` to observe within the session; reverted to the `*/5 * * * *`
   default in committed config).
+
+### 16A Frontend foundation — 2026-10-19
+
+- **Goal:** Scaffold `frontend/` (Vite + React + TS), the typed API client, auth (real
+  login/logout/session, route guard, role-hint helpers), the app shell (sidebar, topbar,
+  design-system tokens), and the full shared component kit every later screen reuses —
+  with placeholder routes for every module so navigation is complete from day one.
+- **Prompt/approach:** `/run-feature 16` (Part A) with the feature spec + CLAUDE.md's Frontend
+  section + context files from 04/05/06/07/08/14. Verified every M1 endpoint's real response
+  shape against the running dev API (seeded data) before writing any frontend code, per the
+  spec's "contract check" instruction.
+- **First output issue / refinements:**
+  1. `docs/openapi.yaml` had never actually been used to generate response types — every path
+     for the endpoints this milestone needs was `description: OK` with no schema, and the
+     pre-existing entity schemas (`User`, `Project`, ...) were unreferenced orphans. Fixed by
+     adding real response envelopes (built from the actual captured API responses, not
+     guessed) and wiring them into every M1 path; found two real shape mismatches this way —
+     `Task`'s schema was missing `assigneeName`/`completedAt`, and project create/update
+     return the list-row shape, not the full detail-with-members shape the naive reading of
+     the feature spec would suggest.
+  2. `npm install` crashed with an unrelated npm/arborist internal error (`Cannot read
+     properties of null (reading 'edgesOut')`) on the first dependency batch; resolved by
+     clearing the lockfile and retrying with `--legacy-peer-deps` (kept on via `.npmrc` since
+     it recurred).
+  3. `npm create vite@latest`'s current template pulls `vitest@5`, `jsdom@30`,
+     `@testing-library/jest-dom@7`, and `msw@3`, all of which require Node ≥22 — this repo
+     pins Node 20 LTS. Installed are the newest versions that still declare Node 20 support
+     (`vitest@4.1.12`, `jsdom@29.1.1`, `msw@2.15.0`, `@testing-library/jest-dom@6.9.1` — note
+     `6.10.0` is a broken release per its own deprecation notice, so pinned one below it).
+  4. The current `shadcn` CLI scaffolds on **Base UI** primitives, not Radix, and defaults to
+     a neutral/Geist theme — CLAUDE.md says "Radix primitives" and specifies an indigo/slate
+     palette with Inter. Read literally, CLAUDE.md also says to "use the current shadcn CLI
+     init ... do not hand-roll a different setup," so the primitive swap was accepted as
+     that CLI's own current implementation choice, and the CLAUDE.md palette/font were
+     reapplied as CSS variable overrides on top of the generated `index.css`.
+  5. `@tanstack/react-table` v9 replaced the familiar v8 hook API (`useReactTable`,
+     `getCoreRowModel`, column-def generics) with an explicit, tree-shakeable `features`
+     object graph. `DataTable` uses the package's own `@tanstack/react-table/legacy`
+     v8-compatibility layer (`useLegacyTable`) instead, since this table only ever needs the
+     plain row model (sorting/pagination are server-side) — noted in-code as a deliberate,
+     revisit-if-needed choice, not an oversight.
+  6. Login tests only partially worked at first: MSW wasn't intercepting requests at all in
+     the Vitest/jsdom environment. Root cause was two-deep: (a) `openapi-fetch` captures
+     `globalThis.fetch` **by value** at client-creation time, which can be *before* MSW
+     patches it depending on module import order — fixed with a thin wrapper that looks up
+     `globalThis.fetch` fresh per call; (b) even after that, MSW's relative-path handlers
+     (`'/api/v1/...'`) didn't match requests built from the absolute base URL tests need
+     (Node's `fetch` has no `window.location` to resolve a relative `baseUrl` against,
+     unlike a real browser) — fixed by giving `client.ts` a test-only absolute `baseUrl`
+     (`import.meta.env.VITEST`) and writing every test handler against that same absolute
+     origin. Without the first fix, every API-dependent test was silently passing or failing
+     for the *wrong* reason (a swallowed network error producing the same visible "logged
+     out" state as a real 401) — only caught because one assertion checked the exact error
+     *text*, not just presence/absence of an element.
+  7. Manual browser check (not just automated tests) caught a real runtime bug the test
+     suite's mocked rendering hadn't: the user-menu dropdown crashed with "Base UI:
+     MenuGroupContext is missing" because `DropdownMenuLabel` (shadcn's wrapper around Base
+     UI's `Menu.GroupLabel`) requires a `<Menu.Group>` ancestor — Radix's equivalent doesn't.
+     Fixed by wrapping the label in `DropdownMenuGroup` in `Topbar.tsx`.
+- **Verification:** `cd frontend && npm run typecheck && npm run lint && npm test && npm run
+  build` — 14/14 tests pass, clean typecheck/lint, build succeeds (710 KB main chunk, flagged
+  by Vite as a size-split candidate to revisit once real feature code is added, not a feature
+  16 blocker). `cd backend && npm test` — 453/453 pass, no regression. `npm run routes:check`
+  — 77/77 matching (no route changes, response-schema enrichment only). Manually driven in a
+  real browser: login/logout for admin, PM and contributor; role-aware sidebar (Admin group
+  hidden for non-admin, Finance hidden for contributor); `next=` redirect after login; 401 →
+  redirect to `/login`; sidebar icon-collapse; 404 page; "Data as of 30 Sep 2026" badge.
+- **Human review:** Clicked through as admin, PM and contributor — login, logout, the `next=`
+  redirect and the role-based sidebar (Admin/Finance hidden for non-admin) all check out.
+  Caught the account-menu crash myself before merging; wasn't flagged by the test suite.

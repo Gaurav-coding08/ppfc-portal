@@ -31,6 +31,34 @@ npm run dev                    # API on http://localhost:4000
 curl -i localhost:4000/api/v1/health
 ```
 
+## Running the frontend
+
+The frontend (`frontend/`) is a Vite + React SPA that talks only to the backend's
+`/api/v1`. Run both at once, in two terminals:
+
+```bash
+# Terminal 1 — backend (from repo root)
+cd backend && npm run dev              # http://localhost:4000
+
+# Terminal 2 — frontend (from repo root)
+cd frontend && npm install
+npm run dev                            # http://localhost:5173
+```
+
+Vite's dev server proxies `/api` to `http://localhost:4000` (see `frontend/vite.config.ts`),
+so the browser only ever talks to `localhost:5173` — no CORS to configure in dev. Open
+`http://localhost:5173` and log in with any account from [docs/demo-accounts.md](docs/demo-accounts.md)
+(password `Demo@1234` for all of them; the login page also lists a few for convenience).
+
+Regenerate the typed API client after any backend route/schema change:
+
+```bash
+cd frontend && npm run api:types       # docs/openapi.yaml → src/api/schema.ts
+```
+
+Frontend commands: `npm run dev|build|preview|typecheck|lint|format|test|test:watch|test:e2e|api:types`.
+Frontend gate: `cd frontend && npm run typecheck && npm run lint && npm test && npm run build`.
+
 ## Environment variables
 
 All config lives in `backend/.env` (never committed — `.gitignore`d). Copy `.env.example`
@@ -143,7 +171,21 @@ ppfc-portal/
 │       ├── helpers/           # api(), loginAs(), resetDb(), routeExtractor
 │       └── integration/       # Feature tests, route-guard, rbac-matrix, id-escalation,
 │                              # logging, health-down
-└── frontend/                  # Later phase
+└── frontend/                  # React + Vite SPA (feature 16+)
+    ├── src/
+    │   ├── app/                # App.tsx, providers, router, queryClient
+    │   ├── api/                # schema.ts (generated), client.ts, errors.ts, queryKeys.ts
+    │   ├── auth/                # AuthProvider, useAuth, RequireAuth, can.ts, LoginPage
+    │   ├── components/
+    │   │   ├── ui/              # shadcn-generated primitives (light edits only)
+    │   │   ├── layout/          # AppShell, Sidebar, Topbar, PageHeader, nav config
+    │   │   ├── data/             # DataTable, FilterBar, Pagination, Loading/Empty/ErrorState
+    │   │   ├── form/              # FormField wrappers, ConfirmDialog, VersionConflictDialog
+    │   │   └── display/           # StatusBadge, Money, Percent, DateText, ProgressBar, KpiCard
+    │   ├── features/<module>/     # One folder per backend module (placeholders until built)
+    │   ├── lib/                    # format.ts, cn.ts, idempotency.ts, useUrlFilters, useDebouncedValue
+    │   └── test/                    # setup.ts, msw handlers/server, render helper
+    └── vite.config.ts              # /api → localhost:4000 dev proxy
 ```
 
 ## API documentation

@@ -186,6 +186,257 @@ components:
         month: { type: string, pattern: '^\d{4}-\d{2}$' }
         amount: { type: number }
 
+    # ── Response envelopes added in feature 16 (frontend M1) ──
+    # The schemas above this point predate the frontend work and were never
+    # referenced by a response (every path below just said "description: OK"
+    # with no content schema), so `openapi-typescript` generated unusable
+    # response types. These envelopes were written from real API responses
+    # captured against the seeded dev DB, not guessed — see
+    # .claude/context/16-frontend-m1-foundation-delivery.md Part A.
+    AuthUser:
+      type: object
+      properties:
+        id: { type: integer }
+        email: { type: string, format: email }
+        fullName: { type: string }
+        role: { type: string, enum: [contributor, project_manager, admin] }
+        departmentId: { type: integer, nullable: true }
+
+    LoginResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            user: { $ref: '#/components/schemas/AuthUser' }
+            token: { type: string }
+
+    Membership:
+      type: object
+      properties:
+        projectId: { type: integer }
+        projectCode: { type: string }
+        memberRole: { type: string, enum: [manager, contributor] }
+
+    MeResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            user: { $ref: '#/components/schemas/AuthUser' }
+            memberships:
+              type: array
+              items: { $ref: '#/components/schemas/Membership' }
+
+    Department:
+      type: object
+      properties:
+        id: { type: integer }
+        code: { type: string }
+        name: { type: string }
+
+    DepartmentListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Department' }
+
+    UserDirectoryEntry:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
+
+    UserListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/UserDirectoryEntry' }
+        meta: { $ref: '#/components/schemas/PaginationMeta' }
+
+    UserDetailResponse:
+      type: object
+      properties:
+        data: { $ref: '#/components/schemas/UserDirectoryEntry' }
+
+    DepartmentRef:
+      type: object
+      properties:
+        id: { type: integer }
+        code: { type: string }
+        name: { type: string }
+
+    OwnerRef:
+      type: object
+      properties:
+        id: { type: integer }
+        fullName: { type: string }
+        email: { type: string }
+
+    ProjectListItem:
+      type: object
+      properties:
+        id: { type: integer }
+        code: { type: string }
+        name: { type: string }
+        department: { $ref: '#/components/schemas/DepartmentRef' }
+        owner: { $ref: '#/components/schemas/OwnerRef' }
+        status: { type: string, enum: [planning, active, on_hold, completed, cancelled] }
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date }
+        progressPct: { type: number, nullable: true }
+        deliveryStatus:
+          type: string
+          nullable: true
+          enum: [on_track, behind, at_risk, completed]
+        version: { type: integer }
+
+    ProjectListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/ProjectListItem' }
+        meta: { $ref: '#/components/schemas/PaginationMeta' }
+
+    ProjectMember:
+      type: object
+      properties:
+        userId: { type: integer }
+        fullName: { type: string }
+        email: { type: string }
+        memberRole: { type: string, enum: [manager, contributor] }
+        addedAt: { type: string, format: date-time }
+
+    ProjectCounts:
+      type: object
+      properties:
+        taskCount: { type: integer }
+        overdueTaskCount: { type: integer }
+        openRiskCount: { type: integer }
+        pendingCrCount: { type: integer }
+
+    ProjectBudgetHeadline:
+      type: object
+      properties:
+        currentBudget: { type: number }
+        actualSpend: { type: number }
+        utilization: { type: number, nullable: true }
+        currency: { type: string, example: AED }
+
+    ProjectDetail:
+      allOf:
+        - $ref: '#/components/schemas/ProjectListItem'
+        - type: object
+          properties:
+            description: { type: string, nullable: true }
+            members:
+              type: array
+              items: { $ref: '#/components/schemas/ProjectMember' }
+            counts: { $ref: '#/components/schemas/ProjectCounts' }
+            budget: { $ref: '#/components/schemas/ProjectBudgetHeadline' }
+
+    ProjectDetailResponse:
+      type: object
+      properties:
+        data: { $ref: '#/components/schemas/ProjectDetail' }
+
+    ProjectMembersResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/ProjectMember' }
+
+    ProgressSnapshot:
+      type: object
+      properties:
+        snapshotDate: { type: string, format: date }
+        progressPct: { type: number }
+        actualSpend: { type: number }
+
+    ProgressSnapshotsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/ProgressSnapshot' }
+        meta: { $ref: '#/components/schemas/PaginationMeta' }
+
+    ActivityEvent:
+      type: object
+      properties:
+        id: { type: integer }
+        actorId: { type: integer, nullable: true }
+        actorName: { type: string, nullable: true }
+        entityType: { type: string }
+        entityId: { type: integer }
+        action: { type: string }
+        projectId: { type: integer, nullable: true }
+        before: {}
+        after: {}
+        requestId: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    ActivityListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/ActivityEvent' }
+        meta: { $ref: '#/components/schemas/PaginationMeta' }
+
+    TaskRow:
+      allOf:
+        - $ref: '#/components/schemas/Task'
+        - type: object
+          properties:
+            assigneeName: { type: string, nullable: true }
+            completedAt: { type: string, format: date-time, nullable: true }
+
+    TaskListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/TaskRow' }
+        meta: { $ref: '#/components/schemas/PaginationMeta' }
+
+    TaskDetailResponse:
+      type: object
+      properties:
+        data: { $ref: '#/components/schemas/TaskRow' }
+
+    MilestoneListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Milestone' }
+
+    MilestoneDetailResponse:
+      type: object
+      properties:
+        data: { $ref: '#/components/schemas/Milestone' }
+
+    # Dashboard itself ships in milestone 3 — this one field is enriched
+    # now because Part A's topbar reads `meta.asOf` off this endpoint for
+    # the "Data as of" badge (feature spec Part A.5: "if none is exposed,
+    # read it from an existing endpoint's asOf"). The rest of the dashboard
+    # response shapes are left as-is for M3 to fill in.
+    DashboardMeta:
+      type: object
+      properties:
+        asOf: { type: string, format: date }
+        appliedFilters: { type: array, items: {} }
+        ignoredFilters: { type: array, items: {} }
+        generatedAt: { type: string, format: date-time }
+
   parameters:
     pageParam:
       name: page
@@ -255,6 +506,9 @@ paths:
       responses:
         '200':
           description: Logged in
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LoginResponse' }
         '401':
           description: Bad credentials
           content:
@@ -267,7 +521,11 @@ paths:
     get:
       summary: Current user
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeResponse' }
         '401':
           content:
             application/json:
@@ -284,7 +542,11 @@ paths:
     get:
       summary: List all departments
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DepartmentListResponse' }
 
   # ── Users ──
   /users:
@@ -298,7 +560,11 @@ paths:
         - { $ref: '#/components/parameters/pageParam' }
         - { $ref: '#/components/parameters/pageSizeParam' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserListResponse' }
         '403': { description: Contributor not allowed }
 
   /users/{id}:
@@ -307,7 +573,11 @@ paths:
       parameters:
         - { name: id, in: path, required: true, schema: { type: integer } }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserDetailResponse' }
         '404': { description: Not found or out of scope }
 
   # ── Admin ──
@@ -376,7 +646,11 @@ paths:
         - { $ref: '#/components/parameters/pageSizeParam' }
         - { $ref: '#/components/parameters/asOfParam' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProjectListResponse' }
     post:
       summary: Create project
       requestBody:
@@ -397,7 +671,14 @@ paths:
                 endDate: { type: string, format: date }
                 initialBudget: { type: number }
       responses:
-        '201': { description: Created }
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/ProjectListItem' }
 
   /projects/{id}:
     get:
@@ -406,7 +687,11 @@ paths:
         - { name: id, in: path, required: true, schema: { type: integer } }
         - { $ref: '#/components/parameters/asOfParam' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProjectDetailResponse' }
         '404': { description: Not found or out of scope }
     patch:
       summary: Update project
@@ -424,7 +709,14 @@ paths:
                 status: { type: string }
                 version: { type: integer }
       responses:
-        '200': { description: Updated }
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/ProjectListItem' }
         '409': { description: Version conflict }
 
   /projects/{id}/members:
@@ -433,7 +725,11 @@ paths:
       parameters:
         - { name: id, in: path, required: true, schema: { type: integer } }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProjectMembersResponse' }
     post:
       summary: Add member
       parameters:
@@ -449,7 +745,14 @@ paths:
                 userId: { type: integer }
                 memberRole: { type: string, enum: [manager, contributor] }
       responses:
-        '201': { description: Added }
+        '201':
+          description: Added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/ProjectMember' }
 
   /projects/{id}/members/{userId}:
     delete:
@@ -466,7 +769,11 @@ paths:
       parameters:
         - { name: id, in: path, required: true, schema: { type: integer } }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProgressSnapshotsResponse' }
 
   /projects/{projectId}/activity:
     get:
@@ -476,7 +783,11 @@ paths:
         - { $ref: '#/components/parameters/pageParam' }
         - { $ref: '#/components/parameters/pageSizeParam' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ActivityListResponse' }
 
   # ── Tasks ──
   /projects/{projectId}/tasks:
@@ -488,7 +799,11 @@ paths:
         - { $ref: '#/components/parameters/pageSizeParam' }
         - { $ref: '#/components/parameters/asOfParam' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TaskListResponse' }
     post:
       summary: Create task
       parameters:
@@ -506,7 +821,11 @@ paths:
                 dueDate: { type: string, format: date }
                 weight: { type: integer }
       responses:
-        '201': { description: Created }
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TaskDetailResponse' }
 
   /tasks/mine:
     get:
@@ -515,7 +834,11 @@ paths:
         - { $ref: '#/components/parameters/pageParam' }
         - { $ref: '#/components/parameters/pageSizeParam' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TaskListResponse' }
 
   /tasks/{id}:
     get:
@@ -523,7 +846,11 @@ paths:
       parameters:
         - { name: id, in: path, required: true, schema: { type: integer } }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TaskDetailResponse' }
     patch:
       summary: Update task
       parameters:
@@ -540,7 +867,11 @@ paths:
                 status: { type: string }
                 version: { type: integer }
       responses:
-        '200': { description: Updated }
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TaskDetailResponse' }
     delete:
       summary: Delete task (todo, 0% only)
       parameters:
@@ -556,7 +887,11 @@ paths:
         - { name: projectId, in: path, required: true, schema: { type: integer } }
         - { $ref: '#/components/parameters/asOfParam' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MilestoneListResponse' }
     post:
       summary: Create milestone
       parameters:
@@ -574,7 +909,11 @@ paths:
                 status: { type: string }
                 achievedDate: { type: string, format: date }
       responses:
-        '201': { description: Created }
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MilestoneDetailResponse' }
 
   /milestones/{id}:
     patch:
@@ -595,7 +934,11 @@ paths:
                 achievedDate: { type: string, format: date }
                 version: { type: integer }
       responses:
-        '200': { description: Updated }
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MilestoneDetailResponse' }
 
   # ── Risks ──
   /projects/{projectId}/risks:
@@ -1014,7 +1357,15 @@ paths:
         - { name: status, in: query, schema: { type: string } }
         - { name: categoryId, in: query, schema: { type: integer } }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: {}
+                  meta: { $ref: '#/components/schemas/DashboardMeta' }
 
   /dashboard/project-health:
     get:
