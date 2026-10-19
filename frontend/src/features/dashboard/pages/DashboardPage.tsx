@@ -1,13 +1,12 @@
-import { CalendarDays } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useReportingDate } from '@/components/layout/useReportingDate';
-import { formatDate } from '@/lib/format';
 import { useUrlFilters } from '@/lib/useUrlFilters';
 import { DashboardFilterBar } from '../components/DashboardFilterBar';
 import { MilestoneTimeline, OverdueByOwnerChart, ProjectHealthTable } from '../components/DeliveryVisuals';
 import { DrillDrawer } from '../components/DrillDrawer';
 import { BudgetVsActualChart, SpendByCategoryChart } from '../components/FinanceVisuals';
+import { GlanceBand } from '../components/GlanceBand';
 import { MonthlySpendChart } from '../components/MonthlySpendChart';
 import { KpiSections } from '../components/KpiSections';
 import { LastUpdated } from '../components/LastUpdated';
@@ -69,18 +68,7 @@ export function DashboardPage() {
         action={<LastUpdated generatedAt={kpis.data?.meta.generatedAt} />}
       />
 
-      {asOf && (
-        <div className="flex items-start gap-2 text-sm">
-          <CalendarDays className="text-primary mt-0.5 size-4 shrink-0" aria-hidden />
-          <p>
-            <span className="font-medium text-slate-900">Reporting date: {formatDate(asOf)}</span>{' '}
-            <span className="text-muted-foreground">
-              · Financial figures are as of this date; the timeframe filter narrows tasks, milestones and
-              change requests by date.
-            </span>
-          </p>
-        </div>
-      )}
+      <GlanceBand kpis={kpis.data?.data} asOf={asOf} />
 
       <DashboardFilterBar filters={filters} setFilters={setFilters} asOf={asOf} />
 
@@ -93,7 +81,7 @@ export function DashboardPage() {
           query={budgetVsActual}
           isEmpty={(rows) => rows.length === 0}
           onReset={reset}
-          className="xl:col-span-2"
+          className="min-h-[320px] xl:col-span-2"
         >
           {(rows, meta) => (
             <BudgetVsActualChart rows={rows} includeCategory={categoryApplied(meta)} onDrill={setDrill} />
@@ -106,6 +94,7 @@ export function DashboardPage() {
           query={monthly}
           isEmpty={(rows) => rows.every((r) => r.actualSpend === null && r.forecast === null)}
           onReset={reset}
+          className="min-h-[320px]"
         >
           {(rows) => <MonthlySpendChart rows={rows} />}
         </Widget>
@@ -116,6 +105,7 @@ export function DashboardPage() {
           query={byCategory}
           isEmpty={(rows) => rows.length === 0}
           onReset={reset}
+          className="min-h-[320px]"
         >
           {(rows, meta) => (
             <SpendByCategoryChart rows={rows} includeCategory={categoryApplied(meta)} onDrill={setDrill} />
@@ -128,6 +118,7 @@ export function DashboardPage() {
           query={riskMatrix}
           isEmpty={(data) => data.totalOpenRisks === 0}
           onReset={reset}
+          className="min-h-[320px]"
         >
           {(data) => <RiskMatrix data={data} onDrill={setDrill} />}
         </Widget>
@@ -138,6 +129,7 @@ export function DashboardPage() {
           query={overdue}
           isEmpty={(rows) => rows.length === 0}
           onReset={reset}
+          className="min-h-[320px]"
         >
           {(rows) => <OverdueByOwnerChart rows={rows} onDrill={setDrill} />}
         </Widget>

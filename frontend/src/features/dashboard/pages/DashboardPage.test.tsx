@@ -35,7 +35,7 @@ describe('DashboardPage', () => {
   it('reads filters from the URL and sends them to the KPI endpoint', async () => {
     renderDashboard('/dashboard?departmentId=1&status=active,on_hold&from=2026-07-01&to=2026-09-30');
 
-    await screen.findByText(money(580390));
+    await waitFor(() => expect(screen.getAllByText(money(580390)).length).toBeGreaterThan(0));
     const params = lastKpiParams();
     expect(params.get('departmentId')).toBe('1');
     expect(params.get('status')).toBe('active,on_hold');
@@ -54,7 +54,7 @@ describe('DashboardPage', () => {
   it('writes a changed filter to the URL and refetches KPIs with it', async () => {
     const user = userEvent.setup();
     renderDashboard('/dashboard?departmentId=1');
-    await screen.findByText(money(580390));
+    await waitFor(() => expect(screen.getAllByText(money(580390)).length).toBeGreaterThan(0));
 
     await user.click(screen.getByRole('combobox', { name: 'Cost category' }));
     await user.click(await screen.findByRole('option', { name: 'HW — Hardware' }));
@@ -86,7 +86,7 @@ describe('DashboardPage', () => {
     expect(within(failing).getByRole('button', { name: 'Retry' })).toBeInTheDocument();
 
     // KPIs and other widgets are unaffected.
-    expect(screen.getByText(money(580390))).toBeInTheDocument();
+    expect(screen.getAllByText(money(580390)).length).toBeGreaterThan(0);
     const matrix = screen.getByRole('region', { name: 'Risk matrix' });
     expect(within(matrix).getByText('1 open risk in total')).toBeInTheDocument();
     const health = screen.getByRole('region', { name: 'Project health' });
@@ -96,7 +96,7 @@ describe('DashboardPage', () => {
   it('opens the Actual spend drill-down with the finance drill endpoint and current filters', async () => {
     const user = userEvent.setup();
     renderDashboard('/dashboard?departmentId=1&categoryId=3');
-    await screen.findByText(money(580390));
+    await waitFor(() => expect(screen.getAllByText(money(580390)).length).toBeGreaterThan(0));
 
     await user.click(screen.getByRole('button', { name: 'Actual spend: show records' }));
 

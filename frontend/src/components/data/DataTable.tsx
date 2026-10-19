@@ -87,7 +87,7 @@ export function DataTable<TData extends RowData>({
       )}
       <div className="overflow-x-auto rounded-xl border">
         <Table>
-          <TableHeader>
+          <TableHeader className="sticky top-0 z-10 bg-white">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {

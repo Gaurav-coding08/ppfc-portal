@@ -8,6 +8,7 @@ import { EmptyState } from '@/components/data/EmptyState';
 import { ErrorState } from '@/components/data/ErrorState';
 import { LoadingState } from '@/components/data/LoadingState';
 import { Pagination } from '@/components/data/Pagination';
+import { statusBorderClass } from '@/lib/statusBorder';
 import { ConfirmDialog } from '@/components/form/ConfirmDialog';
 import { Button } from '@/components/ui/button';
 import type { ProjectDetail } from '@/features/projects/types';
@@ -99,6 +100,7 @@ export function TasksTab({ project, canManage }: { project: ProjectDetail; canMa
             sort={filters.sort}
             order={filters.order as 'asc' | 'desc'}
             onSortChange={(sort, order) => setFilters({ sort, order, page: '1' })}
+            getRowClassName={(row) => statusBorderClass(row.status)}
           />
           <Pagination
             page={Number(filters.page) || 1}

@@ -10,6 +10,7 @@ import { LoadingState } from '@/components/data/LoadingState';
 import { Pagination } from '@/components/data/Pagination';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
+import { statusBorderClass } from '@/lib/statusBorder';
 import { useUrlFilters } from '@/lib/useUrlFilters';
 import { ProjectFilters } from '../components/ProjectFilters';
 import { ProjectFormSheet } from '../components/ProjectFormSheet';
@@ -60,6 +61,7 @@ export function ProjectsListPage() {
             order={filters.order as 'asc' | 'desc'}
             onSortChange={(sort, order) => setFilters({ sort, order, page: '1' })}
             onRowClick={(row) => navigate(`/projects/${row.id}`)}
+            getRowClassName={(row) => statusBorderClass(row.status)}
           />
           <Pagination
             page={Number(filters.page) || 1}

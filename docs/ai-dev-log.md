@@ -719,3 +719,12 @@ build` — 14/14 tests pass, clean typecheck/lint, build succeeds (710 KB main c
 - **Verification:**
   - Frontend gate: typecheck pass, lint pass, 89/89 tests pass, build pass.
   - Backend and E2E: Docker/Postgres not running in this session; no backend or SQL changes were made, so these are infrastructure-only skips.
+
+### 19B — Fill the empty space with real data
+- **What changed:** Added a portfolio-at-a-glance horizontal band to the dashboard top showing key financials and utilisation. Redesigned the project Overview tab into a 2-column layout: left column shows progress chart, next 3 milestones and top 3 risks; right column shows a financial mini-summary and the latest 5 activity events. Added sticky table headers, status-colour left borders on list rows, and tighter widget padding.
+- **Decisions:**
+  - The glance band reuses KPI data already loaded by the KpiSections query — no new API calls. The same `kpis.data?.data` array feeds both.
+  - Project overview milestones/risks/activity each fire their own query. These are cheap (small result sets), and the data is already cached if the user visited those tabs.
+  - Status border is a central utility (`lib/statusBorder.ts`) mapping every domain's statuses to Tailwind `border-l-4` classes, applied via the existing `getRowClassName` DataTable prop.
+  - Dashboard tests now use `getAllByText` since the actual-spend value appears in both the glance band and KPI cards.
+- **Verification:** Frontend gate: typecheck pass, lint pass, 89/89 tests pass, build pass.

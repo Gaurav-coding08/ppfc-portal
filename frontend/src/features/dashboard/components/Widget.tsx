@@ -70,7 +70,7 @@ export function Widget<T>({
   }
 
   return (
-    <Card className={cn('min-w-0 gap-3 p-5', className)} aria-label={title} role="region">
+    <Card className={cn('min-w-0 gap-3 p-4', className)} aria-label={title} role="region">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h3 className="text-base font-semibold">{title}</h3>
