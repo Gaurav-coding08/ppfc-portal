@@ -704,4 +704,4 @@ build` — 14/14 tests pass, clean typecheck/lint, build succeeds (710 KB main c
   - `npm run test:e2e` against the Docker stack: 17/17. The same suite also passed against the dev servers (`E2E_BASE_URL=http://localhost:5173`).
   - Fresh (non-reused) logins verified through nginx.
   - The app-profile containers were stopped afterwards; `db` was left running.
-- **Human review:** TODO (owner)
+- **Human review:** - **Human review:** Clicked through the Docker build on :8080. At phone width the sidebar opens as a drawer and filters sit behind a "Filters" button; at tablet width the KPI cards show full AED values now. Walked login → project → task edit with the keyboard only and focus stayed inside the sheet; Esc brought it back to the Edit button. Dashboard drill for Digital Platforms showed [N] records, and the actual-spend figure matched my DBeaver query. Run now gave a Manual row and the PM bell picked up the overdue notifications. Accepted the 768 px drawer breakpoint over the 1024 in CLAUDE.md. The shared login limit behind nginx is fine but needs `trust proxy` before any real deployment.
