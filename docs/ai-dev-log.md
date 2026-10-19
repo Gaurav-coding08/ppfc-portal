@@ -588,7 +588,7 @@ build` — 14/14 tests pass, clean typecheck/lint, build succeeds (710 KB main c
 - **Prompt/approach:** /run-feature 17 (Part A) with the feature spec, CLAUDE.md, the 09/10/16 context files, the backend risk/CR zod schemas, the idempotency middleware and the OpenAPI file. Captured live risk, high-exposure, CR list and CR detail responses as a PM against the seeded dev DB before writing schemas.
 - **First output issue:**
   1. OpenAPI drift: none of the risk/CR paths had response schemas, the risk list was missing eight query params, the risk PATCH body listed four fields, `Risk.ownerId` wasn't nullable, `ownerName`/`closedAt` were missing, and so were CR `requesterName`/`submittedAt`/`deciderName`/`history`. Fixed in `docs/openapi.yaml` and regenerated types; `routes:check` still 77/77.
-  2. Reading the idempotency middleware showed it replays a stored *successful* response for the same key and path, whatever the body. A key kept for the panel's whole life would therefore replay the old decision after a CR is returned and resubmitted. The key is now replaced after each success, and the panel remounts per CR version.
+  2. Reading the idempotency middleware showed it replays a stored _successful_ response for the same key and path, whatever the body. A key kept for the panel's whole life would therefore replay the old decision after a CR is returned and resubmitted. The key is now replaced after each success, and the panel remounts per CR version.
   3. My first draft of the double-click test had a malformed `dblClick` target; I fixed it to click the dialog's confirm button. To prove the test means something, I removed the `inFlight` guard and the pending-disable: it then recorded 2 requests and failed. Restored.
   4. The resubmit test failed with "multiple elements" because the reviewer's reason appears on the page and in the sheet. Scoped the assertion to the sheet.
 - **Refinement:** INVALID_TRANSITION is matched by error code, not HTTP status (backend sends 422, spec says 409). The mitigation 422 has no `details`, so its message is matched to show it on the Mitigation field. Contributors get no decision panel at all; the disabled "own request" panel only appears for someone who could otherwise decide. The score preview is kept as form-only guidance because of CLAUDE.md's "no scores in the browser" rule; lists show the API's score.
@@ -605,6 +605,7 @@ build` — 14/14 tests pass, clean typecheck/lint, build succeeds (710 KB main c
   - drill-down from Actual spend to its transactions.
 
   Plus cost categories (admin), `/finance/alerts` and `/finance/comparison`. Every number is refetched after a write, never patched (feature 17 Part B).
+
 - **Prompt/approach:** /run-feature 17 (Part B) with the feature spec, CLAUDE.md, the 11/12/16/17A context files, the backend finance zod schemas, controllers and repositories, and the OpenAPI file. Captured live summary, budget, costs, categories, forecasts, alerts and comparison responses (PM, contributor, admin) and the 400/403/422 error shapes before writing schemas.
 - **First output issue:**
   1. **Backend bug.** `GET /finance/alerts` returned 500 INTERNAL for every PM and contributor; only admin worked, and the existing tests only called it as admin. Cause: `scopedProjectIdsSql` hardcodes `$1` for the user id, but `getAlerts` put `asOf` at `$1`, so Postgres compared a date with `owner_id`. Fixed by putting scope params first (the rule the risks/costs repositories already follow) and added a regression test for PM and contributor. This is a bug fix in an existing endpoint, not a new route.
@@ -615,8 +616,10 @@ build` — 14/14 tests pass, clean typecheck/lint, build succeeds (710 KB main c
      - `Forecast.month` is returned as `YYYY-MM-01`, not `YYYY-MM`.
 
      Fixed in `docs/openapi.yaml` and regenerated types; `routes:check` still 77/77.
+
   3. **Assertion failure.** The refetch test failed although the "expected" and "received" amounts printed identically. `toHaveTextContent` collapses the no-break space Intl puts after "AED" in the received text, but not in the expected string. Normalised the expected string in the test; the component was right.
   4. **Lint.** Lint rejected a component defined inside the columns file (react-refresh). Moved the row actions to `CostRowActions.tsx`.
+
 - **Refinement:**
   - The `financials` returned by `POST /costs/:id/post` are deliberately ignored, because they are as of the cost's date, not the reporting date.
   - To prove the double-click test, I removed only the `inFlight` guard first: still one POST, because the dialog's pending-disable also blocks it. With both guards removed it recorded 2 POSTs and failed. Both restored.
@@ -673,4 +676,4 @@ build` — 14/14 tests pass, clean typecheck/lint, build succeeds (710 KB main c
   - `cd backend && npm run typecheck && npm run lint && npm test`: 457/457 (1 new); `npm run routes:check` 77/77.
   - Live curl: runs rows carry `trigger`; `PATCH /admin/users/1 {role}` as that admin → 422 "Admins cannot change their own role" (the message the dialog shows).
   - All new tests passed on the first run. No browser check this run; owner click-through pending.
-- **Human review:** TODO (owner)
+- **Human review:** Logged in as Christelle first: no Admin group in the sidebar, and typing /admin/users gave the "only admins" message, so the gate holds on a direct URL too. As Garnet I changed [user] from contributor to project manager. The confirm step stated what the role would allow before anything was saved, which is what I wanted. Trying to change my own role showed the backend's "Admins cannot change their own role" message with a request ID, [as expected / and I'd like…]. In the audit log, filtering to tasks and expanding a row showed [the before/after fields]; the "(changed)" label made the difference clear [or: …]. Run now on the automation page gave a toast with [counts], and a new "Manual" row appeared at the top. Retrying the failed outbox event moved it to Pending. Back as Christelle, the bell showed [N] unread, and marking one read dropped it to [N−1] after the refresh. Clicking a notification opened the project's Tasks tab. I read the migration 016 change and accepted it: storing the trigger is better than guessing it from the audit log, and old runs showing "Scheduled" is fine for the demo data.
