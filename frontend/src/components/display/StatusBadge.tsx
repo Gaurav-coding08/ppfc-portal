@@ -21,6 +21,7 @@ const TASK: Record<string, [Tone, string]> = {
 const MILESTONE: Record<string, [Tone, string]> = {
   planned: ['neutral', 'Planned'],
   achieved: ['success', 'Achieved'],
+  missed: ['danger', 'Missed'],
 };
 
 const RISK: Record<string, [Tone, string]> = {

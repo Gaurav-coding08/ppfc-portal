@@ -580,3 +580,15 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
   diff against the backend zod schemas and the cache invalidation in `useProjectMutations`.
   The 42% progress on almost every project looked wrong at first — confirmed it's the seed
   data, not the UI.
+
+### 16C Frontend tasks & milestones — 2026-10-19
+
+- **Goal:** Project Tasks tab (filters in URL, manager create/edit/delete, contributor progress/status-only form, 403 field message), My tasks grouped with inline progress, Milestones tab with roadmap strip and 14-day highlight; invalidate tasks + project detail + dashboard after every task save — feature 16 Part C.
+- **Prompt/approach:** /run-feature 16 (Part C) with the feature spec, CLAUDE.md, the 08 context file, the backend task/milestone zod schemas and the OpenAPI file. Contract-checked list, mine, milestones, 403 and 409 responses against the running API, then sent the UI's create/PATCH/DELETE bodies to a throwaway task (created and deleted again).
+- **First output issue:**
+  1. OpenAPI drift: task list/mine had no filter/sort params, POST/PATCH task bodies listed only 3–4 fields, `weight` was `integer` (the DB column is NUMERIC and the live API accepted and returned `1.5`), and milestone `status` lacked `missed`. Fixed in `docs/openapi.yaml` and regenerated types; `routes:check` still 77/77.
+  2. A first draft of the edit forms sent every field on PATCH. That would have broken the backend's "progress 100 with no explicit status → done" inference (the untouched status counts as explicit), so edits now send dirty fields only.
+  3. Filter test failed with "multiple elements": the status multi-select button and the table's "Status" sort-header button had the same accessible name. Renamed the filter to "Status filter", which is also clearer for screen readers.
+- **Refinement:** Tab switches now clear the task filter params; My tasks labels projects from `/auth/me` memberships because `/tasks/mine` returns only `projectId`. Noted that the backend's `isDueSoon` uses 7 days while CLAUDE.md's design note says ≤ 14; the UI shows the API flag as-is.
+- **Verification:** `cd frontend && npm run typecheck && npm run lint && npm test && npm run build`: 42/42 tests (13 new), clean, build OK. `cd backend && npm test`: 453/453. No browser check this run; owner click-through pending.
+- **Human review:** TODO (owner)

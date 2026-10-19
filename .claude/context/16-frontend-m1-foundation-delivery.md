@@ -260,3 +260,75 @@ No backend endpoints were added. Calls: `GET/POST /projects`, `GET/PATCH /projec
 cd frontend && npm run typecheck && npm run lint && npm test && npm run build   # 29 tests
 cd ../backend && npm test                                                     # 453 tests
 ```
+
+## Part C (done 2026-10-19)
+
+### What exists now
+
+Tasks and milestones (module 02). The project detail page now has real Tasks and Milestones
+tabs. Tasks: a server-sorted, server-paginated DataTable with overdue/due-soon badges and URL
+filters (multi-status, assignee incl. Unassigned, priority, overdue only). Managers get full
+create/edit/delete; a contributor gets a reduced progress/status form on their own task.
+Milestones: a table plus a roadmap strip. `/my-tasks` groups the caller's tasks into
+Overdue / Due soon / Upcoming / Done and lets them update progress inline. **Feature 16 is complete.**
+
+### Files
+
+- `features/tasks/types.ts` — `TaskRow`, status/priority options, `TASK_LIST_DEFAULTS`, `UNASSIGNED` sentinel, `TASK_FILTER_KEYS`, `isUntouched`
+- `features/tasks/schemas.ts` — `taskFormSchema(projectDates)`, `contributorTaskSchema`, `toCreateBody`, `toUpdateBody(values, dirtyFields)`
+- `features/tasks/forbiddenFields.ts` — `forbiddenFieldsMessage(err)` (403 `details.fields` → readable text)
+- `features/tasks/hooks/useTaskQueries.ts` (`useProjectTasks`, `useMyTasks`), `useTaskMutations.ts` (`useCreateTask`, `useUpdateTask`, `useDeleteTask`, `useInvalidateTasks`)
+- `features/tasks/components/` — `TasksTab`, `TaskFilters`, `taskColumns`, `TaskFormSheet` (manager), `ContributorTaskSheet`, `ProgressInput` (slider + number), `InlineProgress`, `TaskDueBadges`
+- `features/tasks/pages/MyTasksPage.tsx` (lazy route `/my-tasks`)
+- `features/milestones/` — `types.ts` (`isDueWithinWindow`, 14 days), `schemas.ts`, `hooks/useMilestones.ts`, `components/MilestonesTab`, `MilestoneRoadmap`, `MilestoneFormSheet`
+- `components/data/FilterMultiSelect.tsx` — checkbox dropdown whose value is a comma list
+- `components/display/StatusBadge.tsx` — added milestone `missed` (danger)
+- `test/fixtures/tasks.ts` — `taskRow()`, `taskListResponse()`, `milestone()`
+- Tests: `TasksTab.test.tsx` (9), `MyTasksPage.test.tsx` (2), `MilestonesTab.test.tsx` (2)
+
+### Database
+
+None.
+
+### Endpoints / Pages
+
+| Route | Roles | Notes |
+|---|---|---|
+| `/projects/:id?tab=tasks` | view; manage → create/edit/delete; own-task contributor → progress/status | `&q&status=a,b&assignee=<id>\|unassigned&priority&overdue=true&sort&order&page` |
+| `/projects/:id?tab=milestones` | view; manage → create/edit | roadmap strip + table |
+| `/my-tasks` | any | `?page`; grouped by API flags |
+
+No backend endpoints added. Calls: `GET/POST /projects/:projectId/tasks`, `GET /tasks/mine`,
+`PATCH/DELETE /tasks/:id`, `GET/POST /projects/:projectId/milestones`, `PATCH /milestones/:id`.
+
+### Reusable pieces (use these, don't rebuild)
+
+- `FilterMultiSelect({label, allLabel, value, onChange, options})` — accessible name is `"<label> filter"`
+- `useInvalidateTasks()` — `tasks.all` + `projects.all` + `dashboard.all`; anything that changes task progress should call it
+- `forbiddenFieldsMessage(err)` — reuse for any other field-level 403
+- `ProgressInput` — controlled slider + number, for Controller or local state
+- Edit forms send **only dirty fields** (`toUpdateBody(values, formState.dirtyFields)`), plus `version`
+
+### Decisions & trade-offs
+
+- **PATCH sends changed fields only.** The backend infers `done` from `progress: 100` only when no `status` is sent; re-sending the untouched status would turn that off. It also keeps audit before/after diffs minimal.
+- **Overdue / due soon / within-14-days come from the API** (`isOverdue`, `isDueSoon`, `daysToDue`). The browser never compares dates. Note: the backend's `isDueSoon` window is **7 days**, while CLAUDE.md's design note says ≤ 14. The UI shows the API flag as-is; the milestone "within 14 days" highlight reads `daysToDue` per the feature spec.
+- **Roadmap dot placement** uses `Date.UTC` on the YYYY-MM-DD parts (layout only, no `new Date(str)`).
+- **Tab switch clears task filter params** (`TASK_FILTER_KEYS`), so `?status=` doesn't trail onto other tabs.
+- **My tasks** loads one page of 100 (backend max) and groups it; pagination still applies beyond that.
+- `/tasks/mine` has no project code, so the label comes from the caller's `memberships` (`Project #id` fallback, e.g. for an admin without membership).
+- OpenAPI fixed: task list/mine query params, full task POST/PATCH bodies, `weight` integer → number (DB NUMERIC; live API accepted/returned 1.5), milestone `missed` status, milestone list params, nullable PATCH fields.
+- A cleared task description can't be saved (backend: min 1, not nullable), so it is left out of the PATCH.
+
+### Known gaps / TODO for later features
+
+- No task detail page (`GET /tasks/:id` is unused); editing happens in sheets.
+- My tasks has no filters (spec didn't ask); the API supports them.
+- Bundle main chunk still 729 KB (warning unchanged from Part B).
+
+### How to verify quickly
+
+```bash
+cd frontend && npm run typecheck && npm run lint && npm test && npm run build   # 42 tests
+cd ../backend && npm test                                                     # 453 tests
+```

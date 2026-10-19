@@ -96,7 +96,8 @@ components:
         priority: { type: string, enum: [low, medium, high, critical] }
         startDate: { type: string, format: date, nullable: true }
         dueDate: { type: string, format: date }
-        weight: { type: integer }
+        # NUMERIC in the DB; the API returns it as a plain number (e.g. 1, 2.5).
+        weight: { type: number }
         progress: { type: integer, minimum: 0, maximum: 100 }
         isOverdue: { type: boolean }
         isDueSoon: { type: boolean }
@@ -109,7 +110,7 @@ components:
         projectId: { type: integer }
         name: { type: string }
         dueDate: { type: string, format: date }
-        status: { type: string, enum: [planned, achieved] }
+        status: { type: string, enum: [planned, achieved, missed] }
         achievedDate: { type: string, format: date, nullable: true }
         isOverdue: { type: boolean }
         daysToDue: { type: integer, nullable: true }
@@ -471,6 +472,25 @@ components:
       in: query
       schema: { type: string, format: date }
       description: Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30).
+    # Shared by GET /projects/{projectId}/tasks and GET /tasks/mine
+    # (backend tasks.schemas.ts taskFilterFields).
+    taskStatusParam:
+      name: status
+      in: query
+      schema: { type: string }
+      description: One status or a comma-separated list (todo,in_progress,blocked,done).
+    taskPriorityParam:
+      name: priority
+      in: query
+      schema: { type: string, enum: [low, medium, high, critical] }
+    taskOverdueParam:
+      name: overdue
+      in: query
+      schema: { type: string, enum: ['true', 'false'] }
+    taskSortParam:
+      name: sort
+      in: query
+      schema: { type: string, enum: [dueDate, priority, status, progress, title], default: dueDate }
 
 security:
   - cookieAuth: []
@@ -838,6 +858,16 @@ paths:
       summary: List project tasks
       parameters:
         - { name: projectId, in: path, required: true, schema: { type: integer } }
+        - { $ref: '#/components/parameters/taskStatusParam' }
+        - { name: assigneeId, in: query, schema: { type: integer } }
+        - { name: unassigned, in: query, schema: { type: string, enum: ['true', 'false'] } }
+        - { $ref: '#/components/parameters/taskPriorityParam' }
+        - { $ref: '#/components/parameters/taskOverdueParam' }
+        - { name: dueFrom, in: query, schema: { type: string, format: date } }
+        - { name: dueTo, in: query, schema: { type: string, format: date } }
+        - { name: q, in: query, schema: { type: string } }
+        - { $ref: '#/components/parameters/taskSortParam' }
+        - { name: order, in: query, schema: { type: string, enum: [asc, desc], default: asc } }
         - { $ref: '#/components/parameters/pageParam' }
         - { $ref: '#/components/parameters/pageSizeParam' }
         - { $ref: '#/components/parameters/asOfParam' }
@@ -860,9 +890,14 @@ paths:
               required: [title, priority, dueDate, weight]
               properties:
                 title: { type: string }
-                priority: { type: string }
+                description: { type: string }
+                assigneeId: { type: integer }
+                status: { type: string, enum: [todo, in_progress, blocked, done] }
+                priority: { type: string, enum: [low, medium, high, critical] }
+                startDate: { type: string, format: date }
                 dueDate: { type: string, format: date }
-                weight: { type: integer }
+                weight: { type: number, exclusiveMinimum: true, minimum: 0 }
+                progress: { type: integer, minimum: 0, maximum: 100 }
       responses:
         '201':
           description: Created
@@ -874,6 +909,15 @@ paths:
     get:
       summary: Caller's own tasks
       parameters:
+        - { $ref: '#/components/parameters/taskStatusParam' }
+        - { $ref: '#/components/parameters/taskPriorityParam' }
+        - { $ref: '#/components/parameters/taskOverdueParam' }
+        - { name: dueFrom, in: query, schema: { type: string, format: date } }
+        - { name: dueTo, in: query, schema: { type: string, format: date } }
+        - { name: q, in: query, schema: { type: string } }
+        - { $ref: '#/components/parameters/taskSortParam' }
+        - { name: order, in: query, schema: { type: string, enum: [asc, desc], default: asc } }
+        - { $ref: '#/components/parameters/asOfParam' }
         - { $ref: '#/components/parameters/pageParam' }
         - { $ref: '#/components/parameters/pageSizeParam' }
       responses:
@@ -905,9 +949,20 @@ paths:
             schema:
               type: object
               required: [version]
+              description: >-
+                At least one field besides version. A contributor who is the
+                task's assignee may send only progress/status (else 403 with
+                details.fields listing the rejected keys).
               properties:
-                progress: { type: integer }
-                status: { type: string }
+                title: { type: string }
+                description: { type: string }
+                assigneeId: { type: integer, nullable: true }
+                status: { type: string, enum: [todo, in_progress, blocked, done] }
+                priority: { type: string, enum: [low, medium, high, critical] }
+                startDate: { type: string, format: date, nullable: true }
+                dueDate: { type: string, format: date }
+                weight: { type: number, exclusiveMinimum: true, minimum: 0 }
+                progress: { type: integer, minimum: 0, maximum: 100 }
                 version: { type: integer }
       responses:
         '200':
@@ -928,6 +983,8 @@ paths:
       summary: List milestones
       parameters:
         - { name: projectId, in: path, required: true, schema: { type: integer } }
+        - { name: status, in: query, schema: { type: string, enum: [planned, achieved, missed] } }
+        - { name: dueWithinDays, in: query, schema: { type: integer, minimum: 0 } }
         - { $ref: '#/components/parameters/asOfParam' }
       responses:
         '200':
@@ -949,7 +1006,7 @@ paths:
               properties:
                 name: { type: string }
                 dueDate: { type: string, format: date }
-                status: { type: string }
+                status: { type: string, enum: [planned, achieved, missed] }
                 achievedDate: { type: string, format: date }
       responses:
         '201':
@@ -973,8 +1030,8 @@ paths:
               properties:
                 name: { type: string }
                 dueDate: { type: string, format: date }
-                status: { type: string }
-                achievedDate: { type: string, format: date }
+                status: { type: string, enum: [planned, achieved, missed] }
+                achievedDate: { type: string, format: date, nullable: true }
                 version: { type: integer }
       responses:
         '200':

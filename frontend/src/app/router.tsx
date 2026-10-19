@@ -16,6 +16,9 @@ const ProjectsListPage = lazy(() =>
 const ProjectDetailPage = lazy(() =>
   import('@/features/projects/pages/ProjectDetailPage').then((m) => ({ default: m.ProjectDetailPage })),
 );
+const MyTasksPage = lazy(() =>
+  import('@/features/tasks/pages/MyTasksPage').then((m) => ({ default: m.MyTasksPage })),
+);
 
 // Plain <Routes> per CLAUDE.md ("data routers not required; plain <Routes>
 // is fine"). Every module gets a placeholder route from Part A onward
@@ -33,7 +36,7 @@ export function AppRoutes() {
           <Route path="dashboard" element={<PlaceholderPage title="Dashboard" />} />
           <Route path="projects" element={<ProjectsListPage />} />
           <Route path="projects/:id" element={<ProjectDetailPage />} />
-          <Route path="my-tasks" element={<PlaceholderPage title="My tasks" />} />
+          <Route path="my-tasks" element={<MyTasksPage />} />
           <Route path="risks" element={<PlaceholderPage title="Risks" />} />
           <Route path="change-requests" element={<PlaceholderPage title="Change requests" />} />
           <Route path="finance/alerts" element={<PlaceholderPage title="Finance alerts" />} />

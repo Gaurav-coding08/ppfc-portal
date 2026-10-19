@@ -860,6 +860,17 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
+                    /** @description One status or a comma-separated list (todo,in_progress,blocked,done). */
+                    status?: components["parameters"]["taskStatusParam"];
+                    assigneeId?: number;
+                    unassigned?: "true" | "false";
+                    priority?: components["parameters"]["taskPriorityParam"];
+                    overdue?: components["parameters"]["taskOverdueParam"];
+                    dueFrom?: string;
+                    dueTo?: string;
+                    q?: string;
+                    sort?: components["parameters"]["taskSortParam"];
+                    order?: "asc" | "desc";
                     page?: components["parameters"]["pageParam"];
                     pageSize?: components["parameters"]["pageSizeParam"];
                     /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */
@@ -899,10 +910,18 @@ export interface paths {
                 content: {
                     "application/json": {
                         title: string;
-                        priority: string;
+                        description?: string;
+                        assigneeId?: number;
+                        /** @enum {string} */
+                        status?: "todo" | "in_progress" | "blocked" | "done";
+                        /** @enum {string} */
+                        priority: "low" | "medium" | "high" | "critical";
+                        /** Format: date */
+                        startDate?: string;
                         /** Format: date */
                         dueDate: string;
                         weight: number;
+                        progress?: number;
                     };
                 };
             };
@@ -935,6 +954,17 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
+                    /** @description One status or a comma-separated list (todo,in_progress,blocked,done). */
+                    status?: components["parameters"]["taskStatusParam"];
+                    priority?: components["parameters"]["taskPriorityParam"];
+                    overdue?: components["parameters"]["taskOverdueParam"];
+                    dueFrom?: string;
+                    dueTo?: string;
+                    q?: string;
+                    sort?: components["parameters"]["taskSortParam"];
+                    order?: "asc" | "desc";
+                    /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */
+                    asOf?: components["parameters"]["asOfParam"];
                     page?: components["parameters"]["pageParam"];
                     pageSize?: components["parameters"]["pageSizeParam"];
                 };
@@ -1031,8 +1061,19 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
+                        title?: string;
+                        description?: string;
+                        assigneeId?: number | null;
+                        /** @enum {string} */
+                        status?: "todo" | "in_progress" | "blocked" | "done";
+                        /** @enum {string} */
+                        priority?: "low" | "medium" | "high" | "critical";
+                        /** Format: date */
+                        startDate?: string | null;
+                        /** Format: date */
+                        dueDate?: string;
+                        weight?: number;
                         progress?: number;
-                        status?: string;
                         version: number;
                     };
                 };
@@ -1062,6 +1103,8 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
+                    status?: "planned" | "achieved" | "missed";
+                    dueWithinDays?: number;
                     /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */
                     asOf?: components["parameters"]["asOfParam"];
                 };
@@ -1101,7 +1144,8 @@ export interface paths {
                         name: string;
                         /** Format: date */
                         dueDate: string;
-                        status?: string;
+                        /** @enum {string} */
+                        status?: "planned" | "achieved" | "missed";
                         /** Format: date */
                         achievedDate?: string;
                     };
@@ -1154,9 +1198,10 @@ export interface paths {
                         name?: string;
                         /** Format: date */
                         dueDate?: string;
-                        status?: string;
+                        /** @enum {string} */
+                        status?: "planned" | "achieved" | "missed";
                         /** Format: date */
-                        achievedDate?: string;
+                        achievedDate?: string | null;
                         version: number;
                     };
                 };
@@ -2844,7 +2889,7 @@ export interface components {
             /** Format: date */
             dueDate?: string;
             /** @enum {string} */
-            status?: "planned" | "achieved";
+            status?: "planned" | "achieved" | "missed";
             /** Format: date */
             achievedDate?: string | null;
             isOverdue?: boolean;
@@ -3110,6 +3155,11 @@ export interface components {
         pageSizeParam: number;
         /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */
         asOfParam: string;
+        /** @description One status or a comma-separated list (todo,in_progress,blocked,done). */
+        taskStatusParam: string;
+        taskPriorityParam: "low" | "medium" | "high" | "critical";
+        taskOverdueParam: "true" | "false";
+        taskSortParam: "dueDate" | "priority" | "status" | "progress" | "title";
     };
     requestBodies: never;
     headers: never;

@@ -9,6 +9,9 @@ import { ErrorState } from '@/components/data/ErrorState';
 import { LoadingState } from '@/components/data/LoadingState';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MilestonesTab } from '@/features/milestones/components/MilestonesTab';
+import { TasksTab } from '@/features/tasks/components/TasksTab';
+import { TASK_FILTER_KEYS } from '@/features/tasks/types';
 import { ActivityTab } from '../components/ActivityTab';
 import { MembersTab } from '../components/MembersTab';
 import { OverviewTab } from '../components/OverviewTab';
@@ -30,8 +33,6 @@ const TABS = [
 ] as const;
 
 const COMING_LATER: Record<string, string> = {
-  tasks: 'Project tasks arrive in the next delivery update.',
-  milestones: 'Milestones arrive in the next delivery update.',
   risks: 'Risks & issues arrive with the governance screens.',
   'change-requests': 'Change requests arrive with the governance screens.',
   finance: 'Project finance arrives with the finance screens.',
@@ -74,6 +75,9 @@ export function ProjectDetailPage() {
           setSearchParams(
             (prev) => {
               const next = new URLSearchParams(prev);
+              // The Tasks tab keeps its filters in the URL too; drop them
+              // when leaving it so they don't trail along on other tabs.
+              for (const key of TASK_FILTER_KEYS) next.delete(key);
               if (value === 'overview') next.delete('tab');
               else next.set('tab', String(value));
               return next;
@@ -94,6 +98,12 @@ export function ProjectDetailPage() {
 
         <TabsContent value="overview" className="pt-4">
           <OverviewTab project={project} />
+        </TabsContent>
+        <TabsContent value="tasks" className="pt-4">
+          <TasksTab project={project} canManage={canManage} />
+        </TabsContent>
+        <TabsContent value="milestones" className="pt-4">
+          <MilestonesTab project={project} canManage={canManage} />
         </TabsContent>
         <TabsContent value="members" className="pt-4">
           <MembersTab project={project} canManage={canManage} />
