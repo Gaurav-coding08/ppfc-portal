@@ -554,9 +554,7 @@ build` — 14/14 tests pass, clean typecheck/lint, build succeeds (710 KB main c
   real browser: login/logout for admin, PM and contributor; role-aware sidebar (Admin group
   hidden for non-admin, Finance hidden for contributor); `next=` redirect after login; 401 →
   redirect to `/login`; sidebar icon-collapse; 404 page; "Data as of 30 Sep 2026" badge.
-- **Human review:** Clicked through as admin, PM and contributor — login, logout, the `next=`
-  redirect and the role-based sidebar (Admin/Finance hidden for non-admin) all check out.
-  Caught the account-menu crash myself before merging; wasn't flagged by the test suite.
+- **Human review:** Clicked through as admin, PM and contributor — login, logout, the `next=` redirect and the role-based sidebar (Admin/Finance hidden for non-admin) all check out. Caught the account-menu crash myself before merging; wasn't flagged by the test suite.
 
 ### 16B Frontend projects module — 2026-10-19
 
@@ -595,4 +593,4 @@ build` — 14/14 tests pass, clean typecheck/lint, build succeeds (710 KB main c
   4. The resubmit test failed with "multiple elements" because the reviewer's reason appears on the page and in the sheet. Scoped the assertion to the sheet.
 - **Refinement:** INVALID_TRANSITION is matched by error code, not HTTP status (backend sends 422, spec says 409). The mitigation 422 has no `details`, so its message is matched to show it on the Mitigation field. Contributors get no decision panel at all; the disabled "own request" panel only appears for someone who could otherwise decide. The score preview is kept as form-only guidance because of CLAUDE.md's "no scores in the browser" rule; lists show the API's score.
 - **Verification:** `cd frontend && npm run typecheck && npm run lint && npm test && npm run build`: 57/57 tests (15 new), clean, build OK. `cd backend && npm test`: 453/453. Live curl: contributor `POST /change-requests/16/decision` → 403 FORBIDDEN with requestId. No browser check this run; owner click-through pending.
-- **Human review:** TODO (owner)
+- **Human review:** Checked it as the PM and as Estell. On PRJ-001's Risks tab, 5 × 3 showed "15 · High" and Mitigation went required; saving without one put the backend's message right under the field. Closing a risk asked first and the row went grey. As Estell I raised a CR and landed on it with no decision panel. Back as PM, Approve with no reason was blocked; with a reason it went to Approved with the finance note and exactly one new history entry. A double-click on confirm still recorded one decision. My own CR showed the panel disabled. Resubmitting a returned CR as Estell worked. Read through the decision panel's idempotency-key handling. The score preview being computed in the browser is fine by me since it's labelled and never saved.
