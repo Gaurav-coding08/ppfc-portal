@@ -1,5 +1,12 @@
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { AXIS_TICK, GRID, SERIES, compactAed, moneyTooltip } from '@/components/display/chartTheme';
+import {
+  AXIS_TICK,
+  GRID,
+  SERIES,
+  compactAed,
+  moneyTooltip,
+  legendLabel,
+} from '@/components/display/chartTheme';
 import { formatDate } from '@/lib/format';
 import type { MonthlySpendRow } from '../types';
 
@@ -29,7 +36,7 @@ export function MonthlySpendChart({ rows }: { rows: MonthlySpendRow[] }) {
             formatter={(v, name) => [moneyTooltip(v), name]}
             labelFormatter={(d) => formatDate(String(d), 'MMMM yyyy')}
           />
-          <Legend iconType="plainline" wrapperStyle={{ fontSize: 12 }} />
+          <Legend iconType="plainline" wrapperStyle={{ fontSize: 12 }} formatter={legendLabel} />
           <Line
             type="monotone"
             dataKey="actualSpend"

@@ -12,7 +12,7 @@ import {
   YAxis,
 } from 'recharts';
 import { EmptyState } from '@/components/data/EmptyState';
-import { AXIS_TICK, GRID, compactAed } from '@/components/display/chartTheme';
+import { AXIS_TICK, GRID, compactAed, legendLabel } from '@/components/display/chartTheme';
 import { Card } from '@/components/ui/card';
 import { formatDate, formatMoney } from '@/lib/format';
 import type { MonthlyTrendRow, SpendByCategoryRow } from '../types';
@@ -109,7 +109,7 @@ function MonthlyTrendChart({ rows }: { rows: MonthlyTrendRow[] }) {
             formatter={(v, name) => [v === null || v === undefined ? '—' : formatMoney(Number(v)), name]}
             labelFormatter={(d) => formatDate(String(d), 'MMMM yyyy')}
           />
-          <Legend iconType="plainline" wrapperStyle={{ fontSize: 12 }} />
+          <Legend iconType="plainline" wrapperStyle={{ fontSize: 12 }} formatter={legendLabel} />
           <Line
             type="monotone"
             dataKey="actualSpend"

@@ -9,6 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/auth/useAuth';
 import { NAV_GROUPS } from './nav';
@@ -16,6 +17,8 @@ import { NAV_GROUPS } from './nav';
 export function AppSidebar() {
   const { user } = useAuth();
   const location = useLocation();
+  // On phones the sidebar is a drawer; close it once a page is chosen.
+  const { isMobile, setOpenMobile } = useSidebar();
 
   return (
     <SidebarRoot collapsible="icon">
@@ -35,7 +38,7 @@ export function AppSidebar() {
                   .map((item) => (
                     <SidebarMenuItem key={item.to}>
                       <SidebarMenuButton
-                        render={<Link to={item.to} />}
+                        render={<Link to={item.to} onClick={() => isMobile && setOpenMobile(false)} />}
                         isActive={location.pathname.startsWith(item.to)}
                         tooltip={item.label}
                       >

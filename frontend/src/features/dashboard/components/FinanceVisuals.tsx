@@ -63,7 +63,17 @@ export function BudgetVsActualChart({
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
             <CartesianGrid stroke={GRID} strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="code" tick={AXIS_TICK} axisLine={false} tickLine={false} interval={0} />
+            {/* Angled so every project code stays readable on narrow screens. */}
+            <XAxis
+              dataKey="code"
+              tick={AXIS_TICK}
+              axisLine={false}
+              tickLine={false}
+              interval={0}
+              angle={-40}
+              textAnchor="end"
+              height={56}
+            />
             <YAxis
               tickFormatter={(v: number) => compactAed.format(v)}
               tick={AXIS_TICK}

@@ -4,10 +4,26 @@ Internal PMO application for managing projects, tasks, milestones, risks, change
 approvals, project finance (budgets, costs, forecasts, EAC) and an executive analytics
 dashboard.
 
+| Dashboard | Project finance |
+|---|---|
+| ![Executive dashboard](docs/screenshots/dashboard.png) | ![Project finance tab](docs/screenshots/finance-tab.png) |
+| **Project detail** | **Change request detail** |
+| ![Project detail](docs/screenshots/project-detail.png) | ![Change request detail](docs/screenshots/change-request-detail.png) |
+
+## Ports at a glance
+
+| What | URL | Started by |
+|---|---|---|
+| PostgreSQL | `localhost:5433` | `docker compose up -d db` |
+| API (dev) | `http://localhost:4000` | `cd backend && npm run dev` |
+| SPA (dev, proxies `/api` → 4000) | `http://localhost:5173` | `cd frontend && npm run dev` |
+| API (container) | `http://localhost:4000` (`API_PORT` to change) | `docker compose --profile app up -d --build` |
+| SPA (container, nginx, proxies `/api` → `api`) | `http://localhost:8080` (`WEB_PORT` to change) | same |
+
 ## Prerequisites
 
 - **Node.js 20 LTS** (`node -v` should print `v20.x`)
-- **Docker** and **Docker Compose** (for PostgreSQL)
+- **Docker** and **Docker Compose** (for PostgreSQL, and optionally the whole stack)
 
 ## Quick start
 
@@ -58,6 +74,57 @@ cd frontend && npm run api:types       # docs/openapi.yaml → src/api/schema.ts
 
 Frontend commands: `npm run dev|build|preview|typecheck|lint|format|test|test:watch|test:e2e|api:types`.
 Frontend gate: `cd frontend && npm run typecheck && npm run lint && npm test && npm run build`.
+
+Demo logins for the UI (password `Demo@1234`): admin `garnet.wiegand@ppfc.demo`,
+project manager `christelle.satterfield@ppfc.demo` (owns PRJ-001/004/007), contributor
+`estell.conroy@ppfc.demo` (member of PRJ-001/008). More in [Demo accounts](#demo-accounts).
+
+## Running the whole stack in Docker
+
+```bash
+docker compose --profile app up -d --build     # db + api + worker + web
+open http://localhost:8080
+```
+
+`web` is built by `frontend/Dockerfile` (Node build → nginx serving `dist/`). nginx also
+proxies `/api` to the `api` service, so the browser sees a single origin, the same way the
+Vite proxy works in dev. If `npm run dev` is already using port 4000 on the host, publish the
+container API elsewhere: `API_PORT=4001 docker compose --profile app up -d --build` (the SPA
+reaches the API over the compose network either way). Stop with
+`docker compose --profile app down` (the `db` volume is kept).
+
+## End-to-end tests (Playwright)
+
+The smoke suite in `frontend/e2e/` drives a **running** stack with the seeded data. It does
+not start servers itself.
+
+```bash
+cd frontend
+npx playwright install chromium        # once
+npm run test:e2e                        # against http://localhost:8080 (Docker stack)
+E2E_BASE_URL=http://localhost:5173 npm run test:e2e   # against the dev servers instead
+npx playwright show-report              # HTML report of the last run
+```
+
+What it covers:
+- **Journeys** (`e2e/journeys/`), one per acceptance test A–E:
+  - PM creates a project and a task; the contributor updates progress, which persists across a reload.
+  - PM posts a draft cost; actual spend rises and the drill-down lists the cost.
+  - PM approves a CR; exactly one history entry is added.
+  - A contributor sees no Post/Decide actions.
+  - Dashboard department filter → finance drill-down count = API total.
+- **Quality** (`e2e/quality/`):
+  - every page at 1440/1024/768/390 px, checked for no horizontal page scroll, an accessible name on every control, and WCAG AA text contrast (screenshots land in `frontend/test-results/layout/`);
+  - a keyboard-only walk: project → task edit → cost post → CR decision.
+
+Notes:
+- **It writes to the dev database:** new `E2E …` projects, costs and CR decisions.
+  `cd backend && npm run db:reset` restores the seed.
+- **Sessions are reused.** The setup step signs in each role through the login form once and
+  keeps the session cookie in `frontend/e2e/.auth/` (git-ignored) while it's valid, because
+  the API allows only 10 logins per 15 minutes per IP.
+- **Screenshots:** `SCREENSHOTS=1 npx playwright test screenshots` regenerates
+  `docs/screenshots/`. Best right after `db:reset`.
 
 ## Environment variables
 
@@ -238,11 +305,12 @@ npm run db:import:test
 
 Make sure `backend/.env` exists and has `DATABASE_URL_TEST`. Copy from `.env.example`.
 
-### Docker containers for the API and worker
+### Docker containers for the API, worker and web
 
 ```bash
 docker compose --profile app up -d --build
 curl -i localhost:4000/api/v1/health
+curl -i localhost:8080/api/v1/health    # same API, through the web container's nginx
 docker logs <worker-container-name>   # confirms the scheduled automation pass
 ```
 

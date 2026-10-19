@@ -5,6 +5,11 @@ import { formatMoney } from '@/lib/format';
 export const AXIS_TICK = { fontSize: 12, fill: 'var(--color-slate-500)' };
 export const GRID = 'var(--color-slate-200)';
 
+// Legend labels in body text colour: recharts colours them with the series
+// colour by default, and teal/amber/slate-400 text on white fails WCAG AA
+// (2.1–2.6:1). The legend icon still carries the series colour.
+export const legendLabel = (value: string) => <span className="text-slate-700">{value}</span>;
+
 // CLAUDE.md fixed series colours.
 export const SERIES = {
   budget: 'var(--color-slate-400)',

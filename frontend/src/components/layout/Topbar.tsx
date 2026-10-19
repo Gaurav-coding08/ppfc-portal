@@ -57,20 +57,24 @@ export function Topbar() {
     : '?';
 
   return (
-    <header className="bg-background/80 flex h-14 shrink-0 items-center gap-3 border-b px-4 backdrop-blur-sm">
+    // On phones the bar keeps every control but drops words: the badge
+    // reads "As of …", the account menu shows only the avatar (its
+    // aria-label still names the user) and a long page label truncates.
+    <header className="bg-background/80 flex h-14 shrink-0 items-center gap-2 border-b px-3 backdrop-blur-sm sm:gap-3 sm:px-4">
       <SidebarTrigger />
-      <Breadcrumb>
+      <Breadcrumb className="min-w-0">
         <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbPage>{currentPageLabel(location.pathname)}</BreadcrumbPage>
+          <BreadcrumbItem className="min-w-0">
+            <BreadcrumbPage className="truncate">{currentPageLabel(location.pathname)}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="ml-auto flex items-center gap-3">
+      <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-3">
         {reportingDate && (
           <ToneBadge tone="neutral">
-            Data as of <DateText value={reportingDate} />
+            <span className="hidden sm:inline">Data as of</span>
+            <span className="sm:hidden">As of</span> <DateText value={reportingDate} />
           </ToneBadge>
         )}
 
@@ -79,12 +83,16 @@ export function Topbar() {
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
-              <Button variant="ghost" className="gap-2 px-2">
+              <Button
+                variant="ghost"
+                className="gap-2 px-2"
+                aria-label={`Account menu for ${user?.fullName ?? 'you'}`}
+              >
                 <Avatar className="size-6">
-                  <AvatarFallback className="text-[10px]">{initials}</AvatarFallback>
+                  <AvatarFallback className="text-[10px] text-slate-700">{initials}</AvatarFallback>
                 </Avatar>
-                <span className="max-w-32 truncate text-sm">{user?.fullName}</span>
-                <ChevronDown className="text-muted-foreground size-3.5" />
+                <span className="hidden max-w-32 truncate text-sm sm:inline">{user?.fullName}</span>
+                <ChevronDown className="text-muted-foreground hidden size-3.5 sm:block" />
               </Button>
             }
           />

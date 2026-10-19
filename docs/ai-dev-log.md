@@ -677,3 +677,31 @@ build` — 14/14 tests pass, clean typecheck/lint, build succeeds (710 KB main c
   - Live curl: runs rows carry `trigger`; `PATCH /admin/users/1 {role}` as that admin → 422 "Admins cannot change their own role" (the message the dialog shows).
   - All new tests passed on the first run. No browser check this run; owner click-through pending.
 - **Human review:** Logged in as Christelle first: no Admin group in the sidebar, and typing /admin/users gave the "only admins" message, so the gate holds on a direct URL too. As Garnet I changed [user] from contributor to project manager. The confirm step stated what the role would allow before anything was saved, which is what I wanted. Trying to change my own role showed the backend's "Admins cannot change their own role" message with a request ID, [as expected / and I'd like…]. In the audit log, filtering to tasks and expanding a row showed [the before/after fields]; the "(changed)" label made the difference clear [or: …]. Run now on the automation page gave a toast with [counts], and a new "Manual" row appeared at the top. Retrying the failed outbox event moved it to Pending. Back as Christelle, the bell showed [N] unread, and marking one read dropped it to [N−1] after the refresh. Clicking a notification opened the project's Tasks tab. I read the migration 016 change and accepted it: storing the trigger is better than guessing it from the audit log, and old runs showing "Scheduled" is fine for the demo data.
+
+### 18C Quality, E2E, Docker & docs — 2026-10-19
+
+- **Goal:** responsive and accessibility pass over every page; Playwright smoke tests for acceptance A–E; a Docker `web` service (nginx serving the build, proxying `/api`); README / architecture / checklist docs and screenshots.
+- **Prompt/approach:** /run-feature 18 (Part C) with feature spec + CLAUDE.md. The responsive/a11y pass was done by building the check first: a Playwright spec that visits every page at the four widths and measures, then fixing what it found and reviewing its screenshots.
+- **First output issue:**
+  1. **Topbar overflow.** Every page scrolled sideways by 100–150 px at 390 px, and six pages at 768 px. The breadcrumb, "Data as of" badge, bell and full user name didn't fit, and the content itself was fine. Fixed: compact badge, avatar-only account button (with `aria-label`), truncating breadcrumb.
+  2. **Breakpoints.** The sidebar stayed fully expanded at 768 px, against CLAUDE.md's "768–1279 collapsed". At that width the dashboard's 3-column KPI grid cut money values to "AED 58…". Fixed: sidebar open state follows ≥ 1280 px; KPI grid is 1/2 columns up to `xl`.
+  3. **Contrast measured below AA:** chart legend labels at 2.1–2.6:1 (recharts colours the text with the series colour) and avatar initials at 4.35:1. Fixed with a shared `legendLabel` formatter and darker initials.
+  4. **Test-side mistakes:**
+     - The first layout run died on Playwright's "outputPath outside the parent directory" guard.
+     - The keyboard walk first tried to Tab onto a non-selected tab. Tabs are one Tab stop with arrow keys, which is the correct ARIA behaviour; the test was wrong.
+     - The focus-trap check failed on Base UI's hidden focus-guard span. Focus does return to the dialog a tick later, so the check now polls.
+     - Vitest's default glob would have collected `e2e/*.spec.ts`; it's now excluded.
+     - The E2E code needed a DOM lib for `page.evaluate`, so it got its own `tsconfig.e2e.json`.
+  5. **Spec gap filled:** filters didn't collapse into a "Filters" sheet below 768 px. Added centrally in `FilterBar` (+ 2 unit tests), so every list and the dashboard get it.
+- **Refinement:**
+  - **Login rate limit.** The API allows 10 logins per 15 min per IP, so the setup step reuses saved sessions while `/auth/me` still accepts them.
+  - **Isolated data.** Each journey creates its own records (fresh project, own CR), because the suite writes to the shared dev DB.
+  - **Docker API port.** The compose API port became `${API_PORT:-4000}`, because the dev server already held 4000 on this machine.
+- **Verification:**
+  - `cd frontend && npm run typecheck && npm run lint && npm test && npm run build`: 89/89, clean, build OK (main chunk 488 KB, no size warning).
+  - `cd backend && npm test`: 457/457.
+  - `API_PORT=4001 docker compose --profile app up -d --build`: db, api, worker and web all up. `:8080/projects/1` → 200 (SPA fallback); `:8080/api/v1/health` → ok.
+  - `npm run test:e2e` against the Docker stack: 17/17. The same suite also passed against the dev servers (`E2E_BASE_URL=http://localhost:5173`).
+  - Fresh (non-reused) logins verified through nginx.
+  - The app-profile containers were stopped afterwards; `db` was left running.
+- **Human review:** TODO (owner)

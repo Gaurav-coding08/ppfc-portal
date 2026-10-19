@@ -19,4 +19,4 @@
 | 15  | 15-automation-overdue-escalation       | done    | 2026-10-18 | 453   |
 | 16  | 16-frontend-m1-foundation-delivery     | done    | 2026-10-19 | 42    |
 | 17  | 17-frontend-m2-governance-finance      | done    | 2026-10-19 | 69    |
-| 18  | 18-frontend-m3-dashboard-admin-quality | in_progress (A, B done) | 2026-10-19 | 87 (frontend) / 457 (backend) |
+| 18  | 18-frontend-m3-dashboard-admin-quality | done    | 2026-10-19 | 89 (frontend) / 17 (e2e) / 457 (backend) |

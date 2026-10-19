@@ -152,3 +152,74 @@ No new endpoints. One response gained a field: `GET /admin/automation/runs` rows
 cd backend && npm run db:migrate && npm test          # 457 tests, routes:check 77/77
 cd frontend && npm run typecheck && npm run lint && npm test && npm run build   # 87 tests
 ```
+
+## Part C (done 2026-10-19)
+
+### What exists now
+
+The quality pass that makes the app demo-ready:
+- **Playwright E2E suite** (`npm run test:e2e`, 17 tests): the five journeys for acceptance tests A–E, a keyboard-only walk, and a responsive/a11y check of every page at 1440/1024/768/390 px (no page scroll, named controls, WCAG AA contrast).
+- **Responsive fixes:** topbar, sidebar breakpoints, mobile "Filters" sheet, KPI grid, chart axis.
+- **Contrast fixes:** legend labels, avatar initials.
+- **Docker:** a `web` service (nginx + SPA, proxies `/api`).
+- **Docs:** README, architecture frontend section, UI checklist, and four screenshots.
+
+**Feature 18 is complete.**
+
+### Files
+
+- `frontend/playwright.config.ts` — base URL `E2E_BASE_URL` (default `http://localhost:8080`), 1 worker, `setup` project
+- `frontend/e2e/auth.setup.ts` — keyboard login per role, saves `e2e/.auth/<role>.json`, reuses it while `/auth/me` accepts it
+- `frontend/e2e/support/` — `accounts.ts` (`ACCOUNTS`, `SEED`, `storageStatePath`, `runTag`), `api.ts` (`apiAs`, `dataOf`, `createProjectAsPm`), `ui.ts` (`chooseOption`, `expectToast`)
+- `frontend/e2e/journeys/01…05-*.spec.ts` — tests A–E
+- `frontend/e2e/quality/layout.spec.ts` (overflow + accessible names + contrast, screenshots in `test-results/layout/`), `quality/keyboard.spec.ts`
+- `frontend/e2e/screenshots.spec.ts` — `SCREENSHOTS=1` only → `docs/screenshots/*.png`
+- `frontend/tsconfig.e2e.json` (DOM lib for `page.evaluate`), `tsconfig.json` reference; `vitest.config.ts` excludes `e2e/**`
+- `frontend/Dockerfile`, `frontend/nginx.conf`, `frontend/.dockerignore`; `docker-compose.yml` `web` service + `API_PORT`/`WEB_PORT`
+- `components/layout/AppShell.tsx` (`useSidebarOpenByWidth`), `Sidebar.tsx` (drawer closes on navigate), `Topbar.tsx` (compact on phones)
+- `components/data/FilterBar.tsx` (+ `FilterBar.test.tsx`, 2) — "Filters" bottom sheet < 768 px
+- `components/display/chartTheme.ts` → `.tsx` with `legendLabel`; used by the 3 charts with legends
+- `features/dashboard/components/KpiSections.tsx` (grid), `FinanceVisuals.tsx` (angled x-axis), `pages/DashboardPage.tsx` (reporting-date note)
+- `README.md`, `docs/architecture.md` (Frontend section), `docs/e2e-checklist.md` (UI walkthrough), `docs/screenshots/`
+
+### Database
+
+None.
+
+### Endpoints / Pages
+
+No endpoints or pages added. New: `http://localhost:8080` (Docker `web`).
+
+### Reusable pieces (use these, don't rebuild)
+
+- `apiAs(role, baseURL)` — API context with a role's saved session, for E2E setup and cross-checks
+- `chooseOption(page, comboboxName, option)` — picks from a Base UI select
+- `runTag()` — unique "E2E xxx" prefix for anything a spec creates
+- `legendLabel` — recharts `Legend formatter` that keeps label text readable
+- Add any new page to `ADMIN_PAGES` in `e2e/quality/layout.spec.ts`
+
+### Decisions & trade-offs
+
+- **Sidebar breakpoints.** CLAUDE.md says both "sheet drawer < 1024 px" and "768–1279 collapsed". The shadcn sidebar's CSS switches to its drawer at `md` (768), so moving only its JS breakpoint would desync them. The result: drawer < 768, icon rail 768–1279, expanded ≥ 1280. The state follows the breakpoint when the window crosses it.
+- **Sessions are reused across runs.** The login limiter allows 10 per 15 min per IP, so a fresh login per run would lock the suite out after three runs.
+- **E2E writes to the dev DB**, so each spec creates its own records (fresh project, own CR) instead of depending on earlier runs; `db:reset` restores the seed. Setup steps not under test (adding a member, submitting a CR) use the API; the behaviour under test goes through the UI.
+- **Contrast check measures, not guesses.** Colours are resolved through a canvas (Tailwind v4 emits oklch) and translucent layers are composited. It found legend labels at 2.1–2.6:1 (recharts colours them with the series colour) and avatar initials at 4.35:1. Disabled controls and SVG chart text are exempt.
+- **Tabs use the WAI-ARIA pattern** (one Tab stop, arrow keys), so the keyboard walk reaches tabs that way.
+- **The focus-trap check polls** because Base UI's hidden focus guards bounce focus back on the next tick.
+- **nginx proxies `/api` on the same origin**, so no CORS or cookie changes were needed and the API image is untouched. `API_PORT` exists because the dev server usually holds 4000.
+
+### Known gaps / TODO
+
+- Behind nginx, the API sees nginx's IP (no `trust proxy`), so the login rate limit is shared by every Docker user. Fine for a local demo; a real deployment should set `trust proxy` and key on the client IP.
+- No automated axe-style audit (no new dependency); the layout spec covers names, contrast and overflow.
+- Screenshots were taken on the dev DB after E2E runs (pages chosen to avoid E2E records); regenerate after `db:reset` for a pristine set.
+- Chart bars are still mouse-only; keyboard users reach the same records via KPI cards, risk-matrix cells and health-table badges.
+
+### How to verify quickly
+
+```bash
+cd frontend && npm run typecheck && npm run lint && npm test && npm run build   # 89 tests
+cd ../backend && npm test                                                      # 457 tests
+docker compose --profile app up -d --build                                     # API_PORT=4001 if dev holds 4000
+cd frontend && npx playwright install chromium && npm run test:e2e             # 17 tests
+```

@@ -1,3 +1,4 @@
+import { legendLabel } from '@/components/display/chartTheme';
 import { BarChart3 } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Link } from 'react-router-dom';
@@ -199,7 +200,7 @@ function ComparisonChart({
             cursor={{ fill: 'var(--color-slate-100)' }}
             formatter={(v, name) => [formatMoney(Number(v)), name]}
           />
-          <Legend wrapperStyle={{ fontSize: 12 }} />
+          <Legend wrapperStyle={{ fontSize: 12 }} formatter={legendLabel} />
           <Bar
             dataKey="currentBudget"
             name="Budget"

@@ -1,6 +1,9 @@
-import { Search } from 'lucide-react';
+import { Search, SlidersHorizontal } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
 
 // CLAUDE.md "Page header pattern: ... filter bar below." A plain flex
@@ -8,8 +11,33 @@ import { useDebouncedValue } from '@/lib/useDebouncedValue';
 // it (each already wired to useUrlFilters by the caller); this component
 // only owns the layout and the debounced search box, since search is the
 // one control with special timing behaviour.
+//
+// Below 768 px (CLAUDE.md responsive rules) the same controls move into a
+// "Filters" bottom sheet, stacked full width. Each control still writes to
+// the URL as soon as it changes, so there is no separate Apply step.
 export function FilterBar({ children }: { children: ReactNode }) {
-  return <div className="flex flex-wrap items-center gap-3">{children}</div>;
+  const isMobile = useIsMobile();
+  const [open, setOpen] = useState(false);
+
+  if (!isMobile) return <div className="flex flex-wrap items-center gap-3">{children}</div>;
+
+  return (
+    <>
+      <Button variant="outline" onClick={() => setOpen(true)}>
+        <SlidersHorizontal className="size-4" />
+        Filters
+      </Button>
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent side="bottom" className="max-h-[85svh] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Filters</SheetTitle>
+            <SheetDescription>Changes apply straight away.</SheetDescription>
+          </SheetHeader>
+          <div className="flex flex-col gap-3 px-4 pb-6 *:w-full *:max-w-none">{children}</div>
+        </SheetContent>
+      </Sheet>
+    </>
+  );
 }
 
 export function SearchInput({

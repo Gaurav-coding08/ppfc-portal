@@ -70,14 +70,16 @@ export function DashboardPage() {
       />
 
       {asOf && (
-        <p className="flex items-center gap-2 text-sm font-medium text-slate-900">
-          <CalendarDays className="text-primary size-4" aria-hidden />
-          Reporting date: {formatDate(asOf)}
-          <span className="text-muted-foreground font-normal">
-            · Financial figures are as of this date; the timeframe filter narrows tasks, milestones and change
-            requests by date.
-          </span>
-        </p>
+        <div className="flex items-start gap-2 text-sm">
+          <CalendarDays className="text-primary mt-0.5 size-4 shrink-0" aria-hidden />
+          <p>
+            <span className="font-medium text-slate-900">Reporting date: {formatDate(asOf)}</span>{' '}
+            <span className="text-muted-foreground">
+              · Financial figures are as of this date; the timeframe filter narrows tasks, milestones and
+              change requests by date.
+            </span>
+          </p>
+        </div>
       )}
 
       <DashboardFilterBar filters={filters} setFilters={setFilters} asOf={asOf} />

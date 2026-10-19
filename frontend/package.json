@@ -12,7 +12,7 @@
     "preview": "vite preview",
     "test": "TZ=Asia/Dubai vitest run",
     "test:watch": "TZ=Asia/Dubai vitest",
-    "test:e2e": "echo 'Playwright E2E arrives in milestone 3' && exit 0",
+    "test:e2e": "playwright test",
     "api:types": "openapi-typescript ../docs/openapi.yaml -o src/api/schema.ts"
   },
   "dependencies": {
@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.63",
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^6.9.1",

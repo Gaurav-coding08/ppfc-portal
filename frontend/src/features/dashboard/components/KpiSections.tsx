@@ -87,7 +87,10 @@ export function KpiSections({
             <CategoryChip meta={meta} />
           </div>
           {/* auto-fill: rows have 5, 3 and 6 cards; this stacks to one column on phones. */}
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
+          {/* 1 column on phones, 2 up to xl (CLAUDE.md: 768–1279 → 2-column
+              KPI grid, so AED values never truncate), then as many 200 px
+              cards as fit. */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
             {section.keys.map(card)}
           </div>
         </section>
