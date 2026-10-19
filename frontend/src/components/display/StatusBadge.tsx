@@ -65,6 +65,21 @@ const DELIVERY: Record<string, [Tone, string]> = {
   completed: ['success', 'Completed'],
 };
 
+// Automation job runs and outbox events (feature 15 backend). Not in the
+// CLAUDE.md map; they follow its semantic tones: in flight = info,
+// finished = success, failed = danger.
+const AUTOMATION_RUN: Record<string, [Tone, string]> = {
+  running: ['info', 'Running'],
+  success: ['success', 'Success'],
+  failed: ['danger', 'Failed'],
+};
+
+const OUTBOX: Record<string, [Tone, string]> = {
+  pending: ['info', 'Pending'],
+  sent: ['success', 'Sent'],
+  failed: ['danger', 'Failed'],
+};
+
 const DOMAINS = {
   project: PROJECT,
   task: TASK,
@@ -75,6 +90,8 @@ const DOMAINS = {
   revision: REVISION,
   alertSeverity: ALERT_SEVERITY,
   delivery: DELIVERY,
+  automationRun: AUTOMATION_RUN,
+  outbox: OUTBOX,
 } as const;
 
 export type StatusDomain = keyof typeof DOMAINS;

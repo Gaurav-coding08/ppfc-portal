@@ -87,3 +87,27 @@ export const dashboard = {
   // projects list's owner filter reads `managers` from here (Part B).
   filters: () => [...dashboard.all, 'filters'] as const,
 };
+
+// Admin screens (feature 18B). Users and audit events are admin-only
+// endpoints, so they get their own namespace rather than sharing `users`
+// (the PM-scoped directory used by owner/member pickers).
+export const admin = {
+  all: ['admin'] as const,
+  users: (filters: Record<string, unknown>) => [...admin.all, 'users', filters] as const,
+  audit: (filters: Record<string, unknown>) => [...admin.all, 'audit', filters] as const,
+};
+
+export const automation = {
+  all: ['automation'] as const,
+  runs: (filters: Record<string, unknown>) => [...automation.all, 'runs', filters] as const,
+  outbox: (filters: Record<string, unknown>) => [...automation.all, 'outbox', filters] as const,
+};
+
+// The bell and the /notifications page read different pages of the same
+// list; both live under `notifications.all`, so marking one read (or a
+// manual automation run) refetches both and the unread count comes from
+// the server, never from a local decrement.
+export const notifications = {
+  all: ['notifications'] as const,
+  list: (filters: Record<string, unknown>) => [...notifications.all, 'list', filters] as const,
+};

@@ -1018,6 +1018,139 @@ components:
               items: { type: integer }
             currency: { type: string }
 
+    # ── Admin, automation & notifications (feature 18B, from live responses) ──
+    AdminUserResponse:
+      type: object
+      properties:
+        data: { $ref: '#/components/schemas/UserDirectoryEntry' }
+
+    AuditEvent:
+      type: object
+      properties:
+        id: { type: integer }
+        actorId: { type: integer, nullable: true }
+        actorName: { type: string, nullable: true }
+        entityType: { type: string }
+        entityId: { type: integer }
+        action: { type: string }
+        projectId: { type: integer, nullable: true }
+        # Free-form JSON snapshots of the record before/after the change (null for creates/deletes/logins)
+        before: { type: object, nullable: true, additionalProperties: true }
+        after: { type: object, nullable: true, additionalProperties: true }
+        requestId: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    AuditEventListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/AuditEvent' }
+        meta: { $ref: '#/components/schemas/PaginationMeta' }
+
+    AutomationRun:
+      type: object
+      properties:
+        id: { type: integer }
+        jobName: { type: string }
+        startedAt: { type: string, format: date-time }
+        finishedAt: { type: string, format: date-time, nullable: true }
+        status: { type: string, enum: [running, success, failed] }
+        # schedule = worker cron; manual = admin Run now or the automation:run CLI (migration 016)
+        trigger: { type: string, enum: [schedule, manual] }
+        itemsFound: { type: integer, nullable: true }
+        itemsCreated: { type: integer, nullable: true }
+        error: { type: string, nullable: true }
+
+    AutomationRunListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/AutomationRun' }
+        meta: { $ref: '#/components/schemas/PaginationMeta' }
+
+    AutomationManualRunResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            run:
+              type: object
+              properties:
+                runId: { type: integer }
+                itemsFound: { type: integer }
+                itemsCreated: { type: integer }
+            dispatch:
+              type: object
+              properties:
+                processed: { type: integer }
+                sent: { type: integer }
+                retried: { type: integer }
+                failed: { type: integer }
+
+    OutboxEvent:
+      type: object
+      properties:
+        id: { type: integer }
+        eventType: { type: string }
+        entityType: { type: string }
+        entityId: { type: integer }
+        eventDate: { type: string, format: date, nullable: true }
+        payload: { type: object, additionalProperties: true }
+        status: { type: string, enum: [pending, sent, failed] }
+        attempts: { type: integer }
+        lastError: { type: string, nullable: true }
+        nextAttemptAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        processedAt: { type: string, format: date-time, nullable: true }
+
+    OutboxEventListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/OutboxEvent' }
+        meta: { $ref: '#/components/schemas/PaginationMeta' }
+
+    OutboxRetryResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id: { type: integer }
+            status: { type: string, enum: [pending] }
+
+    Notification:
+      type: object
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        title: { type: string }
+        body: { type: string, nullable: true }
+        # Backend path such as /projects/7/tasks/75 or /projects/1/change-requests/3
+        link: { type: string, nullable: true }
+        outboxId: { type: integer, nullable: true }
+        readAt: { type: string, format: date-time, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    NotificationListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Notification' }
+        meta: { $ref: '#/components/schemas/PaginationMeta' }
+        # Caller's unread total, independent of the unread filter and page
+        unreadCount: { type: integer }
+
+    NotificationResponse:
+      type: object
+      properties:
+        data: { $ref: '#/components/schemas/Notification' }
+
   parameters:
     # Shared dashboard filter contract (backend dashboard.filters.ts). Id
     # filters accept a comma list (e.g. "1,3").
@@ -1274,12 +1407,26 @@ paths:
               properties:
                 email: { type: string }
                 fullName: { type: string }
-                role: { type: string }
+                role: { type: string, enum: [contributor, project_manager, admin] }
                 departmentId: { type: integer }
                 password: { type: string }
       responses:
-        '201': { description: Created }
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminUserResponse' }
+        '400':
+          description: Validation error (e.g. weak password)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
         '403': { description: Not admin }
+        '409':
+          description: Email already in use (IDEMPOTENCY_CONFLICT)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
 
   /admin/users/{id}:
     patch:
@@ -1295,25 +1442,145 @@ paths:
               required: [version]
               properties:
                 fullName: { type: string }
-                role: { type: string }
+                role: { type: string, enum: [contributor, project_manager, admin] }
                 departmentId: { type: integer }
                 isActive: { type: boolean }
                 version: { type: integer }
       responses:
-        '200': { description: Updated }
-        '409': { description: Version conflict }
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminUserResponse' }
+        '409':
+          description: Version conflict
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '422':
+          description: Own role/deactivation, or last active admin (BUSINESS_RULE)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
 
   /admin/audit-events:
     get:
       summary: List audit events (admin)
       parameters:
         - { name: entityType, in: query, schema: { type: string } }
+        - { name: entityId, in: query, schema: { type: integer } }
         - { name: actorId, in: query, schema: { type: integer } }
         - { name: projectId, in: query, schema: { type: integer } }
+        - { name: action, in: query, schema: { type: string } }
+        - { name: from, in: query, schema: { type: string, format: date } }
+        - { name: to, in: query, schema: { type: string, format: date } }
         - { $ref: '#/components/parameters/pageParam' }
         - { $ref: '#/components/parameters/pageSizeParam' }
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuditEventListResponse' }
+        '403': { description: Not admin }
+
+  # ── Automation (admin) ──
+  /admin/automation/overdue-escalation/run:
+    post:
+      summary: Run the overdue-escalation producer + dispatcher once (admin)
+      responses:
+        '200':
+          description: Run summary
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AutomationManualRunResponse' }
+        '403': { description: Not admin }
+        '409':
+          description: Job already running
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /admin/automation/runs:
+    get:
+      summary: List automation runs, newest first (admin)
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [running, success, failed] } }
+        - { name: jobName, in: query, schema: { type: string } }
+        - { $ref: '#/components/parameters/pageParam' }
+        - { $ref: '#/components/parameters/pageSizeParam' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AutomationRunListResponse' }
+        '403': { description: Not admin }
+
+  /admin/automation/outbox:
+    get:
+      summary: List outbox events, newest first (admin)
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [pending, sent, failed] } }
+        - { name: eventType, in: query, schema: { type: string } }
+        - { $ref: '#/components/parameters/pageParam' }
+        - { $ref: '#/components/parameters/pageSizeParam' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OutboxEventListResponse' }
+        '403': { description: Not admin }
+
+  /admin/automation/outbox/{id}/retry:
+    post:
+      summary: Reset a failed outbox event to pending (admin)
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200':
+          description: Queued again
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OutboxRetryResponse' }
+        '404': { description: Not found }
+        '422':
+          description: Not in status failed (INVALID_TRANSITION)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  # ── Notifications (own rows) ──
+  /notifications:
+    get:
+      summary: List the caller's notifications, newest first
+      parameters:
+        - name: unread
+          in: query
+          description: Send `true` for unread only; omit for all (the backend coerces any value, including "false", to true).
+          schema: { type: boolean }
+        - { $ref: '#/components/parameters/pageParam' }
+        - { $ref: '#/components/parameters/pageSizeParam' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotificationListResponse' }
+
+  /notifications/{id}/read:
+    patch:
+      summary: Mark one of the caller's notifications as read (idempotent)
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotificationResponse' }
+        '404': { description: Not found or not the caller's }
 
   # ── Projects ──
   /projects:

@@ -46,7 +46,17 @@ export const handlers = [
   http.get(`${API}/dashboard/kpis`, () =>
     HttpResponse.json({
       data: { kpis: [] },
-      meta: { asOf: '2026-09-30', appliedFilters: [], ignoredFilters: [], generatedAt: '2026-10-18T00:00:00.000Z' },
+      meta: {
+        asOf: '2026-09-30',
+        appliedFilters: [],
+        ignoredFilters: [],
+        generatedAt: '2026-10-18T00:00:00.000Z',
+      },
     }),
+  ),
+
+  // The topbar bell polls this for every signed-in page; empty by default.
+  http.get(`${API}/notifications`, () =>
+    HttpResponse.json({ data: [], meta: { page: 1, pageSize: 8, total: 0 }, unreadCount: 0 }),
   ),
 ];

@@ -382,6 +382,7 @@ Log of batch/automation job executions.
 | started_at | TIMESTAMPTZ | no | |
 | finished_at | TIMESTAMPTZ | yes | |
 | status | TEXT | no | `running`, `success`, `failed` |
+| trigger | TEXT | no | `schedule` (worker cron, default) or `manual` (admin Run now / `npm run automation:run`). Migration 016. |
 | items_found | INT | yes | |
 | items_created | INT | yes | |
 | error | TEXT | yes | |

@@ -45,6 +45,14 @@ describe('AppSidebar', () => {
     expect(screen.queryByText('Finance')).not.toBeInTheDocument();
   });
 
+  it('hides the Admin nav group for a project manager', async () => {
+    renderSidebarAs({ role: 'project_manager' });
+
+    expect(await screen.findByText('Finance')).toBeInTheDocument();
+    expect(screen.queryByText('Admin')).not.toBeInTheDocument();
+    expect(screen.queryByText('Automation')).not.toBeInTheDocument();
+  });
+
   it('shows the Admin nav group for an admin', async () => {
     renderSidebarAs({ role: 'admin' });
 

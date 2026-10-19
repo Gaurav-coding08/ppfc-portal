@@ -4,10 +4,10 @@ import { pool } from '../../db/pool.js';
 // Started in its own short transaction (via the pool, not the caller's
 // client) so a run row exists even if the producer's main transaction later
 // rolls back or throws before it can mark the run finished.
-export async function startRun(jobName: string): Promise<number> {
+export async function startRun(jobName: string, trigger: 'schedule' | 'manual'): Promise<number> {
   const { rows } = await pool.query<{ id: number }>(
-    `INSERT INTO automation_runs (job_name, status) VALUES ($1, 'running') RETURNING id`,
-    [jobName],
+    `INSERT INTO automation_runs (job_name, status, trigger) VALUES ($1, 'running', $2) RETURNING id`,
+    [jobName, trigger],
   );
   return rows[0]!.id;
 }

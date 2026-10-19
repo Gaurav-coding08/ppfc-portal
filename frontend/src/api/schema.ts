@@ -354,7 +354,8 @@ export interface paths {
                     "application/json": {
                         email: string;
                         fullName: string;
-                        role: string;
+                        /** @enum {string} */
+                        role: "contributor" | "project_manager" | "admin";
                         departmentId: number;
                         password: string;
                     };
@@ -366,7 +367,18 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["AdminUserResponse"];
+                    };
+                };
+                /** @description Validation error (e.g. weak password) */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
                 };
                 /** @description Not admin */
                 403: {
@@ -374,6 +386,15 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content?: never;
+                };
+                /** @description Email already in use (IDEMPOTENCY_CONFLICT) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
                 };
             };
         };
@@ -410,7 +431,8 @@ export interface paths {
                 content: {
                     "application/json": {
                         fullName?: string;
-                        role?: string;
+                        /** @enum {string} */
+                        role?: "contributor" | "project_manager" | "admin";
                         departmentId?: number;
                         isActive?: boolean;
                         version: number;
@@ -423,14 +445,27 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["AdminUserResponse"];
+                    };
                 };
                 /** @description Version conflict */
                 409: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Own role/deactivation, or last active admin (BUSINESS_RULE) */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
                 };
             };
         };
@@ -448,8 +483,12 @@ export interface paths {
             parameters: {
                 query?: {
                     entityType?: string;
+                    entityId?: number;
                     actorId?: number;
                     projectId?: number;
+                    action?: string;
+                    from?: string;
+                    to?: string;
                     page?: components["parameters"]["pageParam"];
                     pageSize?: components["parameters"]["pageSizeParam"];
                 };
@@ -464,6 +503,15 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
+                    content: {
+                        "application/json": components["schemas"]["AuditEventListResponse"];
+                    };
+                };
+                /** @description Not admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
                     content?: never;
                 };
             };
@@ -474,6 +522,294 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/admin/automation/overdue-escalation/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Run the overdue-escalation producer + dispatcher once (admin) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Run summary */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AutomationManualRunResponse"];
+                    };
+                };
+                /** @description Not admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Job already running */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/automation/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List automation runs, newest first (admin) */
+        get: {
+            parameters: {
+                query?: {
+                    status?: "running" | "success" | "failed";
+                    jobName?: string;
+                    page?: components["parameters"]["pageParam"];
+                    pageSize?: components["parameters"]["pageSizeParam"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AutomationRunListResponse"];
+                    };
+                };
+                /** @description Not admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/automation/outbox": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List outbox events, newest first (admin) */
+        get: {
+            parameters: {
+                query?: {
+                    status?: "pending" | "sent" | "failed";
+                    eventType?: string;
+                    page?: components["parameters"]["pageParam"];
+                    pageSize?: components["parameters"]["pageSizeParam"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OutboxEventListResponse"];
+                    };
+                };
+                /** @description Not admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/automation/outbox/{id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reset a failed outbox event to pending (admin) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Queued again */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OutboxRetryResponse"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not in status failed (INVALID_TRANSITION) */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the caller's notifications, newest first */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Send `true` for unread only; omit for all (the backend coerces any value, including "false", to true). */
+                    unread?: boolean;
+                    page?: components["parameters"]["pageParam"];
+                    pageSize?: components["parameters"]["pageSizeParam"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["NotificationListResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Mark one of the caller's notifications as read (idempotent) */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["NotificationResponse"];
+                    };
+                };
+                /** @description Not found or not the caller's */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         trace?: never;
     };
     "/projects": {
@@ -3889,6 +4225,117 @@ export interface components {
                 excluded?: number[];
                 currency?: string;
             };
+        };
+        AdminUserResponse: {
+            data?: components["schemas"]["UserDirectoryEntry"];
+        };
+        AuditEvent: {
+            id?: number;
+            actorId?: number | null;
+            actorName?: string | null;
+            entityType?: string;
+            entityId?: number;
+            action?: string;
+            projectId?: number | null;
+            before?: {
+                [key: string]: unknown;
+            } | null;
+            after?: {
+                [key: string]: unknown;
+            } | null;
+            requestId?: string | null;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        AuditEventListResponse: {
+            data?: components["schemas"]["AuditEvent"][];
+            meta?: components["schemas"]["PaginationMeta"];
+        };
+        AutomationRun: {
+            id?: number;
+            jobName?: string;
+            /** Format: date-time */
+            startedAt?: string;
+            /** Format: date-time */
+            finishedAt?: string | null;
+            /** @enum {string} */
+            status?: "running" | "success" | "failed";
+            /** @enum {string} */
+            trigger?: "schedule" | "manual";
+            itemsFound?: number | null;
+            itemsCreated?: number | null;
+            error?: string | null;
+        };
+        AutomationRunListResponse: {
+            data?: components["schemas"]["AutomationRun"][];
+            meta?: components["schemas"]["PaginationMeta"];
+        };
+        AutomationManualRunResponse: {
+            data?: {
+                run?: {
+                    runId?: number;
+                    itemsFound?: number;
+                    itemsCreated?: number;
+                };
+                dispatch?: {
+                    processed?: number;
+                    sent?: number;
+                    retried?: number;
+                    failed?: number;
+                };
+            };
+        };
+        OutboxEvent: {
+            id?: number;
+            eventType?: string;
+            entityType?: string;
+            entityId?: number;
+            /** Format: date */
+            eventDate?: string | null;
+            payload?: {
+                [key: string]: unknown;
+            };
+            /** @enum {string} */
+            status?: "pending" | "sent" | "failed";
+            attempts?: number;
+            lastError?: string | null;
+            /** Format: date-time */
+            nextAttemptAt?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            processedAt?: string | null;
+        };
+        OutboxEventListResponse: {
+            data?: components["schemas"]["OutboxEvent"][];
+            meta?: components["schemas"]["PaginationMeta"];
+        };
+        OutboxRetryResponse: {
+            data?: {
+                id?: number;
+                /** @enum {string} */
+                status?: "pending";
+            };
+        };
+        Notification: {
+            id?: number;
+            userId?: number;
+            title?: string;
+            body?: string | null;
+            link?: string | null;
+            outboxId?: number | null;
+            /** Format: date-time */
+            readAt?: string | null;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        NotificationListResponse: {
+            data?: components["schemas"]["Notification"][];
+            meta?: components["schemas"]["PaginationMeta"];
+            unreadCount?: number;
+        };
+        NotificationResponse: {
+            data?: components["schemas"]["Notification"];
         };
     };
     responses: never;

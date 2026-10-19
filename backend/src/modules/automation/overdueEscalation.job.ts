@@ -30,7 +30,7 @@ export interface RunOverdueEscalationInput {
 // date (REPORTING_DATE), per CLAUDE.md's financial-definitions pattern.
 export async function runOverdueEscalation(input: RunOverdueEscalationInput): Promise<OverdueEscalationResult> {
   const asOf = input.asOf ?? env.REPORTING_DATE;
-  const runId = await mutationsRepo.startRun(JOB_NAME);
+  const runId = await mutationsRepo.startRun(JOB_NAME, input.trigger);
 
   try {
     const { itemsFound, itemsCreated } = await withTx(async (client) => {

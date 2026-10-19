@@ -10,6 +10,7 @@ export interface AutomationRunRow {
   startedAt: string;
   finishedAt: string | null;
   status: 'running' | 'success' | 'failed';
+  trigger: 'schedule' | 'manual';
   itemsFound: number | null;
   itemsCreated: number | null;
   error: string | null;
@@ -21,6 +22,7 @@ function toRunRow(row: {
   started_at: string;
   finished_at: string | null;
   status: 'running' | 'success' | 'failed';
+  trigger: 'schedule' | 'manual';
   items_found: number | null;
   items_created: number | null;
   error: string | null;
@@ -31,6 +33,7 @@ function toRunRow(row: {
     startedAt: row.started_at,
     finishedAt: row.finished_at,
     status: row.status,
+    trigger: row.trigger,
     itemsFound: row.items_found,
     itemsCreated: row.items_created,
     error: row.error,
@@ -106,7 +109,7 @@ export async function listRuns(filters: RunsQuery, client: Queryable = pool): Pr
   params.push(limit, offset);
 
   const { rows } = await client.query(
-    `SELECT id, job_name, started_at, finished_at, status, items_found, items_created, error,
+    `SELECT id, job_name, started_at, finished_at, status, trigger, items_found, items_created, error,
             count(*) OVER() AS total_count
      FROM automation_runs
      ${where}

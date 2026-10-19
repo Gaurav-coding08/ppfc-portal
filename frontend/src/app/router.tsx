@@ -3,7 +3,6 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { RequireAuth } from '@/auth/RequireAuth';
 import { LoginPage } from '@/auth/LoginPage';
 import { AppShell } from '@/components/layout/AppShell';
-import { PlaceholderPage } from '@/components/layout/PlaceholderPage';
 import { NotFoundPage } from './NotFoundPage';
 
 // Feature pages are loaded on demand (route-level code splitting) so the
@@ -49,12 +48,22 @@ const FinanceComparisonPage = lazy(() =>
 const CostCategoriesPage = lazy(() =>
   import('@/features/finance/pages/CostCategoriesPage').then((m) => ({ default: m.CostCategoriesPage })),
 );
+const UsersPage = lazy(() =>
+  import('@/features/admin/pages/UsersPage').then((m) => ({ default: m.UsersPage })),
+);
+const AuditLogPage = lazy(() =>
+  import('@/features/admin/pages/AuditLogPage').then((m) => ({ default: m.AuditLogPage })),
+);
+const AutomationPage = lazy(() =>
+  import('@/features/automation/pages/AutomationPage').then((m) => ({ default: m.AutomationPage })),
+);
+const NotificationsPage = lazy(() =>
+  import('@/features/notifications/pages/NotificationsPage').then((m) => ({ default: m.NotificationsPage })),
+);
 
 // Plain <Routes> per CLAUDE.md ("data routers not required; plain <Routes>
-// is fine"). Every module gets a placeholder route from Part A onward
-// (feature 16 spec: "Placeholder routes for every later module ... so
-// navigation is complete from day one"); later parts/milestones replace a
-// placeholder with its real page one module at a time.
+// is fine"). Feature 16 started every module as a placeholder route; since
+// feature 18B every nav entry has its real page.
 export function AppRoutes() {
   return (
     <Routes>
@@ -74,9 +83,12 @@ export function AppRoutes() {
           <Route path="finance/alerts" element={<FinanceAlertsPage />} />
           <Route path="finance/comparison" element={<FinanceComparisonPage />} />
           <Route path="finance/categories" element={<CostCategoriesPage />} />
-          <Route path="admin/users" element={<PlaceholderPage title="Users" />} />
-          <Route path="admin/audit-log" element={<PlaceholderPage title="Audit log" />} />
-          <Route path="admin/automation" element={<PlaceholderPage title="Automation" />} />
+          <Route path="notifications" element={<NotificationsPage />} />
+          <Route path="admin/users" element={<UsersPage />} />
+          <Route path="admin/audit-log" element={<AuditLogPage />} />
+          {/* The feature 18 spec names this /admin/audit; the nav has used /admin/audit-log since M1. */}
+          <Route path="admin/audit" element={<Navigate to="/admin/audit-log" replace />} />
+          <Route path="admin/automation" element={<AutomationPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Route>

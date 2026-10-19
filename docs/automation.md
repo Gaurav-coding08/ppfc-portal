@@ -14,7 +14,10 @@ Two independent producers feed one shared outbox/dispatcher pipeline:
    outbox event per overdue task per day. Runs every `AUTOMATION_CRON` tick
    via `src/worker.ts` (`trigger: 'schedule'`), or on demand via
    `POST /api/v1/admin/automation/overdue-escalation/run` (`trigger: 'manual'`)
-   or `npm run automation:run`.
+   or `npm run automation:run`. The trigger is stored on the run row
+   (`automation_runs.trigger`, migration 016) and shown in the admin
+   Automation screen (`/admin/automation`, feature 18B). Rows created
+   before migration 016 read `schedule` (the column default).
 2. **Change request approved — transactional.** When a CR decision commits
    with `decision: 'approve'`, `changeRequests.decision.service.ts` inserts a
    `CR_APPROVED` outbox row in the **same transaction** as the status update,

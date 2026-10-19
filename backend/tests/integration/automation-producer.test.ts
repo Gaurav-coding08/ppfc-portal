@@ -1,5 +1,6 @@
 import pg from 'pg';
 import { beforeAll, afterAll, describe, expect, test } from 'vitest';
+import { loginAs } from '../helpers/auth.js';
 import { resetDb } from '../helpers/resetDb.js';
 import { runOverdueEscalation } from '../../src/modules/automation/overdueEscalation.job.js';
 
@@ -135,5 +136,29 @@ describe('runOverdueEscalation (producer)', () => {
     );
     expect(lastRun[0].status).toBe('failed');
     expect(lastRun[0].error).toBeTruthy();
+  });
+});
+
+describe('automation run trigger (migration 016)', () => {
+  test('a scheduled pass is stored as schedule; an admin Run now is stored and listed as manual', async () => {
+    const scheduled = await runOverdueEscalation({ asOf: ASOF, trigger: 'schedule' });
+    const { rows } = await client.query<{ trigger: string }>(
+      `SELECT trigger FROM automation_runs WHERE id = $1`,
+      [scheduled.runId],
+    );
+    expect(rows[0]!.trigger).toBe('schedule');
+
+    const { rows: admins } = await client.query<{ email: string }>(
+      `SELECT email FROM users WHERE role = 'admin' AND is_active ORDER BY id LIMIT 1`,
+    );
+    const admin = await loginAs(admins[0]!.email);
+    const run = await admin.agent.post('/api/v1/admin/automation/overdue-escalation/run');
+    expect(run.status).toBe(200);
+
+    const list = await admin.agent.get('/api/v1/admin/automation/runs').query({ pageSize: 2 });
+    expect(list.status).toBe(200);
+    // Newest first: the manual run, then the scheduled one above.
+    expect(list.body.data[0]).toMatchObject({ id: run.body.data.run.runId, trigger: 'manual' });
+    expect(list.body.data[1]).toMatchObject({ id: scheduled.runId, trigger: 'schedule' });
   });
 });

@@ -1,4 +1,4 @@
-import { Bell, ChevronDown, LogOut } from 'lucide-react';
+import { ChevronDown, LogOut } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
@@ -16,6 +16,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useAuth } from '@/auth/useAuth';
 import { ToneBadge } from '@/components/display/ToneBadge';
 import { DateText } from '@/components/display/DateText';
+import { NotificationBell } from '@/features/notifications/components/NotificationBell';
 import { NAV_GROUPS } from './nav';
 import { useReportingDate } from './useReportingDate';
 
@@ -73,10 +74,7 @@ export function Topbar() {
           </ToneBadge>
         )}
 
-        {/* Unread count wiring arrives with the notifications module (M3). */}
-        <Button variant="ghost" size="icon" aria-label="Notifications">
-          <Bell className="size-4" />
-        </Button>
+        <NotificationBell />
 
         <DropdownMenu>
           <DropdownMenuTrigger
