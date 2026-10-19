@@ -35,7 +35,16 @@ export function SelectField({
 }) {
   return (
     <Field label={label} htmlFor={name} error={error} required={required} description={description}>
-      <Select value={value} onValueChange={(v) => onChange(v ?? '')} disabled={disabled}>
+      {/* `items` makes <SelectValue> render the option's label, not its raw
+          value (Base UI shows the bare value — e.g. a department id —
+          otherwise). An empty value is passed as `null` so the placeholder
+          shows instead of a blank trigger. */}
+      <Select
+        items={options}
+        value={value ? value : null}
+        onValueChange={(v) => onChange((v as string | null) ?? '')}
+        disabled={disabled}
+      >
         <SelectTrigger id={name} className="w-full" aria-invalid={!!error}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>

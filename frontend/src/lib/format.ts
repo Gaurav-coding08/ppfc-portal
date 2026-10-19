@@ -38,3 +38,16 @@ export function formatPercent(value: number | null | undefined, digits = 0): str
   if (value === null || value === undefined) return '—';
   return `${value.toFixed(digits)}%`;
 }
+
+// For API fields that are a ratio rather than a percentage — e.g. budget
+// `utilization` (actual / budget, so 0.9375 means 93.75 %), unlike
+// `progressPct` which already arrives as 0–100. Intl's percent style takes
+// the ratio as-is, so the frontend does no arithmetic on the value.
+export function formatRatio(value: number | null | undefined, digits = 0): string {
+  if (value === null || value === undefined) return '—';
+  return new Intl.NumberFormat('en-AE', {
+    style: 'percent',
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  }).format(value);
+}

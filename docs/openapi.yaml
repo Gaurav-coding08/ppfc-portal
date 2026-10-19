@@ -437,6 +437,26 @@ components:
         ignoredFilters: { type: array, items: {} }
         generatedAt: { type: string, format: date-time }
 
+    # Enriched in feature 16 Part B: the projects list's owner filter reads
+    # `managers` from here, the one option list every role can call.
+    FilterOption:
+      type: object
+      properties:
+        id: { type: integer }
+        label: { type: string }
+
+    DashboardFiltersResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            departments: { type: array, items: { $ref: '#/components/schemas/FilterOption' } }
+            projects: { type: array, items: { $ref: '#/components/schemas/FilterOption' } }
+            managers: { type: array, items: { $ref: '#/components/schemas/FilterOption' } }
+            statuses: { type: array, items: { type: string } }
+            categories: { type: array, items: { $ref: '#/components/schemas/FilterOption' } }
+
   parameters:
     pageParam:
       name: page
@@ -559,6 +579,10 @@ paths:
         - { name: projectId, in: query, schema: { type: integer } }
         - { $ref: '#/components/parameters/pageParam' }
         - { $ref: '#/components/parameters/pageSizeParam' }
+        - name: sort
+          in: query
+          schema: { type: string, enum: [fullName, email, role, createdAt], default: fullName }
+        - { name: order, in: query, schema: { type: string, enum: [asc, desc], default: asc } }
       responses:
         '200':
           description: OK
@@ -641,7 +665,18 @@ paths:
       summary: List projects (scoped)
       parameters:
         - { name: q, in: query, schema: { type: string } }
-        - { name: status, in: query, schema: { type: string } }
+        - { name: departmentId, in: query, schema: { type: integer } }
+        - { name: ownerId, in: query, schema: { type: integer } }
+        - name: status
+          in: query
+          description: One status or a comma-separated list (planning,active,on_hold,completed,cancelled).
+          schema: { type: string }
+        - { name: startFrom, in: query, schema: { type: string, format: date } }
+        - { name: endTo, in: query, schema: { type: string, format: date } }
+        - name: sort
+          in: query
+          schema: { type: string, enum: [code, name, status, startDate, endDate, progress], default: code }
+        - { name: order, in: query, schema: { type: string, enum: [asc, desc], default: asc } }
         - { $ref: '#/components/parameters/pageParam' }
         - { $ref: '#/components/parameters/pageSizeParam' }
         - { $ref: '#/components/parameters/asOfParam' }
@@ -666,10 +701,10 @@ paths:
                 description: { type: string }
                 departmentId: { type: integer }
                 ownerId: { type: integer }
-                status: { type: string }
+                status: { type: string, enum: [planning, active, on_hold, completed, cancelled] }
                 startDate: { type: string, format: date }
                 endDate: { type: string, format: date }
-                initialBudget: { type: number }
+                initialBudget: { type: number, minimum: 0 }
       responses:
         '201':
           description: Created
@@ -704,9 +739,15 @@ paths:
             schema:
               type: object
               required: [version]
+              additionalProperties: false
               properties:
                 name: { type: string }
-                status: { type: string }
+                description: { type: string }
+                departmentId: { type: integer }
+                ownerId: { type: integer }
+                status: { type: string, enum: [planning, active, on_hold, completed, cancelled] }
+                startDate: { type: string, format: date }
+                endDate: { type: string, format: date }
                 version: { type: integer }
       responses:
         '200':
@@ -768,6 +809,8 @@ paths:
       summary: Progress snapshots
       parameters:
         - { name: id, in: path, required: true, schema: { type: integer } }
+        - { $ref: '#/components/parameters/pageParam' }
+        - { $ref: '#/components/parameters/pageSizeParam' }
       responses:
         '200':
           description: OK
@@ -1450,4 +1493,8 @@ paths:
     get:
       summary: Filter option lists for dashboard UI
       responses:
-        '200': { description: OK }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardFiltersResponse' }

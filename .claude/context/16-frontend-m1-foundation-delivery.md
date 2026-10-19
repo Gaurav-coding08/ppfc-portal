@@ -181,3 +181,82 @@ Manual: open `http://localhost:5173`, log in as any `docs/demo-accounts.md` acco
 (password `Demo@1234`) — confirm role-aware sidebar (Admin hidden for non-admin, Finance
 hidden for contributor), the "Data as of 30 Sep 2026" topbar badge, logout + `next=` redirect
 on re-login, and a 404 for an unknown path.
+
+## Part B (done 2026-10-19)
+
+### What exists now
+
+The Projects module (module 01): a server-sorted, server-paginated list at `/projects` with
+every filter in the URL; a create/edit sheet with inline server errors and 409 handling; and
+`/projects/:id` with a header card plus tabs. Overview (counts, budget headline, progress
+history chart), Members (add/remove for managers) and Activity (audit feed) are built. Tasks
+and Milestones tabs are placeholders for Part C; Risks, Change requests and Finance wait for M2.
+
+### Files
+
+- `frontend/src/features/projects/types.ts` — API-derived types, `PROJECT_STATUS_OPTIONS`, `PROJECT_LIST_DEFAULTS` (URL filter shape)
+- `features/projects/schemas.ts` — form zod schema (mirrors backend), `toCreateBody`/`toUpdateBody`
+- `features/projects/activity.ts` — `describeAction(event)` → "added project member"
+- `features/projects/hooks/useProjectQueries.ts` — `useProjectsList`, `useProjectDetail`, `useProgressSnapshots`, `useProjectActivity`
+- `features/projects/hooks/useProjectMutations.ts` — create/update/add-member/remove-member + shared invalidation
+- `features/projects/hooks/useReferenceData.ts` — `useDepartmentOptions`, `useProjectFilterOptions`, `useOwnerOptions`, `useMemberCandidates`
+- `features/projects/pages/ProjectsListPage.tsx`, `ProjectDetailPage.tsx` (lazy-loaded routes)
+- `features/projects/components/` — `projectColumns`, `ProjectFilters`, `ProjectFormSheet`, `ProjectHeaderCard`, `OverviewTab`, `ProgressHistoryChart`, `MembersTab`, `AddMemberDialog`, `ActivityTab`
+- `components/data/FilterSelect.tsx` — compact "All …" select for filter bars
+- `components/ui/tabs.tsx` — shadcn tabs (CLI-generated)
+- `lib/applyServerErrors.ts`, `lib/notify.ts` (`toastApiError`), `lib/format.ts#formatRatio`
+- `test/session.ts` (`mockSession(role, memberships)`), `test/fixtures/projects.ts`, `test/LocationProbe.tsx`
+- Tests: `ProjectsListPage.test.tsx` (4), `ProjectFormSheet.test.tsx` (3), `ProjectDetailPage.test.tsx` (5), `activity.test.ts` (3)
+
+### Database
+
+None.
+
+### Endpoints / Pages
+
+| Route | Roles | Notes |
+|---|---|---|
+| `/projects` | any (scoped by API) | `?q&departmentId&ownerId&status&startFrom&endTo&sort&order&page`; "New project" for PM/admin |
+| `/projects/:id` | view (API 404 → "Project not found or you don't have access") | `?tab=overview\|tasks\|milestones\|risks\|change-requests\|finance\|members\|activity` |
+
+No backend endpoints were added. Calls: `GET/POST /projects`, `GET/PATCH /projects/:id`,
+`POST /projects/:id/members`, `DELETE /projects/:id/members/:userId`,
+`GET /projects/:id/progress-snapshots`, `GET /projects/:projectId/activity`, `GET /departments`,
+`GET /users` (PM/admin only), `GET /dashboard/filters` (owner filter options, every role).
+
+### Reusable pieces (use these, don't rebuild)
+
+- `applyServerErrors(err, setError, knownFields)` → attaches 400 `fieldErrors` to RHF fields and returns a form-level message (422s, unknown fields), or null
+- `toastApiError(err)` — error toast with `Request ID:` description
+- `FilterSelect({label, allLabel, value, onChange, options})` — URL-filter dropdown; '' = no filter
+- `<Percent kind="ratio">` / `formatRatio` — for API fractions (`utilization`); default `kind` is 0–100 percent
+- `renderWithProviders(ui, { route, path })` — `path` mounts under a `<Route>` so `useParams` works; returns `queryClient`; `screen.getByTestId('location')` shows the current URL
+- `mockSession(role, memberships)` — logged-in `/auth/me` for tests
+- Mutation invalidation pattern (`useInvalidateProjects`): `projects.all` + `dashboard.all` + `auth.me`. Part C's task save should invalidate `tasks.all`, `projects.detail(id)` and `dashboard.all` the same way
+
+### Decisions & trade-offs
+
+- **OpenAPI fixed rather than casting**: `GET /projects` was missing `departmentId/ownerId/startFrom/endTo/sort/order`; PATCH `/projects/{id}` only listed `name/status`; `GET /users` lacked `sort/order`; progress-snapshots lacked paging; `/dashboard/filters` had no response schema. All are now added from the backend zod schemas and live responses. `routes:check` is still 77/77.
+- **Owner filter reads `/dashboard/filters.managers`**, the one option list every role can call (`GET /users` returns 403 for contributors). It returns exactly "owners of projects you can see".
+- **Owner field**: on create, a PM gets a disabled field fixed to themselves (backend 403s anything else); an admin picks from active PMs and admins. When editing, the current owner is always included in the options even if outside the caller's `/users` scope.
+- **`auth.me` is invalidated after project/member mutations**: memberships drive `can.ts`, and the session query has `staleTime: Infinity`, so without this a PM wouldn't see Edit on a project they just created.
+- **Date-order check uses zod 4 `refine(..., { when })`**: plain `superRefine` is skipped while any other field is invalid, which hid the end-date error until the whole form was valid (found by a failing test).
+- **The form mounts only once the session has loaded**: RHF reads `defaultValues` once, and a PM's owner default is their own id.
+- **Budget utilization is a ratio** (0.9375) while `progressPct` is 0–100. `formatRatio` uses Intl's percent style, so the browser does no arithmetic on the value.
+- **Detail tab is in the URL (`?tab=`)**; the activity page number is local state (a secondary feed, not a shareable list).
+- **Route-level `React.lazy`** for the project pages, with `Suspense` in AppShell: the main chunk fell from 1.28 MB to 729 KB because recharts moved into the detail-page chunk.
+- Part A fixes found while building: `SelectField` showed raw ids (Base UI needs `items`); AppShell lacked `min-w-0` (wide tables pushed the topbar off-screen); Link-rendered `Button`s need `nativeButton={false}` (console a11y error, also in `NotFoundPage`).
+
+### Known gaps / TODO for later parts/features
+
+- Part C: Tasks and Milestones tabs (placeholders now), `/my-tasks`.
+- Status filter is single-select although the API accepts a comma list; multi-select can come later if needed.
+- Seed data: every project has the same 12-task set, so most projects show 42.42 % progress. This comes from the data generator, not a UI or SQL bug.
+- Logging out from a project page lands on `/login?next=%2Fdashboard` (Part A behaviour, harmless).
+
+### How to verify quickly
+
+```bash
+cd frontend && npm run typecheck && npm run lint && npm test && npm run build   # 29 tests
+cd ../backend && npm test                                                     # 453 tests
+```

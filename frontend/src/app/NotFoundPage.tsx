@@ -6,7 +6,9 @@ export function NotFoundPage() {
     <div className="flex h-screen flex-col items-center justify-center gap-3 text-center">
       <p className="text-muted-foreground text-sm">404</p>
       <h1 className="text-2xl font-semibold">Page not found</h1>
-      <Button render={<Link to="/" />}>Back to dashboard</Button>
+      <Button nativeButton={false} render={<Link to="/" />}>
+        Back to dashboard
+      </Button>
     </div>
   );
 }

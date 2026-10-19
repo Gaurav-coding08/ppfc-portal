@@ -557,3 +557,17 @@ db:reset && npm run db:import:test` load cleanly. Hand-checked every edge case a
 - **Human review:** Clicked through as admin, PM and contributor — login, logout, the `next=`
   redirect and the role-based sidebar (Admin/Finance hidden for non-admin) all check out.
   Caught the account-menu crash myself before merging; wasn't flagged by the test suite.
+
+### 16B Frontend projects module — 2026-10-19
+
+- **Goal:** Projects list (URL-synced filters, server sort and paging), create/edit with inline server errors and 409 handling, and project detail (header card, Overview/Members/Activity tabs, progress history chart, friendly 404) — feature 16 Part B.
+- **Prompt/approach:** /run-feature 16 (Part B) with the feature spec, CLAUDE.md, the 06/07 context files and the OpenAPI file. Contract-checked every endpoint against the running API with seeded data before building on its shape.
+- **First output issue:**
+  1. OpenAPI drift: `GET /projects` was missing six query params the backend accepts, PATCH `/projects/{id}` listed only `name`/`status`, and `/dashboard/filters` had no response schema. Fixed in `docs/openapi.yaml` from the backend zod schemas and live responses, then regenerated the types (no `as any`).
+  2. The create-form test failed: the "end before start" error never appeared. Zod skips object-level `superRefine` while any field is invalid, so the date error only showed once everything else was filled in. Fixed with zod 4 `refine(..., { when })`.
+  3. The same test showed the PM's owner field empty: the form had mounted before `/auth/me` resolved, and react-hook-form reads `defaultValues` only once. The form now mounts only once the session has loaded.
+  4. Checking in a real browser found three bugs the tests didn't catch: the page overflowed horizontally (AppShell flex column had no `min-w-0`, so the wide table pushed the topbar off-screen); Base UI logged an a11y error for `Button` rendered as a `<Link>` without `nativeButton={false}` (also present in Part A's `NotFoundPage`); and the activity feed showed raw "decide", because seeded audit rows use bare action names.
+  5. Found while reading Part A code: `SelectField` would display raw ids (e.g. "3") instead of labels, because Base UI's `Select.Value` needs the `items` prop.
+- **Refinement:** Fixed all of the above. `budget.utilization` turned out to be a ratio (0.9375) while `progressPct` is 0–100, so I added `formatRatio` (Intl percent style, no browser arithmetic) instead of multiplying by 100. Mutations invalidate `auth.me` as well, since memberships drive the UI permission hints. Route-level `React.lazy` cut the main chunk from 1.28 MB to 729 KB.
+- **Verification:** `cd frontend && npm run typecheck && npm run lint && npm test && npm run build`: 29/29 tests (15 new), clean, build OK. `cd backend && npm test`: 453/453. `npm run routes:check`: 77/77. In Chrome against the dev API, as contributor and PM: list, URL filter read-back, detail tabs, chart, edit sheet (opened and cancelled, no data changed), role-gated member actions, 404 view, and no console errors.
+- **Human review:** TODO (owner)

@@ -252,6 +252,8 @@ export interface paths {
                     projectId?: number;
                     page?: components["parameters"]["pageParam"];
                     pageSize?: components["parameters"]["pageSizeParam"];
+                    sort?: "fullName" | "email" | "role" | "createdAt";
+                    order?: "asc" | "desc";
                 };
                 header?: never;
                 path?: never;
@@ -486,7 +488,14 @@ export interface paths {
             parameters: {
                 query?: {
                     q?: string;
+                    departmentId?: number;
+                    ownerId?: number;
+                    /** @description One status or a comma-separated list (planning,active,on_hold,completed,cancelled). */
                     status?: string;
+                    startFrom?: string;
+                    endTo?: string;
+                    sort?: "code" | "name" | "status" | "startDate" | "endDate" | "progress";
+                    order?: "asc" | "desc";
                     page?: components["parameters"]["pageParam"];
                     pageSize?: components["parameters"]["pageSizeParam"];
                     /** @description Reporting cut-off date; defaults to app_settings.reporting_date (2026-09-30). */
@@ -526,7 +535,8 @@ export interface paths {
                         description?: string;
                         departmentId: number;
                         ownerId: number;
-                        status: string;
+                        /** @enum {string} */
+                        status: "planning" | "active" | "on_hold" | "completed" | "cancelled";
                         /** Format: date */
                         startDate: string;
                         /** Format: date */
@@ -614,7 +624,15 @@ export interface paths {
                 content: {
                     "application/json": {
                         name?: string;
-                        status?: string;
+                        description?: string;
+                        departmentId?: number;
+                        ownerId?: number;
+                        /** @enum {string} */
+                        status?: "planning" | "active" | "on_hold" | "completed" | "cancelled";
+                        /** Format: date */
+                        startDate?: string;
+                        /** Format: date */
+                        endDate?: string;
                         version: number;
                     };
                 };
@@ -759,7 +777,10 @@ export interface paths {
         /** Progress snapshots */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    page?: components["parameters"]["pageParam"];
+                    pageSize?: components["parameters"]["pageSizeParam"];
+                };
                 header?: never;
                 path: {
                     id: number;
@@ -2735,7 +2756,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DashboardFiltersResponse"];
+                    };
                 };
             };
         };
@@ -3066,6 +3089,19 @@ export interface components {
             ignoredFilters?: unknown[];
             /** Format: date-time */
             generatedAt?: string;
+        };
+        FilterOption: {
+            id?: number;
+            label?: string;
+        };
+        DashboardFiltersResponse: {
+            data?: {
+                departments?: components["schemas"]["FilterOption"][];
+                projects?: components["schemas"]["FilterOption"][];
+                managers?: components["schemas"]["FilterOption"][];
+                statuses?: string[];
+                categories?: components["schemas"]["FilterOption"][];
+            };
         };
     };
     responses: never;

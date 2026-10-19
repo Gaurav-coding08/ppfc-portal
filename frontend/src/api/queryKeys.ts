@@ -47,4 +47,7 @@ export const milestones = {
 export const dashboard = {
   all: ['dashboard'] as const,
   kpis: (filters: Record<string, unknown>) => [...dashboard.all, 'kpis', filters] as const,
+  // Option lists (departments, managers, …) scoped to the caller. The
+  // projects list's owner filter reads `managers` from here (Part B).
+  filters: () => [...dashboard.all, 'filters'] as const,
 };

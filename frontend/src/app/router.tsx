@@ -1,9 +1,21 @@
+import { lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { RequireAuth } from '@/auth/RequireAuth';
 import { LoginPage } from '@/auth/LoginPage';
 import { AppShell } from '@/components/layout/AppShell';
 import { PlaceholderPage } from '@/components/layout/PlaceholderPage';
 import { NotFoundPage } from './NotFoundPage';
+
+// Feature pages are loaded on demand (route-level code splitting) so the
+// login screen and shell don't pay for every module's code — recharts in
+// particular. The shell's <Suspense> shows a skeleton while a chunk loads.
+// The `.then` maps the named export to the default export `lazy` expects.
+const ProjectsListPage = lazy(() =>
+  import('@/features/projects/pages/ProjectsListPage').then((m) => ({ default: m.ProjectsListPage })),
+);
+const ProjectDetailPage = lazy(() =>
+  import('@/features/projects/pages/ProjectDetailPage').then((m) => ({ default: m.ProjectDetailPage })),
+);
 
 // Plain <Routes> per CLAUDE.md ("data routers not required; plain <Routes>
 // is fine"). Every module gets a placeholder route from Part A onward
@@ -19,7 +31,8 @@ export function AppRoutes() {
         <Route element={<AppShell />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<PlaceholderPage title="Dashboard" />} />
-          <Route path="projects" element={<PlaceholderPage title="Projects" />} />
+          <Route path="projects" element={<ProjectsListPage />} />
+          <Route path="projects/:id" element={<ProjectDetailPage />} />
           <Route path="my-tasks" element={<PlaceholderPage title="My tasks" />} />
           <Route path="risks" element={<PlaceholderPage title="Risks" />} />
           <Route path="change-requests" element={<PlaceholderPage title="Change requests" />} />
